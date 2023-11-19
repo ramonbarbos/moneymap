@@ -17,6 +17,7 @@ class Folha extends TRecord
         parent::addAttribute('cpf');
         parent::addAttribute('anoMes');
         parent::addAttribute('vl_salario');
+        parent::addAttribute('vl_desconto');
 
     }
 

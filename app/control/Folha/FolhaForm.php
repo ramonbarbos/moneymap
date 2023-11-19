@@ -70,6 +70,7 @@ class FolhaForm extends TPage
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf', null, $criteria_cpf);
     $anoMes = new TEntry('anoMes');
     $vl_salario = new TEntry('vl_salario');
+    $vl_desconto = new TEntry('vl_desconto');
 
     $uniqid      = new THidden('uniqid');
     $detail_id         = new THidden('detail_id');
@@ -83,10 +84,12 @@ class FolhaForm extends TPage
 
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('Mês')], [$anoMes]);
-    $this->form->addFields([new TLabel('CPF (*)')], [$cpf], [new TLabel('Salario')], [$vl_salario]);
+    $this->form->addFields([new TLabel('Codigo')], [$id],);
+    $this->form->addFields([new TLabel('CPF (*)')], [$cpf],  [new TLabel('Mês')], [$anoMes]);
+    $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Desconto')], [$vl_desconto], );
     $this->form->addContent([new TFormSeparator('Eventos')]);
 
+    $id->setEditable(false);
     $id->setSize('100%');
     $cpf->addValidation('cpf', new TRequiredValidator);
     $cpf->setMinLength(0);
@@ -95,6 +98,8 @@ class FolhaForm extends TPage
     $anoMes->setEditable(false);
     $vl_salario->setEditable(false);
     $vl_salario->setNumericMask(2, '.', '', true);
+    $vl_desconto->setEditable(false);
+    $vl_desconto->setNumericMask(2, '.', '', true);
 
 
     $evento_id->setChangeAction(new TAction([$this, 'onEventChange']));
@@ -419,21 +424,24 @@ class FolhaForm extends TPage
       TTransaction::open('sample');
 
 
-      $total = 0;
+      $totalP = 0;
+      $totalD = 0;
 
       if ($param['list_data']) {
         foreach ($param['list_data'] as $row) {
           $evento = Evento::where('id', '=', $row['evento_id'])->first();
 
-          $total += ($evento->incidencia == 'P') ? floatval($row['valor']) : 0;
+          $totalP += ($evento->incidencia == 'P') ? floatval($row['valor']) : 0;
+          $totalD += ($evento->incidencia == 'D') ? floatval($row['valor']) : 0;
         }
       }
 
       $anoMesAtual = date('Ym');
 
       TForm::sendData('form_folha', (object) ['anoMes' => $anoMesAtual]);
-      TForm::sendData('form_folha', (object) ['vl_salario' => $total]);
-      TToast::show('info', 'Total: <b>' . 'R$ ' . number_format($total, 2, ',', '.') . '</b>', 'bottom right');
+      TForm::sendData('form_folha', (object) ['vl_salario' => $totalP]);
+      TForm::sendData('form_folha', (object) ['vl_desconto' => $totalD]);
+      TToast::show('info', 'Total: <b>' . 'R$ ' . number_format($totalP, 2, ',', '.') . '</b>', 'bottom right');
     } catch (Exception $e) {
       new TMessage('error', $e->getMessage());
       TTransaction::rollback();
