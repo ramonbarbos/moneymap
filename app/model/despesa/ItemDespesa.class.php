@@ -3,10 +3,10 @@
 use Adianti\Database\TRecord;
 
 
-class DespesaFixa extends TRecord
+class ItemDespesa extends TRecord
 {
-    const TABLENAME = 'despesa_fixa';
-    const PRIMARYKEY= 'id';
+    const TABLENAME = 'item_despesa';
+    const PRIMARYKEY= 'id_item';
     const IDPOLICY =  'max'; // {max, serial}
     
     
@@ -14,10 +14,12 @@ class DespesaFixa extends TRecord
     public function __construct($id = NULL, $callObjectLoad = TRUE)
     {
         parent::__construct($id, $callObjectLoad);
-        parent::addAttribute('cpf');
+        parent::addAttribute('despesa_id');
+        parent::addAttribute('dt_despesa');
         parent::addAttribute('evento_id');
-        parent::addAttribute('evento_descricao');
+        parent::addAttribute('descricao');
         parent::addAttribute('valor');
+        parent::addAttribute('saldo');
 
     }
 }

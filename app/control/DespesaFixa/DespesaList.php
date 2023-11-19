@@ -23,7 +23,7 @@ use Adianti\Widget\Wrapper\TDBCombo;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class DespesaFixaList extends TPage
+class DespesaList extends TPage
 {
     private $form;
     private $datagrid;
@@ -40,15 +40,15 @@ class DespesaFixaList extends TPage
 
         //Conexão com a tabela
         $this->setDatabase('sample');
-        $this->setActiveRecord('DespesaFixa');
+        $this->setActiveRecord('Despesa');
         $this->setDefaultOrder('id', 'asc');
         $this->setLimit(10);
 
         $this->addFilterField('cpf', 'like', 'cpf');
 
         //Criação do formulario 
-        $this->form = new BootstrapFormBuilder('form_search_folha');
-        $this->form->setFormTitle('Despesa Fixa');
+        $this->form = new BootstrapFormBuilder('form_search_despesa');
+        $this->form->setFormTitle('Despesa');
 
         //Criação de fields
         $campo1 = new TEntry('cpf');
@@ -63,7 +63,7 @@ class DespesaFixaList extends TPage
         //Adicionar field de busca
         $btn = $this->form->addAction(_t('Find'), new TAction([$this, 'onSearch']), 'fa:search');
         $btn->class = 'btn btn-sm btn-primary';
-        $this->form->addActionLink(_t('New'), new TAction(['DespesaFixaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
+        $this->form->addActionLink(_t('New'), new TAction(['DespesaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
 
         //Criando a data grid
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
@@ -72,8 +72,8 @@ class DespesaFixaList extends TPage
         //Criando colunas da datagrid
         $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
         $column_2 = new TDataGridColumn('cpf', 'CPF', 'left', );
-        $column_3 = new TDataGridColumn('evento_id', 'Mês', 'left', );
-        $column_4 = new TDataGridColumn('vl_salario', 'Salario', 'left', );
+        $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left', );
+        $column_4 = new TDataGridColumn('vl_despesa', 'Valor', 'left', );
 
       
      
@@ -86,9 +86,9 @@ class DespesaFixaList extends TPage
 
         //Criando ações para o datagrid
         $column_1->setAction(new TAction([$this, 'onReload']), ['order'=> 'id']);
-        $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'descricao']);
+        $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'cpf']);
 
-        $action1 = new TDataGridAction(['FolhaForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
+        $action1 = new TDataGridAction(['DespesaForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([ $this, 'onDelete'], ['id'=> '{id}']);
 
         //Adicionando a ação na tela
@@ -131,7 +131,28 @@ class DespesaFixaList extends TPage
 
     }
    
+    public function onDelete($param)
+    {
+        try {
+            if (isset($param['key'])) {
 
+                $id = $param['key'];
+
+                TTransaction::open('sample');
+                $despesa = new Despesa($id);
+                ItemDespesa::where('despesa_id', '=', $despesa->id)->delete();
+                $despesa->delete();
+                
+            }
+
+            TTransaction::close();
+        } catch (Exception $e) {
+            new TMessage('error', $e->getMessage(), $this->afterSaveAction);
+            TTransaction::rollback();
+        }
+    
+  
+}
 
   
 }

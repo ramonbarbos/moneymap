@@ -15,6 +15,9 @@
       <menuitem label="Folhas">
         <action>FolhaList</action>
       </menuitem>
+      <menuitem label="Despesas">
+        <action>DespesaList</action>
+      </menuitem>
     </menu>
   </menuitem>
   <menuitem label="_t{Administration}">
