@@ -1,0 +1,37 @@
+SAMPLE
+host   = "127.0.0.1:3306"
+name   = "u232862127_sge"
+user   = "u232862127_root"
+pass   = "Ramon@21"
+type   = "mysql"
+prep   = "1"
+
+PERMISSION
+host   = "127.0.0.1:3306"
+port   = 
+name   = "u232862127_sge"
+user   = "u232862127_root"
+pass   = "Ramon@21"
+type   = "mysql"
+slog   = 
+prep   = "1"
+
+LOG.INI
+host   = "127.0.0.1:3306"
+port   = 
+name   = "u232862127_sge"
+user   = "u232862127_root"
+pass   = "Ramon@21"
+type   = "mysql"
+slog   = 
+prep   = "1"
+
+UNI (A, B)
+host   = "127.0.0.1:3306"
+port   = 
+name   = "u232862127_sge"
+user   = "u232862127_root"
+pass   = "Ramon@21"
+type   = "mysql"
+slog   = 
+prep   = "1"
