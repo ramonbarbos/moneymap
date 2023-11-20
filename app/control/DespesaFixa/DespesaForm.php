@@ -45,6 +45,7 @@ use Adianti\Wrapper\BootstrapFormBuilder;
 class DespesaForm extends TPage
 {
   private $form;
+  protected $formInstance;
 
   use Adianti\base\AdiantiStandardFormTrait;
 
@@ -67,7 +68,7 @@ class DespesaForm extends TPage
 
     // Criação de fields
     $id = new TEntry('id');
-    $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
+    $cpf         = new TDBUniqueSearch('cpf', 'sample', 'Folha', 'cpf', 'cpf');
     $cpf->setChangeAction(new TAction([$this, 'onCPFChange']));
     $anoMes = new TEntry('anoMes');
     $vl_despesa = new TEntry('vl_despesa');
@@ -81,7 +82,7 @@ class DespesaForm extends TPage
     $id->setSize('100%');
     $cpf->addValidation('cpf', new TRequiredValidator);
     $cpf->setMinLength(0);
-    $cpf->setMask('<b>{cpf}</b> - {nome}');
+    $cpf->setMask('<b>{cpf}</b>');
     $cpf->setSize('100%');
     $anoMes->setEditable(false);
     $vl_despesa->setEditable(false);
@@ -114,6 +115,7 @@ class DespesaForm extends TPage
     $saldo->setNumericMask(2, ',', '.', true);
     $saldo->setSize('100%');
     $saldo->style = 'valor-align: right';
+    $saldo->setEditable(false);
     $saldo->addValidation('saldo', new TRequiredValidator);
 
 
@@ -160,9 +162,7 @@ class DespesaForm extends TPage
 
     // Adicionar link para fechar o formulário
     $this->form->addHeaderActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
-    $this->form->addAction('Clear', new TAction([$this, 'onClear']), 'fa:eraser red');
-    $this->form->addAction('Fill', new TAction([$this, 'onFill']), 'fas:pencil-alt green');
-    $this->form->addAction('Clear/Fill', new TAction([$this, 'onClearFill']), 'fas:pencil-alt orange');
+  
 
     // Vertical container
     $container = new TVBox;
@@ -175,10 +175,54 @@ class DespesaForm extends TPage
   {
     if (!empty($params['cpf'])) {
       try {
+
+        $obj = new DespesaForm();
+
+
         TTransaction::open('sample');
-       
-        new TMessage('info', 'Chegou');
-    
+        
+        $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
+        $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
+        if (@$folha->cpf ==  @$despesa->cpf) {
+          $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
+          $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->load();
+
+          $data = new stdClass;
+          $data->id_item = [];
+          $data->dt_despesa = [];
+          $data->evento_id = [];
+          $data->descricao = [];
+          $data->valor = [];
+          $data->id = [];
+          $data->anoMes = [];
+          $data->vl_despesa = [];
+          $cont = 0;
+
+
+          foreach ($item_despesas as $item) {
+
+            TFieldList::addRows('my_field_list', $cont);
+            $data->id_item[] = $item->id_item;
+            $data->dt_despesa[] = $item->dt_despesa;
+            $data->evento_id[] = $item->evento_id;
+            $data->descricao[] = $item->descricao;
+            $data->valor[] = $item->valor;
+            $data->saldo[] = $item->saldo;
+
+            $data->id = $despesa->id;
+            $data->anoMes = $despesa->anoMes;
+            $data->vl_despesa = $despesa->vl_despesa;
+
+            TForm::sendData('my_form', (object) $data);
+            $cont++;
+          new TMessage('info', 'Dados Carregados.');
+
+          }
+        } else if( !$folha  ) {
+          // TFieldList::clear('my_field_list');
+          new TMessage('info',  'Folha não encontrada');
+        }
+
         TTransaction::close();
       } catch (Exception $e) {
         new TMessage('error', $e->getMessage());
@@ -266,6 +310,7 @@ class DespesaForm extends TPage
   public function onEdit($param)
   {
     try {
+
       TTransaction::open('sample');
 
       if (isset($param['key'])) {
@@ -288,7 +333,7 @@ class DespesaForm extends TPage
 
 
         foreach ($item_despesas as $item) {
-          
+
           TFieldList::addRows('my_field_list', $cont);
           $data->id_item[] = $item->id_item;
           $data->dt_despesa[] = $item->dt_despesa;
@@ -296,8 +341,8 @@ class DespesaForm extends TPage
           $data->descricao[] = $item->descricao;
           $data->valor[] = $item->valor;
           $data->saldo[] = $item->saldo;
-      
-           
+
+
           TForm::sendData('my_form', $data);
           $cont++;
         }

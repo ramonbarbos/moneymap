@@ -317,6 +317,7 @@ class FolhaForm extends TPage
     try {
       TTransaction::open('sample');
 
+
       if (isset($param['key'])) {
         $key = $param['key'];
 
