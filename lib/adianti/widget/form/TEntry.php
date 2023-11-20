@@ -378,7 +378,8 @@ class TEntry extends TField implements AdiantiWidgetInterface
         // define the tag properties
         $this->tag->{'name'}  = $this->name;    // TAG name
         $this->tag->{'value'} = htmlspecialchars( (string) $this->value, ENT_QUOTES | ENT_HTML5, 'UTF-8');   // TAG value
-        
+        //$this->tag->{'value'} = htmlspecialchars(strval($this->value), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         if (!empty($this->size))
         {
             if (strstr((string) $this->size, '%') !== FALSE)

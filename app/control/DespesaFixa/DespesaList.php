@@ -144,6 +144,7 @@ class DespesaList extends TPage
                 $despesa->delete();
                 
             }
+            new TMessage('info', 'Registo Excluido', $this->afterSaveAction); //$this->afterSaveAction
 
             TTransaction::close();
         } catch (Exception $e) {
