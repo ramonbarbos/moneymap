@@ -159,10 +159,9 @@ class DespesaForm extends TPage
 
     // Adicionar link para criar um novo registro
     $this->form->addActionLink(_t('New'), new TAction([$this, 'onEdit']), 'fa:eraser red');
-
     // Adicionar link para fechar o formulário
     $this->form->addHeaderActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
-  
+
 
     // Vertical container
     $container = new TVBox;
@@ -176,11 +175,8 @@ class DespesaForm extends TPage
     if (!empty($params['cpf'])) {
       try {
 
-        $obj = new DespesaForm();
-
-
+        //$obj = new DespesaForm();
         TTransaction::open('sample');
-        
         $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
         $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
         if (@$folha->cpf ==  @$despesa->cpf) {
@@ -215,12 +211,40 @@ class DespesaForm extends TPage
 
             TForm::sendData('my_form', (object) $data);
             $cont++;
+          }
           new TMessage('info', 'Dados Carregados.');
+        } else if (!$folha) {
+
+          new TMessage('info',  'Folha não encontrada');
+        } else {
+         
+          //verificar se existe desconto vinculado ao cpf
+          $folha  =  Folha::where('cpf', 'like', $params['cpf'])->first();
+          $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
+                                    ->where('tipo', 'like', 'D')
+                                  ->load();
+
+          if ($item_folhas) {
+            new TMessage('info', 'Descontos Carregados.');
+            
+            $dataF = new stdClass;
+            $dataF->evento_id = [];
+            $dataF->valor = [];
+            $cont = 0;
+
+            foreach ($item_folhas as $item) {
+
+              TFieldList::addRows('my_field_list', $cont);
+              $dataF->evento_id[] = $item->evento_id;
+              $dataF->valor[] = $item->valor;
+
+              TForm::sendData('my_form', (object) $dataF);
+              $cont++;
+            }
+          }else{
+            TFieldList::clear('my_field_list');
 
           }
-        } else if( !$folha  ) {
-          // TFieldList::clear('my_field_list');
-          new TMessage('info',  'Folha não encontrada');
         }
 
         TTransaction::close();
@@ -366,7 +390,7 @@ class DespesaForm extends TPage
   public static function onClear($param)
   {
     TFieldList::clear('my_field_list');
-    TFieldList::addRows('my_field_list', 4);
+    TFieldList::addRows('my_field_list', 1);
   }
 
   /**
