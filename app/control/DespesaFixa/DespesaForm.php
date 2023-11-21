@@ -42,6 +42,8 @@ use Adianti\Widget\Wrapper\TDBUniqueSearch;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
+
+
 class DespesaForm extends TPage
 {
   private $form;
@@ -69,13 +71,15 @@ class DespesaForm extends TPage
     // Criação de fields
     $id = new TEntry('id');
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'Folha', 'cpf', 'cpf');
-    $cpf->setChangeAction(new TAction([$this, 'onCPFChange']));
+    $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
     $anoMes = new TEntry('anoMes');
     $vl_despesa = new TEntry('vl_despesa');
+    $vl_salario = new TEntry('vl_salario');
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('Mês')], [$anoMes]);
-    $this->form->addFields([new TLabel('CPF (*)')], [$cpf], [new TLabel('Despesa')], [$vl_despesa]);
+    $this->form->addFields([new TLabel('Codigo')], [$id]);
+    $this->form->addFields([new TLabel('CPF (*)')], [$cpf],[new TLabel('Mês')], [$anoMes]);
+    $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Despesa')], [$vl_despesa]);
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
@@ -87,6 +91,8 @@ class DespesaForm extends TPage
     $anoMes->setEditable(false);
     $vl_despesa->setEditable(false);
     $vl_despesa->setNumericMask(2, '.', '', true);
+    $vl_salario->setEditable(false);
+    $vl_salario->setNumericMask(2, '.', '', true);
 
 
     $id_item = new THidden('id_item[]');
@@ -107,6 +113,8 @@ class DespesaForm extends TPage
     $descricao->addValidation('descricao', new TRequiredValidator);
 
     $vl = new TEntry('valor[]');
+    $exit_action = new TAction(array('DespesaService', 'onValorChange'));
+    $vl->setExitAction($exit_action);
     $vl->setSize('100%');
     $vl->addValidation('valor', new TRequiredValidator);
 
@@ -116,7 +124,6 @@ class DespesaForm extends TPage
     $saldo->setSize('100%');
     $saldo->style = 'valor-align: right';
     $saldo->setEditable(false);
-    $saldo->addValidation('saldo', new TRequiredValidator);
 
 
 
@@ -142,7 +149,7 @@ class DespesaForm extends TPage
     $this->form->addField($vl);
     $this->form->addField($saldo);
 
-    $this->fieldlist->addButtonAction(new TAction([$this, 'showRow']), 'fa:info-circle purple', 'Show valor');
+    $this->fieldlist->addButtonAction(new TAction(['DespesaService', 'showRow']), 'fa:info-circle purple', 'Show valor');
     // $this->fieldlist->addButtonFunction("__adianti_message('Row data', JSON.stringify(tfieldlist_get_row_data(this)))", 'fa:info-circle blue', 'Show "valor" field');
 
     $this->fieldlist->addHeader();
@@ -170,90 +177,7 @@ class DespesaForm extends TPage
 
     parent::add($container);
   }
-  public static function onCPFChange($params)
-  {
-    if (!empty($params['cpf'])) {
-      try {
-
-        //$obj = new DespesaForm();
-        TTransaction::open('sample');
-        $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
-        $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
-        if (@$folha->cpf ==  @$despesa->cpf) {
-          $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
-          $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->load();
-
-          $data = new stdClass;
-          $data->id_item = [];
-          $data->dt_despesa = [];
-          $data->evento_id = [];
-          $data->descricao = [];
-          $data->valor = [];
-          $data->id = [];
-          $data->anoMes = [];
-          $data->vl_despesa = [];
-          $cont = 0;
-
-
-          foreach ($item_despesas as $item) {
-
-            TFieldList::addRows('my_field_list', $cont);
-            $data->id_item[] = $item->id_item;
-            $data->dt_despesa[] = $item->dt_despesa;
-            $data->evento_id[] = $item->evento_id;
-            $data->descricao[] = $item->descricao;
-            $data->valor[] = $item->valor;
-            $data->saldo[] = $item->saldo;
-
-            $data->id = $despesa->id;
-            $data->anoMes = $despesa->anoMes;
-            $data->vl_despesa = $despesa->vl_despesa;
-
-            TForm::sendData('my_form', (object) $data);
-            $cont++;
-          }
-          new TMessage('info', 'Dados Carregados.');
-        } else if (!$folha) {
-
-          new TMessage('info',  'Folha não encontrada');
-        } else {
-         
-          //verificar se existe desconto vinculado ao cpf
-          $folha  =  Folha::where('cpf', 'like', $params['cpf'])->first();
-          $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
-                                    ->where('tipo', 'like', 'D')
-                                  ->load();
-
-          if ($item_folhas) {
-            new TMessage('info', 'Descontos Carregados.');
-            
-            $dataF = new stdClass;
-            $dataF->evento_id = [];
-            $dataF->valor = [];
-            $cont = 0;
-
-            foreach ($item_folhas as $item) {
-
-              TFieldList::addRows('my_field_list', $cont);
-              $dataF->evento_id[] = $item->evento_id;
-              $dataF->valor[] = $item->valor;
-
-              TForm::sendData('my_form', (object) $dataF);
-              $cont++;
-            }
-          }else{
-            TFieldList::clear('my_field_list');
-
-          }
-        }
-
-        TTransaction::close();
-      } catch (Exception $e) {
-        new TMessage('error', $e->getMessage());
-        TTransaction::rollback();
-      }
-    }
-  }
+  
   public function onSave($param)
   {
     try {
@@ -342,7 +266,8 @@ class DespesaForm extends TPage
 
         $object = new Despesa($key);
         $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->load();
-        $item_despesa = ItemDespesa::where('despesa_id', '=', $object->id)->first();
+        $folha   =  Folha::where('cpf', '=', $object->cpf)->first();
+
         $this->form->getField('cpf')->setEditable(false);
 
 
@@ -353,12 +278,11 @@ class DespesaForm extends TPage
         $data->descricao = [];
         $data->valor = [];
         $data->saldo = [];
-        $cont = 0;
 
 
         foreach ($item_despesas as $item) {
 
-          TFieldList::addRows('my_field_list', $cont);
+          TFieldList::addRows('my_field_list', 1);
           $data->id_item[] = $item->id_item;
           $data->dt_despesa[] = $item->dt_despesa;
           $data->evento_id[] = $item->evento_id;
@@ -366,10 +290,10 @@ class DespesaForm extends TPage
           $data->valor[] = $item->valor;
           $data->saldo[] = $item->saldo;
 
-
           TForm::sendData('my_form', $data);
-          $cont++;
+
         }
+        TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
 
         $this->form->setData($object);
         TTransaction::close();
@@ -381,31 +305,8 @@ class DespesaForm extends TPage
       TTransaction::rollback();
     }
   }
-  public static function showRow($param)
-  {
-    new TMessage('info', str_replace(',', '<br>', json_encode($param)));
-  }
+ 
 
-
-  public static function onClear($param)
-  {
-    TFieldList::clear('my_field_list');
-    TFieldList::addRows('my_field_list', 1);
-  }
-
-  /**
-   * Fill data
-   */
-  public static function onFill($param)
-  {
-  }
-
-  /**
-   * Fill data
-   */
-  public static function onClearFill($param)
-  {
-  }
 
   // Método fechar
   public function onClose($param)
