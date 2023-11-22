@@ -21,6 +21,12 @@
       <menuitem label="Despesas">
         <action>DespesaList</action>
       </menuitem>
+      <menuitem label="Teste ">
+        <action>FormFieldListEventsView</action>
+      </menuitem>
+      <menuitem label="new teste">
+        <action>DespesaView</action>
+      </menuitem>
     </menu>
   </menuitem>
   <menuitem label="_t{Administration}">

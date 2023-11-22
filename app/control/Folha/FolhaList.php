@@ -144,6 +144,7 @@ class FolhaList extends TPage
                 $folha->delete();
                 
             }
+            new TMessage('info', 'Deletado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
 
             TTransaction::close();
         } catch (Exception $e) {

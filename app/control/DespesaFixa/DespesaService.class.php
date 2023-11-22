@@ -175,6 +175,8 @@ class DespesaService
                 TFieldList::clear('my_field_list');
               }
             }
+          }else{
+            TFieldList::clear('my_field_list');
           }
         }
 

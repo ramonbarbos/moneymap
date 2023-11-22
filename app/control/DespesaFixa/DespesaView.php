@@ -3,71 +3,50 @@
 use Adianti\Control\TAction;
 use Adianti\Control\TPage;
 use Adianti\Control\TWindow;
-use Adianti\Core\AdiantiCoreApplication;
-use Adianti\Database\TCriteria;
-use Adianti\Database\TFilter;
-use Adianti\Database\TRepository;
 use Adianti\Database\TTransaction;
-use Adianti\Validator\TincidenciaValidator;
-use Adianti\Validator\TMinLengthValidator;
-use Adianti\Validator\TNumericValidator;
+use Adianti\Validator\TRequiredListValidator;
 use Adianti\Validator\TRequiredValidator;
-use Adianti\Widget\Base\TScript;
-use Adianti\Widget\Container\THBox;
-use Adianti\Widget\Container\TPanelGroup;
 use Adianti\Widget\Container\TVBox;
-use Adianti\Widget\Datagrid\TDataGrid;
-use Adianti\Widget\Datagrid\TDataGridAction;
-use Adianti\Widget\Datagrid\TDataGridColumn;
-use Adianti\Widget\Dialog\TAlert;
 use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Dialog\TToast;
 use Adianti\Widget\Form\TButton;
-use Adianti\Widget\Form\TCheckList;
 use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TDate;
-use Adianti\Widget\Form\Tevento_id;
-use Adianti\Widget\Form\Tdt_despesa;
-use Adianti\Widget\Form\Tdt_despesaTime;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TFieldList;
 use Adianti\Widget\Form\TForm;
 use Adianti\Widget\Form\TFormSeparator;
 use Adianti\Widget\Form\THidden;
 use Adianti\Widget\Form\TLabel;
-use Adianti\Widget\Form\TPassword;
+use Adianti\Widget\Util\TActionLink;
+use Adianti\Widget\Util\TXMLBreadCrumb;
 use Adianti\Widget\Wrapper\TDBCombo;
-use Adianti\Widget\Wrapper\TDBevento_id;
-use Adianti\Widget\Wrapper\TDBSeekButton;
 use Adianti\Widget\Wrapper\TDBUniqueSearch;
-use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-
-
-class DespesaForm extends TPage
+class DespesaView extends TPage
 {
   private $form;
-  protected $formInstance;
   private $fieldlist;
 
   use Adianti\base\AdiantiStandardFormTrait;
 
+
+  /**
+   * Constructor
+   */
   public function __construct()
   {
     parent::__construct();
-
-    parent::setTargetContainer('adianti_right_panel');
-    $this->setAfterSaveAction(new TAction(['DespesaList', 'onReload'], ['register_state' => 'true']));
-
-    $this->setDatabase('sample');
-    $this->setActiveRecord('Despesa');
 
     // create form and table container
     $this->form = new BootstrapFormBuilder('my_form');
     $this->form->setFormTitle('Novas Despesas');
     $this->form->setClientValidation(true);
-    $this->form->setColumnClasses(3, ['col-sm-4', 'col-sm-4', 'col-sm-4']);
+    $this->form->setColumnClasses(3, ['col-sm-3', 'col-sm-3', 'col-sm-3','col-sm-3']);
+
+    $this->setDatabase('sample');
+    $this->setActiveRecord('Despesa');
 
 
     // Criação de fields
@@ -107,87 +86,104 @@ class DespesaForm extends TPage
 
     $uniq = new THidden('uniq[]');
 
-    $dt_despesa = new TDate('dt_despesa[]');
-    $dt_despesa->setSize('100%');
-    //$dt_despesa->setMask('dd/mm/yyyy');
-    //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
-    $dt_despesa->addValidation('dt_despesa', new TRequiredValidator);
-
     $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao');
     $evento_id->enableSearch();
+   // $evento_id->addItems(['1' => '<b>One</b>', '2' => '<b>Two</b>', '3' => '<b>Three</b>', '4' => '<b>Four</b>', '5' => '<b>Five</b>']);
     $evento_id->setSize('100%');
-    $evento_id->addValidation('evento_id', new TRequiredValidator);
 
     $descricao = new TEntry('descricao[]');
     $descricao->setSize('100%');
-    $descricao->addValidation('descricao', new TRequiredValidator);
 
-    $vl = new TEntry('valor[]');
-    $exit_action = new TAction(array('DespesaService', 'onValorChange'));
-    $vl->setExitAction($exit_action);
-    $vl->setSize('100%');
-    $vl->addValidation('valor', new TRequiredValidator);
-
+    $valor = new TEntry('valor[]');
+    $valor->setNumericMask(2, ',', '.', true);
+    $valor->setSize('100%');
+    $valor->style = 'text-align: right';
 
     $saldo = new TEntry('saldo[]');
     $saldo->setNumericMask(2, ',', '.', true);
     $saldo->setSize('100%');
-    $saldo->style = 'valor-align: right';
-    $saldo->setEditable(false);
+    $saldo->style = 'text-align: right';
 
+    $dt_despesa = new TDate('dt_despesa[]');
+    $dt_despesa->setSize('100%');
 
-
-    $this->fieldlist = new TFieldList();
+    $this->fieldlist = new TFieldList;
     $this->fieldlist->generateAria();
     $this->fieldlist->width = '100%';
     $this->fieldlist->name  = 'my_field_list';
-    $this->fieldlist->class .= ' table-responsive';
-    $this->fieldlist->addField('<b>Unniq</b>',  $uniq,   ['width' => '5%', 'uniqid' => true]);
-    $this->fieldlist->addField('<b>Data</b>',   $dt_despesa,   ['width' => '25%']);
-    $this->fieldlist->addField('<b>C.Custo</b>', $evento_id,  ['width' => '15%']);
-    $this->fieldlist->addField('<b>Descricao</b>', $descricao,  ['width' => '25%']);
-    $this->fieldlist->addField('<b>Valor</b>', $vl, ['width' => '25%', 'sum' => true]);
-    $this->fieldlist->addField('<b>Saldo</b>',   $saldo,   ['width' => '25%']);
+    $this->fieldlist->addField('<b>Unniq</b>',  $uniq,   ['width' => '0%', 'uniqid' => true]);
+    $this->fieldlist->addField('<b>Date</b>',   $dt_despesa,   ['width' => '25%']);
+    $this->fieldlist->addField('<b>Combo</b>',  $evento_id,  ['width' => '25%']);
+    $this->fieldlist->addField('<b>Text</b>',   $descricao,   ['width' => '25%']);
+    $this->fieldlist->addField('<b>Number</b>', $valor, ['width' => '25%', 'sum' => true]);
+    $this->fieldlist->addField('<b>Number</b>', $saldo, ['width' => '25%', 'sum' => true]);
 
-    //$this->fieldlist->setTotalUpdt_despesaAction(new TAction([$this, 'x']));
+    // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'onTotalUpdate']));
 
     $this->fieldlist->enableSorting();
-    $this->form->addField($uniq);
-    $this->form->addField($dt_despesa);
+
     $this->form->addField($evento_id);
     $this->form->addField($descricao);
-    $this->form->addField($vl);
+    $this->form->addField($valor);
     $this->form->addField($saldo);
+    $this->form->addField($dt_despesa);
 
-    $this->fieldlist->addButtonAction(new TAction(['DespesaService', 'showRow']), 'fa:info-circle purple', 'Show valor');
-    // $this->fieldlist->addButtonFunction("__adianti_message('Row data', JSON.stringify(tfieldlist_get_row_data(this)))", 'fa:info-circle blue', 'Show "valor" field');
+    $descricao->addValidation('descricao', new TRequiredListValidator);
+
+    //$this->fieldlist->addButtonFunction("__adianti_message('Row data', JSON.stringify(tfieldlist_get_row_data(this)))", 'fa:info-circle blue', 'Show "Text" field');
+
+    $this->fieldlist->addButtonAction(new TAction([$this, 'showRow']), 'fa:info-circle purple', 'Show text');
+    //$this->fieldlist->disableRemoveButton();
+    $this->fieldlist->setRemoveAction(new TAction([$this, 'actionX']));
+
 
     $this->fieldlist->addHeader();
     $this->fieldlist->addDetail(new stdClass);
-  //  $this->fieldlist->addCloneAction();
-
+    $this->fieldlist->addCloneAction();
     // add field list to the form
     $this->form->addContent([$this->fieldlist]);
 
+    // form actions
+    //$this->form->addActionLink(_t('New'), new TAction(['DespesaList', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
+    $bt5b = new TButton('Voltar');
+    $bt5b->class = 'btn ';
+    $bt5b->style = 'background-color: grey; color: white';
 
-    // Adicionar botão de salvar
-    $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:plus green');
-    $btn->class = 'btn btn-sm btn-primary';
+    $bt5b->setLabel('Voltar');
+    $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaList');");
+    $this->form->addAction('Save', new TAction([$this, 'onSave'], ['static' => '1']), 'fa:save blue');
+    $this->form->addAction('Clear', new TAction([$this, 'onClear']), 'fa:eraser red');
 
-    // Adicionar link para criar um novo registro
-    $this->form->addActionLink(_t('New'), new TAction([$this, 'onEdit']), 'fa:eraser red');
-    // Adicionar link para fechar o formulário
-    $this->form->addHeaderActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
+    // wrap the page content using vertical box
+    $vbox = new TVBox;
+    $vbox->style = 'width: 100%';
+    $vbox->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+    $vbox->add($this->form);
+    $vbox->add($bt5b);
 
-
-    // Vertical container
-    $container = new TVBox;
-    $container->style = 'width: 100%';
-    $container->add($this->form);
-
-    parent::add($container);
+    parent::add($vbox);
   }
-  
+
+  public static function actionX($param)
+  {
+    $win = TWindow::create('test', 0.6, 0.8);
+    $win->add('<pre>' . str_replace("\n", '<br>', print_r($param, true)) . '</pre>');
+    $win->show();
+  }
+
+  public static function showRow($param)
+  {
+    new TMessage('info', str_replace(',', '<br>', json_encode($param)));
+  }
+
+
+  public static function onClear($param)
+  {
+    TFieldList::clear('my_field_list');
+    TFieldList::addRows('my_field_list', 1);
+  }
+
+
   public function onSave($param)
   {
     try {
@@ -224,7 +220,7 @@ class DespesaForm extends TPage
         $despesa->anoMes = date('Ym');
         $despesa->store();
 
-        new TMessage('info', 'Alterado com sucesso',); //$this->afterSaveAction
+        new TMessage('info', 'Alterado com sucesso',$this->afterSaveAction); //$this->afterSaveAction
 
       } else {
         $despesa->store();
@@ -254,7 +250,7 @@ class DespesaForm extends TPage
         $despesa->store();
 
         TForm::sendData('my_form', (object) ['id' => $despesa->id]);
-        new TMessage('info', 'Registos Salvos',); //$this->afterSaveAction
+        new TMessage('info', 'Registos Salvos',$this->afterSaveAction); //
       }
 
       TTransaction::close();
@@ -265,6 +261,7 @@ class DespesaForm extends TPage
     }
   }
 
+  
   public function onEdit($param)
   {
     try {
@@ -317,10 +314,4 @@ class DespesaForm extends TPage
   }
  
 
-
-  // Método fechar
-  public function onClose($param)
-  {
-    TScript::create("Template.closeRightPanel()");
-  }
 }

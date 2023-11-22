@@ -17,6 +17,7 @@ use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
+use Adianti\Widget\Util\TActionLink;
 use Adianti\Widget\Util\TDropDown;
 use Adianti\Widget\Util\TXMLBreadCrumb;
 use Adianti\Widget\Wrapper\TDBCombo;
@@ -63,7 +64,11 @@ class DespesaList extends TPage
         //Adicionar field de busca
         $btn = $this->form->addAction(_t('Find'), new TAction([$this, 'onSearch']), 'fa:search');
         $btn->class = 'btn btn-sm btn-primary';
-        $this->form->addActionLink(_t('New'), new TAction(['DespesaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
+       // $this->form->addActionLink(_t('New'), new TAction(['DespesaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
+        
+       $this->form->addActionLink(_t('New'), new TAction(['DespesaView', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
+       
+   
 
         //Criando a data grid
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
@@ -88,7 +93,7 @@ class DespesaList extends TPage
         $column_1->setAction(new TAction([$this, 'onReload']), ['order'=> 'id']);
         $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'cpf']);
 
-        $action1 = new TDataGridAction(['DespesaForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
+        $action1 = new TDataGridAction(['DespesaView', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([ $this, 'onDelete'], ['id'=> '{id}']);
 
         //Adicionando a ação na tela
