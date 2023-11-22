@@ -47,38 +47,47 @@ use Adianti\Wrapper\BootstrapFormBuilder;
 
 class FolhaService
 {
-    public static function onCheckCPF($param)
-    {
-      TTransaction::open('sample');
-      $repo1 = new TRepository('Folha');
-      $criteria = new TCriteria;
-  
-      if ($param['anoMes']) {
-        $criteria->add(new TFilter('anoMes', 'like', $param['anoMes']));
-        $criteria->add(new TFilter('cpf', 'like', $param['cpf']));
-      }
-  
+  public static function onCheckCPF($param)
+  {
+    TTransaction::open('sample');
+    $repo1 = new TRepository('Folha');
+    $criteria = new TCriteria;
+
+    if ($param['cpf']) {
+      $criteria->add(new TFilter('cpf', 'like', $param['cpf']));
+
+
       $folhas = $repo1->load($criteria);
-  
+
       if ($folhas) {
-        //TCombo::reload('form_folha', 'cpf', $options);
-        //  new TMessage('info', 'Carregando Dados.');
-        $object = Folha::where('cpf', 'like', $param['cpf'])->first();
-        //$item_folhas = ItemFolha::where('folha_id', '=', $object->id)->load();
-        
-        $data = new stdClass;
-        $data->key = $object->id;
-        $data->register_state = false;
-        $data->id = $object->id;
 
-        $folhaform = new FolhaForm();
-        $folhaform->onEdit(json_decode(json_encode($data), true));
-  
-        TForm::sendData('form_folha', (object) $object);
+        $folha = Folha::where('cpf', '=', $param['cpf'])->first();
 
+
+        $anoMes = AnoMes::where('descricao', '<>', $folha->anoMes)
+          ->load();
+          $options = array();
+        if ($anoMes) {
+          foreach($anoMes as $item){
+            $options[ $item->id] = $item->descricao;
+          }
+        }
+        TCombo::reload('form_folha', 'anoMes', $options);
       } else {
-        new TMessage('info', 'Não existe folha para esse mês.');
+        
+        $anoMes = AnoMes::where('descricao', '<>', '999999')
+          ->load();
+          $options = array();
+        if ($anoMes) {
+          foreach($anoMes as $item){
+            $options[ $item->descricao] = $item->descricao;
+          }
+        }
+        TCombo::reload('form_folha', 'anoMes', $options);
+        TToast::show('info', 'CPF sem folha no mês');
       }
-      TTransaction::close();
     }
+
+    TTransaction::close();
+  }
 }

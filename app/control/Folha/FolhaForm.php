@@ -70,10 +70,11 @@ class FolhaForm extends TPage
     $criteria_cpf = new TCriteria();
     $criteria_cpf->setProperty('order', 'id');
     //$criteria_cpf->add(new TFilter('cpf', '<>', cpf));
-    $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
-   // $cpf         = new TCombo('cpf');
+    // $cpf         = new TCombo('cpf');
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
-    $cpf->setChangeAction( new TAction( array('FolhaService', 'onCheckCPF' )) );
+    $cpf->setChangeAction(new TAction(array('FolhaService', 'onCheckCPF')));
+    $anoMes         = new TCombo('anoMes');
+
 
     $vl_salario = new TEntry('vl_salario');
     $vl_desconto = new TEntry('vl_desconto');
@@ -91,8 +92,8 @@ class FolhaForm extends TPage
 
 
     $this->form->addFields([new TLabel('Codigo')], [$id],);
-    $this->form->addFields(  [new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
-    $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Desconto')], [$vl_desconto], );
+    $this->form->addFields([new TLabel('CPF (*)')], [$cpf], [new TLabel('Mês (*)')], [$anoMes]);
+    $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Desconto')], [$vl_desconto],);
     $this->form->addContent([new TFormSeparator('Eventos')]);
 
     $id->setEditable(false);
@@ -103,7 +104,8 @@ class FolhaForm extends TPage
     $cpf->setSize('100%');
     //$cpf->setMask('Selecione');
     $anoMes->setSize('100%');
-    $anoMes->setMinLength(0);
+    $anoMes->addValidation('anoMes', new TRequiredValidator);
+    //$anoMes->setMinLength(0);
     $vl_salario->setEditable(false);
     $vl_salario->setNumericMask(2, '.', '', true);
     $vl_desconto->setEditable(false);
@@ -250,9 +252,14 @@ class FolhaForm extends TPage
       $folha = new Folha;
       $folha->fromArray((array) $data);
 
+      if (empty($param['eventos_list_evento_id'])) {
+        throw new Exception('É necessário informar pelo menos um item na folha.');
+      }
       if ($this->hasNegativeValues($param['eventos_list_valor'])) {
         throw new Exception('Não é permitido inserir valores negativos.');
       }
+      // Verificar se há pelo menos um ItemFolha informado
+
       if (!empty($folha->id)) {
         ItemFolha::where('folha_id', '=', $folha->id)->delete();
 
@@ -284,6 +291,7 @@ class FolhaForm extends TPage
         $total = 0;
 
         if (!empty($param['eventos_list_evento_id'])) {
+
           foreach ($param['eventos_list_evento_id'] as $key => $item_id) {
             $item = new ItemFolha;
             $evento = Evento::where('id', '=', $item_id)->first();
@@ -324,15 +332,15 @@ class FolhaForm extends TPage
   {
     try {
       TTransaction::open('sample');
-    
+
 
       if (isset($param['key'])) {
-      $key = $param['key'];
-
+        $key = $param['key'];
 
         $object = new Folha($key);
         $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->load();
         $this->form->getField('cpf')->setEditable(false);
+        $this->form->getField('anoMes')->setEditable(false);
 
         foreach ($item_folhas as $item) {
           $item->uniqid = uniqid();
@@ -340,6 +348,17 @@ class FolhaForm extends TPage
           $row->id = $item->uniqid;
         }
         $this->form->setData($object);
+
+        $mes = $object->anoMes;
+        $anoMes = AnoMes::where('descricao', 'like', $mes)
+          ->load();
+        $options = array();
+        if ($anoMes) {
+          foreach ($anoMes as $item) {
+            $options[$item->descricao] = $item->descricao;
+          }
+        }
+        TCombo::reload('form_folha', 'anoMes', $options);
         TTransaction::close();
       } else {
         $this->form->clear();
@@ -440,8 +459,7 @@ class FolhaForm extends TPage
           $totalP += ($evento->incidencia == 'P') ? floatval($row['valor']) : 0;
           $totalD += ($evento->incidencia == 'D') ? floatval($row['valor']) : 0;
         }
-      }else{
-
+      } else {
       }
 
       $anoMesAtual = date('Ym');
@@ -461,7 +479,7 @@ class FolhaForm extends TPage
     TScript::create("Template.closeRightPanel()");
   }
 
-  
+
 
 
   // public function onReload($param = NULL)

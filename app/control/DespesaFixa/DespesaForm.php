@@ -24,6 +24,7 @@ use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Dialog\TToast;
 use Adianti\Widget\Form\TButton;
 use Adianti\Widget\Form\TCheckList;
+use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TDate;
 use Adianti\Widget\Form\Tevento_id;
 use Adianti\Widget\Form\Tdt_despesa;
@@ -70,25 +71,34 @@ class DespesaForm extends TPage
 
     // Criação de fields
     $id = new TEntry('id');
+
+    $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'anoMes', 'descricao', 'descricao');
+    $anoMes->addValidation('anoMes', new TRequiredValidator);
+    $anoMes->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'Folha', 'cpf', 'cpf');
     $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
-    $anoMes = new TEntry('anoMes');
+
+
+    
     $vl_despesa = new TEntry('vl_despesa');
     $vl_salario = new TEntry('vl_salario');
 
 
     $this->form->addFields([new TLabel('Codigo')], [$id]);
-    $this->form->addFields([new TLabel('CPF (*)')], [$cpf],[new TLabel('Mês')], [$anoMes]);
+    $this->form->addFields([new TLabel('Mês (*)')], [$anoMes],[new TLabel('CPF (*)')], [$cpf]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Despesa')], [$vl_despesa]);
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
     $id->setSize('100%');
     $cpf->addValidation('cpf', new TRequiredValidator);
-    $cpf->setMinLength(0);
-    $cpf->setMask('<b>{cpf}</b>');
+    //$cpf->setMinLength(0);
+    //$cpf->setMask('<b>{cpf}</b>');
     $cpf->setSize('100%');
-    $anoMes->setEditable(false);
+    $anoMes->setMinLength(0);
+    
+    $anoMes->setSize('100%');
+
     $vl_despesa->setEditable(false);
     $vl_despesa->setNumericMask(2, '.', '', true);
     $vl_salario->setEditable(false);

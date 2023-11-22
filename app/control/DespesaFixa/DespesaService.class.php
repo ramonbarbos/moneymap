@@ -25,6 +25,7 @@ use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Dialog\TToast;
 use Adianti\Widget\Form\TButton;
 use Adianti\Widget\Form\TCheckList;
+use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TDate;
 use Adianti\Widget\Form\Tevento_id;
 use Adianti\Widget\Form\Tdt_despesa;
@@ -49,123 +50,131 @@ class DespesaService
 
   public static function onValorChange($param)
   {
-      try {
-          TTransaction::open('sample');
-  
-          if (!empty($param['cpf'])) {
-              $folha = Folha::where('cpf', '=', $param['cpf'])->first();
-              $data = new stdClass;
-              $data->saldo = [];
+    try {
+      TTransaction::open('sample');
 
-              $acumulado = 0; // Nova variável para acumular os valores retirados
+      if (!empty($param['cpf'])) {
+        $folha = Folha::where('cpf', '=', $param['cpf'])->first();
+        $data = new stdClass;
+        $data->saldo = [];
 
-              if (!empty($param['evento_id'])) {
-                  foreach ($param['evento_id'] as $key => $item) {
-                      $evento = Evento::where('id', '=', $item)->first();
-  
-                      // Vamos atualizar o acumulado para incluir o valor atual
-                      $acumulado += (float) $param['valor'][$key];
-                      
-                      // Calcula o novo saldo subtraindo o acumulado do saldo anterior
-                      $saldoAtual = $folha->vl_salario - $acumulado;
-                      
-                      // Atualiza a memória temporária com o novo saldo
-                      self::$saldos[$param['cpf']][$item] = $saldoAtual;
-                      
-                      // Adiciona o novo saldo ao array $data->saldo
-                      $data->saldo[] = $saldoAtual;
-                      
-                  }
-              }
-  
-              // Envia os saldos calculados para a interface do usuário
-              TForm::sendData('my_form', (object) $data);
+        $acumulado = 0; // Nova variável para acumular os valores retirados
 
+        if (!empty($param['evento_id'])) {
+          foreach ($param['evento_id'] as $key => $item) {
+            $evento = Evento::where('id', '=', $item)->first();
+
+            // Vamos atualizar o acumulado para incluir o valor atual
+            $acumulado += (float) $param['valor'][$key];
+
+            // Calcula o novo saldo subtraindo o acumulado do saldo anterior
+            $saldoAtual = $folha->vl_salario - $acumulado;
+
+            // Atualiza a memória temporária com o novo saldo
+            self::$saldos[$param['cpf']][$item] = $saldoAtual;
+
+            // Adiciona o novo saldo ao array $data->saldo
+            $data->saldo[] = $saldoAtual;
           }
-  
-          TTransaction::close();
-      } catch (Exception $e) {
-          new TMessage('error', $e->getMessage());
-          TTransaction::rollback();
+        }
+
+        // Envia os saldos calculados para a interface do usuário
+        TForm::sendData('my_form', (object) $data);
       }
+
+      TTransaction::close();
+    } catch (Exception $e) {
+      new TMessage('error', $e->getMessage());
+      TTransaction::rollback();
+    }
   }
-  
+
   public static function onCPFChange($params)
   {
     if (!empty($params['cpf'])) {
       try {
-
-        //$obj = new DespesaForm();
         TTransaction::open('sample');
-        $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
-        $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
-        if (@$folha->cpf ==  @$despesa->cpf) { //Já existe despesa  com o CPF
-          $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
-          $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->load();
 
-          $data = new stdClass;
-          $data->id_item = [];
-          $data->dt_despesa = [];
-          $data->evento_id = [];
-          $data->descricao = [];
-          $data->valor = [];
-          $data->id = [];
-          $data->anoMes = [];
-          $data->vl_despesa = [];
-          $data->vl_salario = [];
+        $repo = new TRepository('Folha');
+        $criteria = new TCriteria;
+
+        if ($params['anoMes']) {
+          $criteria->add(new TFilter('anoMes', 'like', $params['anoMes']));
+          $criteria->add(new TFilter('cpf', 'like', $params['cpf']));
+
+          $folhas = $repo->load($criteria);
+
+          if ($folhas) {
+
+            $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
+            $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
+            if (@$folha->cpf ==  @$despesa->cpf) { //Já existe despesa  com o CPF
+              $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
+              $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->load();
+
+              $data = new stdClass;
+              $data->id_item = [];
+              $data->dt_despesa = [];
+              $data->evento_id = [];
+              $data->descricao = [];
+              $data->valor = [];
+              $data->id = [];
+              $data->anoMes = [];
+              $data->vl_despesa = [];
+              $data->vl_salario = [];
 
 
-          foreach ($item_despesas as $item) {
+              foreach ($item_despesas as $item) {
 
-            TFieldList::addRows('my_field_list', 1);
-            $data->id_item[] = $item->id_item;
-            $data->dt_despesa[] = $item->dt_despesa;
-            $data->evento_id[] = $item->evento_id;
-            $data->descricao[] = $item->descricao;
-            $data->valor[] = $item->valor;
-            $data->saldo[] = $item->saldo;
+                TFieldList::addRows('my_field_list', 1);
+                $data->id_item[] = $item->id_item;
+                $data->dt_despesa[] = $item->dt_despesa;
+                $data->evento_id[] = $item->evento_id;
+                $data->descricao[] = $item->descricao;
+                $data->valor[] = $item->valor;
+                $data->saldo[] = $item->saldo;
 
-            $data->id = $despesa->id;
-            $data->anoMes = $despesa->anoMes;
-            $data->vl_despesa = $despesa->vl_despesa;
-            $data->vl_salario = $folha->vl_salario;
+                $data->id = $despesa->id;
+                $data->anoMes = $despesa->anoMes;
+                $data->vl_despesa = $despesa->vl_despesa;
+                $data->vl_salario = $folha->vl_salario;
 
-            TForm::sendData('my_form', (object) $data);
-          }
-          new TMessage('info', 'Dados Carregados.');
-        } else if (!$folha) { //Quando nao tiver folha encontrada
-          new TMessage('info',  'Folha não encontrada');
-        } else { //Quando tiver Folha mas não tem Despesa com o CPF
+                TForm::sendData('my_form', (object) $data);
+              }
+              TToast::show('info', 'Dados Encontrado.');
+            } else if (!$folha) { //Quando nao tiver folha encontrada
+              TToast::show('info', 'Folha não encontrada');
 
-          //verificar se existe desconto vinculado ao cpf
-          $folha  =  Folha::where('cpf', 'like', $params['cpf'])->first();
-          $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
-            ->where('tipo', 'like', 'D')
-            ->load();
+            } else { //Quando tiver Folha mas não tem Despesa com o CPF
 
-          if ($item_folhas || $folha) {
+              //verificar se existe desconto vinculado ao cpf
+              $folha  =  Folha::where('cpf', 'like', $params['cpf'])->first();
+              $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
+                ->where('tipo', 'like', 'D')
+                ->load();
 
-            $dataF = new stdClass;
-            $dataF->evento_id = [];
-            $dataF->valor = [];
-            $cont = 0;
+              if ($item_folhas || $folha) {
 
-            foreach ($item_folhas as $item) {
+                $dataF = new stdClass;
+                $dataF->evento_id = [];
+                $dataF->valor = [];
+                $cont = 0;
 
-              TFieldList::addRows('my_field_list', $cont);
-              $dataF->evento_id[] = $item->evento_id;
-              $dataF->valor[] = $item->valor;
-               TForm::sendData('my_form', (object) $dataF);
+                foreach ($item_folhas as $item) {
 
-              $cont++;
+                  TFieldList::addRows('my_field_list', $cont);
+                  $dataF->evento_id[] = $item->evento_id;
+                  $dataF->valor[] = $item->valor;
+                  TForm::sendData('my_form', (object) $dataF);
+
+                  $cont++;
+                }
+                TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
+
+              } else {
+                TFieldList::clear('my_field_list');
+              }
             }
-           TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
-
-         //   new TMessage('info', 'Descontos Carregados.');
-
-
-          } else {
-           TFieldList::clear('my_field_list');
           }
         }
 
