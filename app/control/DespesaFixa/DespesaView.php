@@ -3,6 +3,8 @@
 use Adianti\Control\TAction;
 use Adianti\Control\TPage;
 use Adianti\Control\TWindow;
+use Adianti\Database\TCriteria;
+use Adianti\Database\TFilter;
 use Adianti\Database\TTransaction;
 use Adianti\Validator\TRequiredListValidator;
 use Adianti\Validator\TRequiredValidator;
@@ -79,14 +81,17 @@ class DespesaView extends TPage
     $anoMes->setSize('100%');
 
     $vl_despesa->setEditable(false);
-    $vl_despesa->setNumericMask(2, '.', '', true);
+    $vl_despesa->setNumericMask(2, '.', '', false);
     $vl_salario->setEditable(false);
-    $vl_salario->setNumericMask(2, '.', '', true);
+    $vl_salario->setNumericMask(2, '.', '', false);
 
 
     $uniq = new THidden('uniq[]');
 
-    $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao');
+    $criteria_event = new TCriteria();
+    $criteria_event->setProperty('order', 'id');
+    $criteria_event->add(new TFilter('incidencia', 'like', 'D'));
+    $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao', null, $criteria_event);
     $evento_id->enableSearch();
    // $evento_id->addItems(['1' => '<b>One</b>', '2' => '<b>Two</b>', '3' => '<b>Three</b>', '4' => '<b>Four</b>', '5' => '<b>Five</b>']);
     $evento_id->setSize('100%');
@@ -95,12 +100,14 @@ class DespesaView extends TPage
     $descricao->setSize('100%');
 
     $valor = new TEntry('valor[]');
-    $valor->setNumericMask(2, ',', '.', true);
+    $valor->setNumericMask(2, '.', '', false);
+    $exit_action = new TAction(array('DespesaService', 'onValorChange'));
+    $valor->setExitAction($exit_action);
     $valor->setSize('100%');
     $valor->style = 'text-align: right';
 
     $saldo = new TEntry('saldo[]');
-    $saldo->setNumericMask(2, ',', '.', true);
+    $saldo->setNumericMask(2, '.', '', false);
     $saldo->setSize('100%');
     $saldo->style = 'text-align: right';
 
@@ -112,11 +119,11 @@ class DespesaView extends TPage
     $this->fieldlist->width = '100%';
     $this->fieldlist->name  = 'my_field_list';
     $this->fieldlist->addField('<b>Unniq</b>',  $uniq,   ['width' => '0%', 'uniqid' => true]);
-    $this->fieldlist->addField('<b>Date</b>',   $dt_despesa,   ['width' => '25%']);
-    $this->fieldlist->addField('<b>Combo</b>',  $evento_id,  ['width' => '25%']);
-    $this->fieldlist->addField('<b>Text</b>',   $descricao,   ['width' => '25%']);
-    $this->fieldlist->addField('<b>Number</b>', $valor, ['width' => '25%', 'sum' => true]);
-    $this->fieldlist->addField('<b>Number</b>', $saldo, ['width' => '25%', 'sum' => true]);
+    $this->fieldlist->addField('<b>Data</b>',   $dt_despesa,   ['width' => '15%']);
+    $this->fieldlist->addField('<b>C.Custo</b>',  $evento_id,  ['width' => '25%']);
+    $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '25%']);
+    $this->fieldlist->addField('<b>Valor</b>', $valor, ['width' => '25%', 'sum' => true]);
+    $this->fieldlist->addField('<b>Saldo</b>', $saldo, ['width' => '25%', 'sum' => true]);
 
     // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'onTotalUpdate']));
 
@@ -128,7 +135,10 @@ class DespesaView extends TPage
     $this->form->addField($saldo);
     $this->form->addField($dt_despesa);
 
-    $descricao->addValidation('descricao', new TRequiredListValidator);
+    $dt_despesa->addValidation('Data', new TRequiredListValidator);
+    $evento_id->addValidation('Centro de custo', new TRequiredListValidator);
+    $descricao->addValidation('Descrição', new TRequiredListValidator);
+    $valor->addValidation('Valor', new TRequiredListValidator);
 
     //$this->fieldlist->addButtonFunction("__adianti_message('Row data', JSON.stringify(tfieldlist_get_row_data(this)))", 'fa:info-circle blue', 'Show "Text" field');
 
@@ -276,6 +286,7 @@ class DespesaView extends TPage
         $folha   =  Folha::where('cpf', '=', $object->cpf)->first();
 
         $this->form->getField('cpf')->setEditable(false);
+        $this->form->getField('anoMes')->setEditable(false);
 
 
         $data = new stdClass;
