@@ -21,12 +21,6 @@
       <menuitem label="Despesas">
         <action>DespesaList</action>
       </menuitem>
-      <menuitem label="Teste ">
-        <action>FormFieldListEventsView</action>
-      </menuitem>
-      <menuitem label="new teste">
-        <action>DespesaView</action>
-      </menuitem>
     </menu>
   </menuitem>
   <menuitem label="_t{Administration}">
@@ -79,6 +73,14 @@
       <menuitem label="System Information">
         <action>SystemInformationView</action>
         <icon>fas:desktop fa-fw</icon>
+      </menuitem>
+      <menuitem label="Paginas">
+        <icon>far:folder-open fa-fw</icon>
+        <menu>
+          <menuitem label="Cadastro Despesa">
+            <action>DespesaView</action>
+          </menuitem>
+        </menu>
       </menuitem>
       <menuitem label="_t{Preferences}">
         <action>SystemPreferenceForm#method=onEdit</action>
