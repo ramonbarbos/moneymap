@@ -6,6 +6,9 @@
   </menuitem>
   <menuitem label="Despesas">
     <menu>
+      <menuitem label="AnoMes">
+        <action>AnoMesList</action>
+      </menuitem>
       <menuitem label="Ficha Cadastral">
         <action>FichaCadastralList</action>
       </menuitem>

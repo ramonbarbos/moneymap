@@ -23,7 +23,7 @@ use Adianti\Widget\Wrapper\TDBCombo;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class FolhaList extends TPage
+class AnoMesList extends TPage
 {
     private $form;
     private $datagrid;
@@ -40,30 +40,33 @@ class FolhaList extends TPage
 
         //Conexão com a tabela
         $this->setDatabase('sample');
-        $this->setActiveRecord('Folha');
+        $this->setActiveRecord('AnoMes');
         $this->setDefaultOrder('id', 'asc');
         $this->setLimit(10);
 
-        $this->addFilterField('cpf', 'like', 'cpf');
+        $this->addFilterField('descricao', 'like', 'descricao');
 
         //Criação do formulario 
-        $this->form = new BootstrapFormBuilder('form_search_folha');
-        $this->form->setFormTitle('Folhas');
+        $this->form = new BootstrapFormBuilder('form_search_evento');
+        $this->form->setFormTitle('Ano Mês');
 
         //Criação de fields
-        $campo1 = new TEntry('cpf');
+        $campo1 = new TCombo('descricao');
+        //$campo1->addItems(['0' => 'Não', '1' => 'Sim']);
 
-        $this->form->addFields( [new TLabel('CPF')], [ $campo1 ]  );
+        $this->form->addFields( [new TLabel('Descricão')], [ $campo1 ]  );
+        //$this->form->addFields( [new TLabel('Descricão')], [ $campo2 ]  );
 
         //Tamanho dos fields
         $campo1->setSize('100%');
+        //$campo2->setSize('100%');
 
         $this->form->setData( TSession::getValue( __CLASS__.'_filter_data') );
 
         //Adicionar field de busca
         $btn = $this->form->addAction(_t('Find'), new TAction([$this, 'onSearch']), 'fa:search');
         $btn->class = 'btn btn-sm btn-primary';
-        $this->form->addActionLink(_t('New'), new TAction(['FolhaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
+        $this->form->addActionLink(_t('New'), new TAction(['AnoMesForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
 
         //Criando a data grid
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
@@ -71,24 +74,18 @@ class FolhaList extends TPage
 
         //Criando colunas da datagrid
         $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
-        $column_2 = new TDataGridColumn('cpf', 'CPF', 'left', );
-        $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left', );
-        $column_4 = new TDataGridColumn('vl_salario', 'Salario', 'left', );
-
-      
-     
+        $column_2 = new TDataGridColumn('descricao', 'Descricão', 'left', );
 
         //add coluna da datagrid
         $this->datagrid->addColumn($column_1);
         $this->datagrid->addColumn($column_2);
-        $this->datagrid->addColumn($column_3);
-        $this->datagrid->addColumn($column_4);
+ 
 
         //Criando ações para o datagrid
         $column_1->setAction(new TAction([$this, 'onReload']), ['order'=> 'id']);
-        $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'cpf']);
+        $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'descricao']);
 
-        $action1 = new TDataGridAction(['FolhaForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
+        $action1 = new TDataGridAction(['EventoForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([ $this, 'onDelete'], ['id'=> '{id}']);
 
         //Adicionando a ação na tela
@@ -131,26 +128,7 @@ class FolhaList extends TPage
 
     }
    
-    public function onDelete($param)
-    {
-        try {
-            if (isset($param['key'])) {
 
-                $id = $param['key'];
-
-                TTransaction::open('sample');
-                $folha = new Folha($id);
-                ItemFolha::where('folha_id', '=', $folha->id)->delete();
-                $folha->delete();
-                
-            }
-
-            TTransaction::close();
-        } catch (Exception $e) {
-            new TMessage('error', $e->getMessage(), $this->afterSaveAction);
-            TTransaction::rollback();
-        }
-    }
 
   
 }

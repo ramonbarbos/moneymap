@@ -7,6 +7,7 @@ use Adianti\Database\TCriteria;
 use Adianti\Database\TFilter;
 use Adianti\Database\TRepository;
 use Adianti\Database\TTransaction;
+use Adianti\Registry\TSession;
 use Adianti\Validator\TincidenciaValidator;
 use Adianti\Validator\TMinLengthValidator;
 use Adianti\Validator\TNumericValidator;
@@ -42,6 +43,8 @@ use Adianti\Wrapper\BootstrapFormBuilder;
 class FolhaForm extends TPage
 {
   private $form;
+  private $eventos_list;
+  private $loaded;
 
   use Adianti\base\AdiantiStandardFormTrait;
 
@@ -67,8 +70,11 @@ class FolhaForm extends TPage
     $criteria_cpf = new TCriteria();
     $criteria_cpf->setProperty('order', 'id');
     //$criteria_cpf->add(new TFilter('cpf', '<>', cpf));
-    $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf', null, $criteria_cpf);
-    $anoMes = new TEntry('anoMes');
+    $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
+   // $cpf         = new TCombo('cpf');
+    $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
+    $cpf->setChangeAction( new TAction( array('FolhaService', 'onCheckCPF' )) );
+
     $vl_salario = new TEntry('vl_salario');
     $vl_desconto = new TEntry('vl_desconto');
 
@@ -85,7 +91,7 @@ class FolhaForm extends TPage
 
 
     $this->form->addFields([new TLabel('Codigo')], [$id],);
-    $this->form->addFields([new TLabel('CPF (*)')], [$cpf],  [new TLabel('Mês')], [$anoMes]);
+    $this->form->addFields(  [new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Desconto')], [$vl_desconto], );
     $this->form->addContent([new TFormSeparator('Eventos')]);
 
@@ -95,7 +101,9 @@ class FolhaForm extends TPage
     $cpf->setMinLength(0);
     $cpf->setMask('<b>{cpf}</b> - {nome}');
     $cpf->setSize('100%');
-    $anoMes->setEditable(false);
+    //$cpf->setMask('Selecione');
+    $anoMes->setSize('100%');
+    $anoMes->setMinLength(0);
     $vl_salario->setEditable(false);
     $vl_salario->setNumericMask(2, '.', '', true);
     $vl_desconto->setEditable(false);
@@ -316,17 +324,15 @@ class FolhaForm extends TPage
   {
     try {
       TTransaction::open('sample');
-
+    
 
       if (isset($param['key'])) {
-        $key = $param['key'];
+      $key = $param['key'];
+
 
         $object = new Folha($key);
         $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->load();
-        $item_folha = ItemFolha::where('folha_id', '=', $object->id)->first();
         $this->form->getField('cpf')->setEditable(false);
-
-
 
         foreach ($item_folhas as $item) {
           $item->uniqid = uniqid();
@@ -424,17 +430,18 @@ class FolhaForm extends TPage
     try {
       TTransaction::open('sample');
 
-
       $totalP = 0;
       $totalD = 0;
 
-      if ($param['list_data']) {
-        foreach ($param['list_data'] as $row) {
+      if (@$param['list_data']) {
+        foreach (@$param['list_data'] as $row) {
           $evento = Evento::where('id', '=', $row['evento_id'])->first();
 
           $totalP += ($evento->incidencia == 'P') ? floatval($row['valor']) : 0;
           $totalD += ($evento->incidencia == 'D') ? floatval($row['valor']) : 0;
         }
+      }else{
+
       }
 
       $anoMesAtual = date('Ym');
@@ -453,4 +460,36 @@ class FolhaForm extends TPage
   {
     TScript::create("Template.closeRightPanel()");
   }
+
+  
+
+
+  // public function onReload($param = NULL)
+  // {
+  //   try {
+  //     $objFolha = new FolhaForm();
+  //     $objFolha->eventos_list->clear(); // clear datagrid
+  //     // Convertendo $item_folhas em uma representação JSON
+  //     $object = TSession::getValue('items');
+  //     foreach ($object as $item) {
+  //      $item->uniqid =  uniqid();
+  //         $row = $objFolha->eventos_list->addItem((object) $item);
+  //           $row->id = $item->uniqid;
+  //    }
+  //     print_r($object);
+
+  //     $this->loaded = true;
+  //   } catch (Exception $e) // in case of exception
+  //   {
+  //     new TMessage('error', $e->getMessage());
+  //   }
+  // }
+  // public function show()
+  // {
+  //     if (!$this->loaded)
+  //     {
+  //         $this->onReload( func_get_arg(0) );
+  //     }
+  //     parent::show();
+  // }
 }
