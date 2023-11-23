@@ -66,21 +66,21 @@ class FolhaService
 
         $anoMes = AnoMes::where('descricao', '<>', $folha->anoMes)
           ->load();
-          $options = array();
+        $options = array();
         if ($anoMes) {
-          foreach($anoMes as $item){
-            $options[ $item->id] = $item->descricao;
+          foreach ($anoMes as $item) {
+            $options[$item->id] = $item->descricao;
           }
         }
         TCombo::reload('form_folha', 'anoMes', $options);
       } else {
-        
+
         $anoMes = AnoMes::where('descricao', '<>', '999999')
           ->load();
-          $options = array();
+        $options = array();
         if ($anoMes) {
-          foreach($anoMes as $item){
-            $options[ $item->descricao] = $item->descricao;
+          foreach ($anoMes as $item) {
+            $options[$item->descricao] = $item->descricao;
           }
         }
         TCombo::reload('form_folha', 'anoMes', $options);
@@ -89,5 +89,33 @@ class FolhaService
     }
 
     TTransaction::close();
+  }
+
+  public static function onCityChange($param)
+  {
+    if (!empty($param['anoMes'])) {
+      TTransaction::open('sample');
+
+      $folhas = Folha::where('anoMes', 'like', $param['anoMes'])->load();
+
+      if($folhas){
+
+        $data = new stdClass;
+        $data->cpf = [];
+
+        foreach ($folhas as $folha) {
+         $data->cpf[] = $folha->cpf;
+        TToast::show('info', $folha->cpf);
+
+        TForm::sendData('my_form', (object) $data);
+
+        }
+
+      }
+     
+
+      //
+      TTransaction::close();
+    }
   }
 }

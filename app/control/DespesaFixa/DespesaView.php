@@ -112,6 +112,8 @@ class DespesaView extends TPage
     $saldo->style = 'text-align: right';
 
     $dt_despesa = new TDate('dt_despesa[]');
+    $dt_despesa->setMask('dd/mm/yyyy');
+    $dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
 
     $this->fieldlist = new TFieldList;

@@ -87,6 +87,8 @@ class FichaCadastralForm extends TPage
     $id->setSize('100%');
     $dt_nascimento->setSize('100%');
     $dt_nascimento->addValidation('Nascimento', new TRequiredValidator);
+    $dt_nascimento->setMask('dd/mm/yyyy');
+    $dt_nascimento->setDatabaseMask('yyyy-mm-dd');
     $cpf->setSize('100%');
     $cpf->addValidation('CPF', new TRequiredValidator);
     $cpf->setMask('999.999.999-99',true);
@@ -96,7 +98,8 @@ class FichaCadastralForm extends TPage
     $lotacao->setSize('100%');
     $lotacao->addValidation('Lotacao', new TRequiredValidator);
     $dt_inicio->addValidation('Inicio', new TRequiredValidator);
-
+    $dt_inicio->setMask('dd/mm/yyyy');
+    $dt_inicio->setDatabaseMask('yyyy-mm-dd');
     // Adicionar botão de salvar
     $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:plus green');
     $btn->class = 'btn btn-sm btn-primary';

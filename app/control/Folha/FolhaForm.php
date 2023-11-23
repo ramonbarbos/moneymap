@@ -350,6 +350,7 @@ class FolhaForm extends TPage
         $this->form->setData($object);
 
         $mes = $object->anoMes;
+        TSession::setValue('id',$object->id);
         $anoMes = AnoMes::where('descricao', 'like', $mes)
           ->load();
         $options = array();
@@ -404,8 +405,12 @@ class FolhaForm extends TPage
       $data->evento_descricao       = '';
       $data->tipo       = '';
       $data->valor     = '';
-
+     
       TForm::sendData('form_folha', $data, false, false);
+
+      
+        TTransaction::close();
+
     } catch (Exception $e) {
       $this->form->setData($this->form->getData());
       new TMessage('error', $e->getMessage());
