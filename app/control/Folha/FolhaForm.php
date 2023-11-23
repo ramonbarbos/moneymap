@@ -48,7 +48,7 @@ class FolhaForm extends TPage
 
   use Adianti\base\AdiantiStandardFormTrait;
 
-  public function __construct()
+  public function __construct($param)
   {
     parent::__construct();
 
@@ -73,7 +73,14 @@ class FolhaForm extends TPage
     // $cpf         = new TCombo('cpf');
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
     $cpf->setChangeAction(new TAction(array('FolhaService', 'onCheckCPF')));
-    $anoMes         = new TCombo('anoMes');
+
+
+    if (isset($param['key'])) {
+      $anoMes         = new TEntry('anoMes[]');
+    } else {
+      // $dados_param = array('key'=>$param['key']);
+      $anoMes         = new TCombo('anoMes');
+    }
 
 
     $vl_salario = new TEntry('vl_salario');
@@ -106,6 +113,8 @@ class FolhaForm extends TPage
     $anoMes->setSize('100%');
     $anoMes->addValidation('anoMes', new TRequiredValidator);
     //$anoMes->setMinLength(0);
+    //$anoMes->setDefaultOption('Selecione');
+
     $vl_salario->setEditable(false);
     $vl_salario->setNumericMask(2, '.', '', true);
     $vl_desconto->setEditable(false);
@@ -278,7 +287,7 @@ class FolhaForm extends TPage
             $total += ($evento->incidencia == 'P') ? $item->valor : 0;
           }
         }
-
+       
         $folha->vl_salario = $total;
         $folha->store();
         new TMessage('info', 'Alterado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
@@ -340,7 +349,7 @@ class FolhaForm extends TPage
         $object = new Folha($key);
         $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->load();
         $this->form->getField('cpf')->setEditable(false);
-        $this->form->getField('anoMes')->setEditable(false);
+        //$this->form->getField('anoMes')->setEditable(false);
 
         foreach ($item_folhas as $item) {
           $item->uniqid = uniqid();
@@ -349,9 +358,9 @@ class FolhaForm extends TPage
         }
         $this->form->setData($object);
 
+        if (empty($param['id'])) {
         $mes = $object->anoMes;
-        TSession::setValue('id',$object->id);
-        $anoMes = AnoMes::where('descricao', 'like', $mes)
+        $anoMes = AnoMes::where('id', '=', $mes)
           ->load();
         $options = array();
         if ($anoMes) {
@@ -360,6 +369,14 @@ class FolhaForm extends TPage
           }
         }
         TCombo::reload('form_folha', 'anoMes', $options);
+        $dataF = new stdClass;
+        $dataF->anoMes = $mes;
+        TForm::sendData('form_folha', (object) $dataF);
+      }
+        
+
+
+
         TTransaction::close();
       } else {
         $this->form->clear();
@@ -405,12 +422,21 @@ class FolhaForm extends TPage
       $data->evento_descricao       = '';
       $data->tipo       = '';
       $data->valor     = '';
-     
+
       TForm::sendData('form_folha', $data, false, false);
 
-      
-        TTransaction::close();
+      TTransaction::open('sample');
+      if (!empty($param['id'])) {
+        $object = Folha::where('cpf', '=', $param['cpf'])->first();
+        $dataF = new stdClass;
+        $dataF->anoMes = $object->anoMes;
+        TForm::sendData('form_folha', (object) $dataF);
+      }
 
+
+      TTransaction::close();
+
+      TTransaction::close();
     } catch (Exception $e) {
       $this->form->setData($this->form->getData());
       new TMessage('error', $e->getMessage());

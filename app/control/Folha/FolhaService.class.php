@@ -60,62 +60,44 @@ class FolhaService
       $folhas = $repo1->load($criteria);
 
       if ($folhas) {
-
-        $folha = Folha::where('cpf', '=', $param['cpf'])->first();
-
-
-        $anoMes = AnoMes::where('descricao', '<>', $folha->anoMes)
-          ->load();
-        $options = array();
-        if ($anoMes) {
-          foreach ($anoMes as $item) {
-            $options[$item->id] = $item->descricao;
-          }
+        if (empty($param['id'])) {
+          $folha = Folha::where('cpf', '=', $param['cpf'])->first();
+          $anoMes = AnoMes::where('descricao', '<>', $folha->anoMes)->load();
+        
+            $options = array();
+            if ($anoMes) {
+              foreach ($anoMes as $item) {
+                $options[$item->descricao] = $item->descricao;
+              }
+            }
+            TCombo::reload('form_folha', 'anoMes', $options);
+            TToast::show('info', 'AnoMes: ' . $item->descricao);
+          
         }
-        TCombo::reload('form_folha', 'anoMes', $options);
+
+      
+
+
+      
       } else {
 
-        $anoMes = AnoMes::where('descricao', '<>', '999999')
-          ->load();
-        $options = array();
-        if ($anoMes) {
-          foreach ($anoMes as $item) {
-            $options[$item->descricao] = $item->descricao;
-          }
+   
+          $anoMes = AnoMes::where('descricao', '<>', '999999')->load();
+
+            $options = array();
+            if ($anoMes) {
+              foreach ($anoMes as $item) {
+                $options[$item->descricao] = $item->descricao;
+              }
+            }
+            TCombo::reload('form_folha', 'anoMes', $options);
+            TToast::show('info', 'AnoMes: ' . $item->descricao);
+          
         }
-        TCombo::reload('form_folha', 'anoMes', $options);
-        TToast::show('info', 'CPF sem folha no mês');
-      }
+      
     }
+    
 
     TTransaction::close();
-  }
-
-  public static function onCityChange($param)
-  {
-    if (!empty($param['anoMes'])) {
-      TTransaction::open('sample');
-
-      $folhas = Folha::where('anoMes', 'like', $param['anoMes'])->load();
-
-      if($folhas){
-
-        $data = new stdClass;
-        $data->cpf = [];
-
-        foreach ($folhas as $folha) {
-         $data->cpf[] = $folha->cpf;
-        TToast::show('info', $folha->cpf);
-
-        TForm::sendData('my_form', (object) $data);
-
-        }
-
-      }
-     
-
-      //
-      TTransaction::close();
-    }
   }
 }
