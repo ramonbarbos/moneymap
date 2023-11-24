@@ -93,7 +93,6 @@ class DespesaView extends TPage
     $criteria_event->add(new TFilter('incidencia', 'like', 'D'));
     $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao', null, $criteria_event);
     $evento_id->enableSearch();
-   // $evento_id->addItems(['1' => '<b>One</b>', '2' => '<b>Two</b>', '3' => '<b>Three</b>', '4' => '<b>Four</b>', '5' => '<b>Five</b>']);
     $evento_id->setSize('100%');
 
     $descricao = new TEntry('descricao[]');
@@ -113,7 +112,7 @@ class DespesaView extends TPage
 
     $dt_despesa = new TDate('dt_despesa[]');
     $dt_despesa->setMask('dd/mm/yyyy');
-    $dt_despesa->setDatabaseMask('yyyy-mm-dd');
+    //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
 
     $this->fieldlist = new TFieldList;
@@ -125,7 +124,7 @@ class DespesaView extends TPage
     $this->fieldlist->addField('<b>C.Custo</b>',  $evento_id,  ['width' => '25%']);
     $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '25%']);
     $this->fieldlist->addField('<b>Valor</b>', $valor, ['width' => '25%', 'sum' => true]);
-    $this->fieldlist->addField('<b>Saldo</b>', $saldo, ['width' => '25%', 'sum' => true]);
+    $this->fieldlist->addField('<b>Saldo</b>', $saldo, ['width' => '25%']);
 
     // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'onTotalUpdate']));
 
@@ -216,10 +215,14 @@ class DespesaView extends TPage
 
         if (!empty($param['evento_id'])) {
           foreach ($param['evento_id'] as $key => $item_id) {
+            $dataOriginal = $param['dt_despesa'][$key];
+            $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
+            $dataFormatada = $dateTime->format('Y-m-d');
+            TToast::show('info', $dataFormatada);
 
             $item = new ItemDespesa;
             $item->despesa_id   = $despesa->id;
-            $item->dt_despesa   = $param['dt_despesa'][$key];
+            $item->dt_despesa   = $dataFormatada;
             $item->evento_id   = $param['evento_id'][$key];
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
@@ -243,10 +246,14 @@ class DespesaView extends TPage
 
         if (!empty($param['evento_id'])) {
           foreach ($param['evento_id'] as $key => $item_id) {
+            $dataOriginal = $param['dt_despesa'][$key];
+            $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
+            $dataFormatada = $dateTime->format('Y-m-d');
+            TToast::show('info', $dataFormatada);
 
             $item = new ItemDespesa;
             $item->despesa_id   = $despesa->id;
-            $item->dt_despesa   = $param['dt_despesa'][$key];
+            $item->dt_despesa   = $dataFormatada;
             $item->evento_id   = $param['evento_id'][$key];
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
@@ -303,8 +310,12 @@ class DespesaView extends TPage
         foreach ($item_despesas as $item) {
 
           TFieldList::addRows('my_field_list', 1);
+
+            // Formatando a data para o formato desejado
+            $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d-m-Y');
+
           $data->id_item[] = $item->id_item;
-          $data->dt_despesa[] = $item->dt_despesa;
+          $data->dt_despesa[] = $dt_despesa_formatada;
           $data->evento_id[] = $item->evento_id;
           $data->descricao[] = $item->descricao;
           $data->valor[] = $item->valor;
