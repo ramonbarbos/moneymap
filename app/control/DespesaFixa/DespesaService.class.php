@@ -95,16 +95,15 @@ class DespesaService
       try {
         TTransaction::open('sample');
 
-        $repo = new TRepository('Folha');
-        $criteria = new TCriteria;
+        if ($params['anoMes'] && $params['anoMes']) {
+         
+          $folhas = Folha::where('cpf','like',$params['cpf'] )
+                        ->where('anoMes','like',$params['anoMes'] )->first();
 
-        if ($params['anoMes']) {
-          $criteria->add(new TFilter('anoMes', 'like', $params['anoMes']));
-          $criteria->add(new TFilter('cpf', 'like', $params['cpf']));
+          
 
-          $folhas = $repo->load($criteria);
-
-          if ($folhas) {
+          if (@$folhas->cpf ==$params['cpf'] && @$folhas->anoMes ==$params['anoMes']) {
+            TFieldList::enableField('my_field_list');
 
             $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
             $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
@@ -177,6 +176,8 @@ class DespesaService
             }
           }else{
             TFieldList::clear('my_field_list');
+           TToast::show('info','Não existe folha para esse mês');
+           TFieldList::disableField('my_field_list');
           }
         }
 

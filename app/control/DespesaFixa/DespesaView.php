@@ -249,7 +249,6 @@ class DespesaView extends TPage
             $dataOriginal = $param['dt_despesa'][$key];
             $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
             $dataFormatada = $dateTime->format('Y-m-d');
-            TToast::show('info', $dataFormatada);
 
             $item = new ItemDespesa;
             $item->despesa_id   = $despesa->id;
