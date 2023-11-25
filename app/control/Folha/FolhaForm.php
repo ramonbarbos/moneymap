@@ -65,6 +65,8 @@ class FolhaForm extends TPage
     $this->form->setClientValidation(true);
     $this->form->setColumnClasses(3, ['col-sm-4', 'col-sm-4', 'col-sm-4']);
 
+   
+
     // Criação de fields
     $id = new TEntry('id');
     $criteria_cpf = new TCriteria();
@@ -79,6 +81,7 @@ class FolhaForm extends TPage
       $anoMes         = new TEntry('anoMes[]');
     } else {
       // $dados_param = array('key'=>$param['key']);
+     // $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
       $anoMes         = new TCombo('anoMes');
     }
 
@@ -126,7 +129,7 @@ class FolhaForm extends TPage
     $this->form->addFields([$uniqid], [$detail_id],);
     $this->form->addFields([new TLabel('Evento (*)')], [$evento_id], [new TLabel('Descrição')], [$evento_descricao],);
     $this->form->addFields([new TLabel('Tipo')], [$tipo], [new TLabel('Valor (*)')], [$valor]);
-    $add_event = TButton::create('add_event', [$this, 'onEventAdd'], 'Register', 'fa:plus-circle green');
+    $add_event = TButton::create('add_event', [$this, 'onEventAdd'], 'Registrar', 'fa:plus-circle green');
     $add_event->getAction()->setParameter('static', '1');
     $this->form->addFields([], [$add_event]);
 
@@ -237,6 +240,8 @@ class FolhaForm extends TPage
         $descricao = $eventos->descricao ?? '';
         $incidencia = $eventos->incidencia ?? '';
 
+        TSession::setValue('mes',$params['anoMes']);
+
         // Consolidar as atualizações em uma única chamada
         TForm::sendData('form_folha', (object) [
           'evento_descricao' => $descricao,
@@ -287,7 +292,7 @@ class FolhaForm extends TPage
             $total += ($evento->incidencia == 'P') ? $item->valor : 0;
           }
         }
-       
+
         $folha->vl_salario = $total;
         $folha->store();
         new TMessage('info', 'Alterado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
@@ -359,21 +364,21 @@ class FolhaForm extends TPage
         $this->form->setData($object);
 
         if (empty($param['id'])) {
-        $mes = $object->anoMes;
-        $anoMes = AnoMes::where('id', '=', $mes)
-          ->load();
-        $options = array();
-        if ($anoMes) {
-          foreach ($anoMes as $item) {
-            $options[$item->descricao] = $item->descricao;
+          $mes = $object->anoMes;
+          $anoMes = AnoMes::where('id', '=', $mes)
+            ->load();
+          $options = array();
+          if ($anoMes) {
+            foreach ($anoMes as $item) {
+              $options[$item->descricao] = $item->descricao;
+            }
           }
+          TCombo::reload('form_folha', 'anoMes', $options);
+          $dataF = new stdClass;
+          $dataF->anoMes = $mes;
+          TForm::sendData('form_folha', (object) $dataF);
         }
-        TCombo::reload('form_folha', 'anoMes', $options);
-        $dataF = new stdClass;
-        $dataF->anoMes = $mes;
-        TForm::sendData('form_folha', (object) $dataF);
-      }
-        
+
 
 
 
@@ -415,6 +420,9 @@ class FolhaForm extends TPage
 
       TDataGrid::replaceRowById('eventos_list', $uniqid, $row);
 
+      
+      $ano = TSession::getValue('mes');
+      TToast::show('info', 'AnoMes: '.$ano);
       // clear product form fields after add
       $data->uniqid     = '';
       $data->detail_id         = '';
@@ -422,19 +430,13 @@ class FolhaForm extends TPage
       $data->evento_descricao       = '';
       $data->tipo       = '';
       $data->valor     = '';
+     // $data->anoMes     = $ano;
+
+
 
       TForm::sendData('form_folha', $data, false, false);
 
-      TTransaction::open('sample');
-      if (!empty($param['id'])) {
-        $object = Folha::where('cpf', '=', $param['cpf'])->first();
-        $dataF = new stdClass;
-        $dataF->anoMes = $object->anoMes;
-        TForm::sendData('form_folha', (object) $dataF);
-      }
-
-
-      TTransaction::close();
+     
 
       TTransaction::close();
     } catch (Exception $e) {
@@ -493,9 +495,7 @@ class FolhaForm extends TPage
       } else {
       }
 
-      $anoMesAtual = date('Ym');
 
-      TForm::sendData('form_folha', (object) ['anoMes' => $anoMesAtual]);
       TForm::sendData('form_folha', (object) ['vl_salario' => $totalP]);
       TForm::sendData('form_folha', (object) ['vl_desconto' => $totalD]);
       TToast::show('info', 'Total: <b>' . 'R$ ' . number_format($totalP, 2, ',', '.') . '</b>', 'bottom right');

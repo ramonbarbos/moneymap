@@ -96,13 +96,11 @@ class DespesaService
         TTransaction::open('sample');
 
         if ($params['anoMes'] && $params['anoMes']) {
-         
-          $folhas = Folha::where('cpf','like',$params['cpf'] )
-                        ->where('anoMes','like',$params['anoMes'] )->first();
 
-          
+          $folhas = Folha::where('cpf', 'like', $params['cpf'])
+            ->where('anoMes', 'like', $params['anoMes'])->first();
 
-          if (@$folhas->cpf ==$params['cpf'] && @$folhas->anoMes ==$params['anoMes']) {
+          if (@$folhas->cpf == $params['cpf'] && @$folhas->anoMes == $params['anoMes']) {
             TFieldList::enableField('my_field_list');
 
             $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
@@ -125,7 +123,7 @@ class DespesaService
 
               foreach ($item_despesas as $item) {
 
-                TFieldList::addRows('my_field_list', 1);
+                TFieldList::addRows('my_field_list', 1,5);
                 $data->id_item[] = $item->id_item;
                 $data->dt_despesa[] = $item->dt_despesa;
                 $data->evento_id[] = $item->evento_id;
@@ -143,7 +141,6 @@ class DespesaService
               TToast::show('info', 'Dados Encontrado.');
             } else if (!$folha) { //Quando nao tiver folha encontrada
               TToast::show('info', 'Folha não encontrada');
-
             } else { //Quando tiver Folha mas não tem Despesa com o CPF
 
               //verificar se existe desconto vinculado ao cpf
@@ -157,27 +154,24 @@ class DespesaService
                 $dataF = new stdClass;
                 $dataF->evento_id = [];
                 $dataF->valor = [];
-                $cont = 0;
 
                 foreach ($item_folhas as $item) {
 
-                  TFieldList::addRows('my_field_list', $cont);
+                  TFieldList::addRows('my_field_list', 1);
                   $dataF->evento_id[] = $item->evento_id;
                   $dataF->valor[] = $item->valor;
                   TForm::sendData('my_form', (object) $dataF);
 
-                  $cont++;
                 }
                 TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
-
               } else {
                 TFieldList::clear('my_field_list');
               }
             }
-          }else{
+          } else {
             TFieldList::clear('my_field_list');
-           TToast::show('info','Não existe folha para esse mês');
-           TFieldList::disableField('my_field_list');
+            TToast::show('info', 'Não existe folha para esse mês');
+            TFieldList::disableField('my_field_list');
           }
         }
 

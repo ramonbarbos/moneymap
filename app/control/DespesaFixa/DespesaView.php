@@ -177,9 +177,11 @@ class DespesaView extends TPage
 
   public static function actionX($param)
   {
-    $win = TWindow::create('test', 0.6, 0.8);
-    $win->add('<pre>' . str_replace("\n", '<br>', print_r($param, true)) . '</pre>');
-    $win->show();
+    // $win = TWindow::create('test', 0.6, 0.8);
+    // $win->add('<pre>' . str_replace("\n", '<br>', print_r($param, true)) . '</pre>');
+    // $win->show();
+    TToast::show('info', 'Linha removida.');
+
   }
 
   public static function showRow($param)
@@ -232,7 +234,6 @@ class DespesaView extends TPage
           }
         }
         $despesa->vl_despesa = $total;
-        $despesa->anoMes = date('Ym');
         $despesa->store();
 
         new TMessage('info', 'Alterado com sucesso',$this->afterSaveAction); //$this->afterSaveAction
@@ -264,7 +265,6 @@ class DespesaView extends TPage
 
 
         $despesa->vl_despesa = $total;
-        $despesa->anoMes = date('Ym');
         $despesa->store();
 
         TForm::sendData('my_form', (object) ['id' => $despesa->id]);

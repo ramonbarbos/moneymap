@@ -47,7 +47,7 @@ class AnoMesList extends TPage
         $this->addFilterField('descricao', 'like', 'descricao');
 
         //Criação do formulario 
-        $this->form = new BootstrapFormBuilder('form_search_evento');
+        $this->form = new BootstrapFormBuilder('form_search_anomes');
         $this->form->setFormTitle('Ano Mês');
 
         //Criação de fields
@@ -85,7 +85,7 @@ class AnoMesList extends TPage
         $column_1->setAction(new TAction([$this, 'onReload']), ['order'=> 'id']);
         $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'descricao']);
 
-        $action1 = new TDataGridAction(['EventoForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
+        $action1 = new TDataGridAction(['AnoMesForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([ $this, 'onDelete'], ['id'=> '{id}']);
 
         //Adicionando a ação na tela

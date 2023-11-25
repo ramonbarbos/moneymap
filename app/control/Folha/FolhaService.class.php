@@ -68,15 +68,14 @@ class FolhaService
             if ($anoMes) {
               foreach ($anoMes as $item) {
                 $options[$item->descricao] = $item->descricao;
+                //TToast::show('info', 'AnoMes: ' . $options);
+
               }
             }
+            TTransaction::close();
             TCombo::reload('form_folha', 'anoMes', $options);
-            TToast::show('info', 'AnoMes: ' . $item->descricao);
           
         }
-
-      
-
 
       
       } else {
