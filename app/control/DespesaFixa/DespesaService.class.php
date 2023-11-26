@@ -95,8 +95,9 @@ class DespesaService
       try {
         TTransaction::open('sample');
 
-        if ($params['anoMes'] && $params['anoMes']) {
+        if ($params['anoMes'] && $params['cpf']) {
 
+          
           $folhas = Folha::where('cpf', 'like', $params['cpf'])
             ->where('anoMes', 'like', $params['anoMes'])->first();
 
@@ -186,5 +187,61 @@ class DespesaService
   public static function showRow($param)
   {
     new TMessage('info', str_replace(',', '<br>', json_encode($param)));
+  }
+
+  public static function onCheckCPF($param)
+  {
+    TTransaction::open('sample');
+    $repo1 = new TRepository('Folha');
+    $criteria = new TCriteria;
+    TToast::show('info', 'Chegoju: ');
+
+    if ($param['anoMes']) {
+      $criteria->add(new TFilter('anoMes', 'like', $param['anoMes']));
+
+
+      $folhas = $repo1->load($criteria);
+
+      if ($folhas) {
+      
+          TToast::show('info', 'Chegoju: ');
+
+          $folha = Folha::where('anoMes', 'like', $param['anoMes'])->first();
+          $fichas = FichaCadastral::where('cpf', '<>', $folha->cpf)->load();
+        
+            $options = array();
+            if ($fichas) {
+              foreach ($fichas as $item) {
+                $options[$item->cpf] = $item->cpf;
+                TToast::show('info', 'AnoMes: ' . $options);
+
+              }
+            }
+            TTransaction::close();
+            TCombo::reload('form_folha', 'cpf', $options);
+          
+        
+
+      
+      } else {
+
+   
+          $anoMes = AnoMes::where('descricao', '<>', '999999')->load();
+
+            $options = array();
+            if ($anoMes) {
+              foreach ($anoMes as $item) {
+                $options[$item->descricao] = $item->descricao;
+              }
+            }
+            TCombo::reload('form_folha', 'anoMes', $options);
+            TToast::show('info', 'AnoMes: ' . $item->descricao);
+          
+        }
+      
+    }
+    
+
+    TTransaction::close();
   }
 }

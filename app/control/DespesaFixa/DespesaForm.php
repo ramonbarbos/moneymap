@@ -75,9 +75,11 @@ class DespesaForm extends TPage
 
     $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'anoMes', 'descricao', 'descricao');
     $anoMes->addValidation('anoMes', new TRequiredValidator);
-    $anoMes->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
+   // $anoMes->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
+    $anoMes->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
 
-    $cpf         = new TDBUniqueSearch('cpf', 'sample', 'Folha', 'cpf', 'cpf');
+
+    $cpf         = new TCombo('cpf');
     $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
 
     $vl_despesa = new TEntry('vl_despesa');
@@ -92,7 +94,7 @@ class DespesaForm extends TPage
     $id->setEditable(false);
     $id->setSize('100%');
     $cpf->addValidation('cpf', new TRequiredValidator);
-    $cpf->setMinLength(0);
+    //$cpf->setMinLength(0);
     //$cpf->setMask('<b>{cpf}</b>');
     $cpf->setSize('100%');
     $anoMes->setMinLength(0);

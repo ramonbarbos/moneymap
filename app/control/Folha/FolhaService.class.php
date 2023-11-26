@@ -60,42 +60,40 @@ class FolhaService
       $folhas = $repo1->load($criteria);
 
       if ($folhas) {
-        if (empty($param['id'])) {
-          $folha = Folha::where('cpf', '=', $param['cpf'])->first();
-          $anoMes = AnoMes::where('descricao', '<>', $folha->anoMes)->load();
-        
-            $options = array();
-            if ($anoMes) {
-              foreach ($anoMes as $item) {
-                $options[$item->descricao] = $item->descricao;
-                //TToast::show('info', 'AnoMes: ' . $options);
 
-              }
-            }
-            TTransaction::close();
-            TCombo::reload('form_folha', 'anoMes', $options);
-          
+        $folhas = Folha::where('cpf', 'like', $param['cpf'])->load();
+
+        $anoMesUtilizados = [];
+
+        foreach ($folhas as $folha) {
+          $anoMesExistentes = explode(',', $folha->anoMes);
+          $anoMesUtilizados = array_merge($anoMesUtilizados, $anoMesExistentes);
         }
 
-      
+        $anoMesTodos = AnoMes::orderBy(1)->load();
+        //$anoMesTodos = AnoMes::where('id','<>','999999')->load();
+
+        $anoMesTodosArray = array_column($anoMesTodos, 'descricao');
+
+        $anoMesNaoUtilizados = array_diff($anoMesTodosArray, $anoMesUtilizados);
+
+        $options = array_combine($anoMesNaoUtilizados, $anoMesNaoUtilizados);
+        TCombo::reload('form_folha', 'anoMes', $options);
       } else {
 
-   
-          $anoMes = AnoMes::where('descricao', '<>', '999999')->load();
 
-            $options = array();
-            if ($anoMes) {
-              foreach ($anoMes as $item) {
-                $options[$item->descricao] = $item->descricao;
-              }
-            }
-            TCombo::reload('form_folha', 'anoMes', $options);
-            TToast::show('info', 'AnoMes: ' . $item->descricao);
-          
+        $anoMes = AnoMes::where('descricao', '<>', '999999')->load();
+
+        $options = array();
+        if ($anoMes) {
+          foreach ($anoMes as $item) {
+            $options[$item->descricao] = $item->descricao;
+          }
         }
-      
+        TCombo::reload('form_folha', 'anoMes', $options);
+      }
     }
-    
+
 
     TTransaction::close();
   }
