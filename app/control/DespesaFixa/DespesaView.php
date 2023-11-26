@@ -37,7 +37,7 @@ class DespesaView extends TPage
   /**
    * Constructor
    */
-  public function __construct()
+  public function __construct($param)
   {
     parent::__construct();
 
@@ -59,8 +59,18 @@ class DespesaView extends TPage
     //$anoMes->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
     $anoMes->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
 
-    $cpf         = new TCombo('cpf');
-    $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
+
+    if (isset($param['key'])) {
+      $cpf         = new TEntry('cpf');
+      $cpf->setEditable(false);
+
+    } else {
+
+      $cpf         = new TCombo('cpf');
+      $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
+
+    }
+
 
     $vl_despesa = new TEntry('vl_despesa');
     $vl_salario = new TEntry('vl_salario');
@@ -294,8 +304,8 @@ class DespesaView extends TPage
         $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->load();
         $folha   =  Folha::where('cpf', '=', $object->cpf)->first();
 
-        $this->form->getField('cpf')->setEditable(false);
         $this->form->getField('anoMes')->setEditable(false);
+        //$this->form->getField('cpf')->setEditable(false);
 
 
         $data = new stdClass;

@@ -52,9 +52,11 @@ class DespesaService
   {
     try {
       TTransaction::open('sample');
+      TToast::show('info',$param['cpf'] );
 
       if (!empty($param['cpf'])) {
-        $folha = Folha::where('cpf', '=', $param['cpf'])->first();
+        $folha = Folha::where('cpf', '=', $param['cpf'])
+                      ->where('anoMes', '=', $param['anoMes'])->first();
         $data = new stdClass;
         $data->saldo = [];
 
@@ -81,6 +83,8 @@ class DespesaService
         // Envia os saldos calculados para a interface do usuário
         TForm::sendData('my_form', (object) $data);
       }
+
+      
 
       TTransaction::close();
     } catch (Exception $e) {
@@ -151,6 +155,8 @@ class DespesaService
                 ->load();
 
               if ($item_folhas || $folha) {
+                TFieldList::clear('my_field_list');
+                TFieldList::addRows('my_field_list', 1);
 
                 $dataF = new stdClass;
                 $dataF->evento_id = [];
@@ -158,12 +164,12 @@ class DespesaService
 
                 foreach ($item_folhas as $item) {
 
-                  TFieldList::addRows('my_field_list', 1);
                   $dataF->evento_id[] = $item->evento_id;
                   $dataF->valor[] = $item->valor;
-                  TForm::sendData('my_form', (object) $dataF);
 
                 }
+                TForm::sendData('my_form',  $dataF,  false, true, 300);
+
                 TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
               } else {
                 TFieldList::clear('my_field_list');
@@ -205,8 +211,9 @@ class DespesaService
       if ($folhas) {
 
         $folhasF = Folha::where('anoMes', 'like', $param['anoMes'])->load();
-
         $options = array();
+
+        $options[''] = 'Selecione uma opção';
 
         foreach($folhasF as $item){
           $options[$item->cpf] = $item->cpf;
