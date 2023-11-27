@@ -79,6 +79,8 @@ class FolhaForm extends TPage
 
     if (isset($param['key'])) {
       $anoMes         = new TEntry('anoMes[]');
+      $anoMes->setEditable(false);
+
     } else {
       // $dados_param = array('key'=>$param['key']);
      // $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');

@@ -52,7 +52,6 @@ class DespesaService
   {
     try {
       TTransaction::open('sample');
-      TToast::show('info',$param['cpf'] );
 
       if (!empty($param['cpf'])) {
         $folha = Folha::where('cpf', '=', $param['cpf'])
@@ -112,7 +111,7 @@ class DespesaService
             $folha   =  Folha::where('cpf', '=', $params['cpf'])->first();
             if (@$folha->cpf ==  @$despesa->cpf) { //Já existe despesa  com o CPF
               $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
-              $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->load();
+              $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->orderBy(1)->load();
 
               $data = new stdClass;
               $data->id_item = [];
@@ -120,29 +119,29 @@ class DespesaService
               $data->evento_id = [];
               $data->descricao = [];
               $data->valor = [];
-              $data->id = [];
-              $data->anoMes = [];
-              $data->vl_despesa = [];
-              $data->vl_salario = [];
+              if(!empty($data->cpf)){
+                 $data->anoMes = $despesa->anoMes;
+                $data->cpf = $despesa->cpf;
+              }
+              $data->id = $despesa->id;
+              $data->vl_despesa = $despesa->vl_despesa;
+              $data->vl_salario = $folha->vl_salario;
 
 
               foreach ($item_despesas as $item) {
+                TFieldList::addRows('my_field_list',1);
+                $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
 
-                TFieldList::addRows('my_field_list', 1,5);
                 $data->id_item[] = $item->id_item;
-                $data->dt_despesa[] = $item->dt_despesa;
+                $data->dt_despesa[] = $dt_despesa_formatada;
                 $data->evento_id[] = $item->evento_id;
                 $data->descricao[] = $item->descricao;
                 $data->valor[] = $item->valor;
-                $data->saldo[] = $item->saldo;
+                $data->saldo[] = $item->saldo;      
 
-                $data->id = $despesa->id;
-                $data->anoMes = $despesa->anoMes;
-                $data->vl_despesa = $despesa->vl_despesa;
-                $data->vl_salario = $folha->vl_salario;
-
-                TForm::sendData('my_form', (object) $data);
               }
+              TForm::sendData('my_form', (object) $data, false, true, 300);
+
               TToast::show('info', 'Dados Encontrado.');
             } else if (!$folha) { //Quando nao tiver folha encontrada
               TToast::show('info', 'Folha não encontrada');

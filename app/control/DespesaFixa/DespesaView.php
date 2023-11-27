@@ -122,7 +122,7 @@ class DespesaView extends TPage
     $saldo->style = 'text-align: right';
 
     $dt_despesa = new TDate('dt_despesa[]');
-    $dt_despesa->setMask('dd/mm/yyyy');
+    $dt_despesa->setMask('dd/mm/yyyy',false);
     //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
 
@@ -301,7 +301,7 @@ class DespesaView extends TPage
         $key = $param['key'];
 
         $object = new Despesa($key);
-        $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->load();
+        $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->orderBy(1)->load();
         $folha   =  Folha::where('cpf', '=', $object->cpf)->first();
 
         $this->form->getField('anoMes')->setEditable(false);
@@ -322,7 +322,7 @@ class DespesaView extends TPage
           TFieldList::addRows('my_field_list', 1);
 
             // Formatando a data para o formato desejado
-            $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d-m-Y');
+            $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
 
           $data->id_item[] = $item->id_item;
           $data->dt_despesa[] = $dt_despesa_formatada;
