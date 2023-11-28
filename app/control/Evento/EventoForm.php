@@ -16,6 +16,7 @@ use Adianti\Widget\Container\THBox;
 use Adianti\Widget\Container\TVBox;
 use Adianti\Widget\Dialog\TAlert;
 use Adianti\Widget\Dialog\TMessage;
+use Adianti\Widget\Dialog\TToast;
 use Adianti\Widget\Form\TCheckList;
 use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TDate;
@@ -26,6 +27,7 @@ use Adianti\Widget\Form\TForm;
 use Adianti\Widget\Form\TFormSeparator;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Form\TPassword;
+use Adianti\Widget\Util\TTextDisplay;
 use Adianti\Widget\Wrapper\TDBCombo;
 use Adianti\Widget\Wrapper\TDBSeekButton;
 use Adianti\Widget\Wrapper\TDBUniqueSearch;
@@ -61,13 +63,16 @@ class EventoForm extends TPage
     $fixo->addItems(['0' => 'Não', '1' => 'Sim']);
     $incidencia = new TCombo('incidencia');
     $incidencia->addItems(['D' => 'Desconto', 'P' => 'Provento']);
-
-
-
-    $this->form->addFields([new TLabel('Codigo (*)')], [$id], [new TLabel('Descricao (*)')], [$descricao]);
-    $this->form->addFields( [new TLabel('Fixo (*)')], [$fixo], [new TLabel('Incidencia (*)')], [$incidencia]);
+    $formula = new TEntry('formula');
   
+    $a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia}', 'red', 12, 'bi');
 
+    $this->form->addFields([new TLabel('Codigo (*)')], [$id],);
+    $this->form->addFields(  [new TLabel('Descricao (*)')], [$descricao], [new TLabel('Fixo')], [$fixo]);
+    $this->form->addFields( [new TLabel('Formula')], [$formula], [new TLabel('Incidencia (*)')], [$incidencia], );
+    $this->form->addFields( [new TLabel('')],[$a]);
+    //$this->form->add($a);
+  
 
     $id->setEditable(false);
     $id->setSize('100%');

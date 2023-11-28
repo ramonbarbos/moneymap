@@ -65,7 +65,7 @@ class FolhaForm extends TPage
     $this->form->setClientValidation(true);
     $this->form->setColumnClasses(3, ['col-sm-4', 'col-sm-4', 'col-sm-4']);
 
-   
+
 
     // Criação de fields
     $id = new TEntry('id');
@@ -80,10 +80,9 @@ class FolhaForm extends TPage
     if (isset($param['key'])) {
       $anoMes         = new TEntry('anoMes[]');
       $anoMes->setEditable(false);
-
     } else {
       // $dados_param = array('key'=>$param['key']);
-     // $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
+      // $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
       $anoMes         = new TCombo('anoMes');
     }
 
@@ -100,6 +99,9 @@ class FolhaForm extends TPage
     $valor      = new TEntry('valor');
     $tipo      = new TEntry('tipo');
     $evento_descricao     = new TEntry('evento_descricao');
+    $formula = new TEntry('formula');
+    $exit_action = new TAction(array('FolhaService', 'onFormula'));
+    $formula->setExitAction($exit_action);
 
 
 
@@ -131,6 +133,7 @@ class FolhaForm extends TPage
     $this->form->addFields([$uniqid], [$detail_id],);
     $this->form->addFields([new TLabel('Evento (*)')], [$evento_id], [new TLabel('Descrição')], [$evento_descricao],);
     $this->form->addFields([new TLabel('Tipo')], [$tipo], [new TLabel('Valor (*)')], [$valor]);
+    $this->form->addFields([new TLabel('Formula')], [$formula],);
     $add_event = TButton::create('add_event', [$this, 'onEventAdd'], 'Registrar', 'fa:plus-circle green');
     $add_event->getAction()->setParameter('static', '1');
     $this->form->addFields([], [$add_event]);
@@ -142,7 +145,9 @@ class FolhaForm extends TPage
     $evento_descricao->setEditable(false);
     $tipo->setEditable(false);
     $valor->setSize('100%');
-    $valor->setNumericMask(2, '.', '', true);
+    $valor->setNumericMask(4, '.', '', true);
+    $formula->setSize('40%');
+    $formula->setEditable(false);
 
 
 
@@ -231,6 +236,8 @@ class FolhaForm extends TPage
 
     parent::add($container);
   }
+
+  
   public static function onEventChange($params)
   {
     if (!empty($params['evento_id'])) {
@@ -241,13 +248,15 @@ class FolhaForm extends TPage
         // Certifique-se de que os campos não são nulos
         $descricao = $eventos->descricao ?? '';
         $incidencia = $eventos->incidencia ?? '';
+        $formula = $eventos->formula ?? '';
 
-        TSession::setValue('mes',$params['anoMes']);
+
 
         // Consolidar as atualizações em uma única chamada
         TForm::sendData('form_folha', (object) [
           'evento_descricao' => $descricao,
           'tipo' => $incidencia,
+          'formula' => $formula
         ]);
         TTransaction::close();
       } catch (Exception $e) {
@@ -354,7 +363,7 @@ class FolhaForm extends TPage
         $key = $param['key'];
 
         $object = new Folha($key);
-        $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->load();
+        $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
         $this->form->getField('cpf')->setEditable(false);
         //$this->form->getField('anoMes')->setEditable(false);
 
@@ -422,9 +431,7 @@ class FolhaForm extends TPage
 
       TDataGrid::replaceRowById('eventos_list', $uniqid, $row);
 
-      
-      $ano = TSession::getValue('mes');
-      TToast::show('info', 'AnoMes: '.$ano);
+
       // clear product form fields after add
       $data->uniqid     = '';
       $data->detail_id         = '';
@@ -432,13 +439,12 @@ class FolhaForm extends TPage
       $data->evento_descricao       = '';
       $data->tipo       = '';
       $data->valor     = '';
-     // $data->anoMes     = $ano;
 
 
 
       TForm::sendData('form_folha', $data, false, false);
 
-     
+
 
       TTransaction::close();
     } catch (Exception $e) {

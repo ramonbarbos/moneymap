@@ -97,4 +97,84 @@ class FolhaService
 
     TTransaction::close();
   }
+
+
+  public static function onFormula($param)
+  {
+    try {
+      TTransaction::open('sample');
+
+      if ($param['formula']) {
+        $folhaService = new FolhaService();
+
+        $expressao = preg_replace('/[^0-9+\-.*\/()\sSP]/', '', $param['formula']);
+
+        $salario = 0;
+
+        if (isset($param['eventos_list_evento_id'])) {
+          foreach ($param['eventos_list_evento_id'] as $key => $evento) {
+            if ($evento == 2) {
+              $salario = $param['eventos_list_valor'][$key];
+            }
+          }
+        }
+
+        // Mapeia eventos para valores
+        $eventos = [
+          'S' => $salario,
+          'P' => $folhaService->calcularINSS($salario) //INSS
+        ];
+
+        TForm::sendData('form_folha', (object) ['valor' =>  $eventos['P']]);
+
+        // Substitui os eventos pelos valores correspondentes na expressão
+        foreach ($eventos as $evento => $valor) {
+          $expressao = str_replace($evento, $valor, $expressao);
+        }
+
+        // Avalia a expressão
+        $resultado = eval("return $expressao;");
+
+
+        // Feedback ao usuário
+         TToast::show('info', "Resultado do cálculo: $resultado");
+
+      }else{
+        TToast::show('info', 'Sem formula');
+
+      }
+
+
+      TTransaction::close();
+    } catch (ParseError $e) {
+      // Manipule erros de análise (se houver)
+      TToast::show('error', "Erro de análise: " . $e->getMessage());
+    } catch (Exception $e) {
+      // Manipule outros erros
+      TToast::show('error', "Erro ao calcular: " . $e->getMessage());
+    }
+  }
+
+  function calcularINSS($salario)
+  {
+    $faixas = [
+      ['limite_inferior' => 0, 'limite_superior' => 1320, 'aliquota' => 0.075], //Faixa 1
+      ['limite_inferior' => 1320.01, 'limite_superior' => 2571.29, 'aliquota' => 0.09],  //Faixa 2
+      ['limite_inferior' => 2571.30, 'limite_superior' => 3856.94, 'aliquota' => 0.12], //Faixa 3
+      ['limite_inferior' => 3856.95, 'limite_superior' => 7507.49, 'aliquota' => 0.14], //Faixa 4
+      // Adicione mais faixas conforme necessário
+    ];
+
+    $contribuicao_total = 0;
+
+    foreach ($faixas as $faixa) {
+      // Calcula a contribuição para cada faixa
+      $contribuicao_faixa = max(0, min($faixa['limite_superior'], $salario) - $faixa['limite_inferior']) * $faixa['aliquota'];
+
+      // Adiciona à contribuição total
+      $contribuicao_total += $contribuicao_faixa;
+    }
+
+    return $contribuicao_total;
+  }
 }

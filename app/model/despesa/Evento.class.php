@@ -17,6 +17,7 @@ class Evento extends TRecord
         parent::addAttribute('descricao');
         parent::addAttribute('fixo');
         parent::addAttribute('incidencia');
+        parent::addAttribute('formula');
     }
 
     
