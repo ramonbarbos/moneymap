@@ -53,11 +53,10 @@ class FolhaService
     $repo1 = new TRepository('Folha');
     $criteria = new TCriteria;
     $folhaService = new FolhaService();
+    $folhaform = new FolhaForm($param);
 
     if ($param['cpf']) {
       $criteria->add(new TFilter('cpf', 'like', $param['cpf']));
-
-
 
       $folhas = $repo1->load($criteria);
 
@@ -86,15 +85,18 @@ class FolhaService
                     $resultadoVerificacao = $folhaService->verificarStatusParcelas($parcelasSet, $ultimoDigito);
                     TToast::show('info', "o Evento: ". $item->evento_id ." " .$resultadoVerificacao);
         
-                    break;
+                    $eventoParcelas = [];
+
+                   
+
+                    $folhaform->onLoad($folha->id);
+                    
                 }
+                
             }
+           
         }
         
-
-
-
-
         $anoMesUtilizados = [];
 
         foreach ($folhas as $folha) {
@@ -137,9 +139,11 @@ class FolhaService
         // Calcula a diferença entre a quantidade total e o último número de parcela para cada evento
         $diferencaParcelas = $quantidadeTotalParcelas[$evento_id] - $ultimaParcela;
 
+        $parcela = $ultimaParcela+1;
+
         if ($diferencaParcelas > 0) {
             // Ainda há parcelas a serem criadas para o evento_id
-            return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.";
+            return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.  Parcela: $parcela/$quantidadeTotalParcelas[$evento_id] ";
         } elseif ($diferencaParcelas === 0) {
             // Todas as parcelas foram quitadas para o evento_id
             return  "Todas as parcelas para o evento_id $evento_id foram quitadas.";

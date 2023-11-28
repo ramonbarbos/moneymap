@@ -396,9 +396,6 @@ class FolhaForm extends TPage
           TForm::sendData('form_folha', (object) $dataF);
         }
 
-
-
-
         TTransaction::close();
       } else {
         $this->form->clear();
@@ -528,6 +525,25 @@ class FolhaForm extends TPage
   public function onClose($param)
   {
     TScript::create("Template.closeRightPanel()");
+  }
+  public function onLoad($key)
+  {
+    TTransaction::open('sample');
+    TToast::show('info', 'chegou');
+    $object = new Folha($key);
+    $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
+    
+
+    foreach ($item_folhas as $item) {
+      $item->uniqid = uniqid();
+      $row = $this->eventos_list->addItem($item);
+      $row->id = $item->uniqid;
+      //TDataGrid::replaceRowById('eventos_list', $item->uniqid, $row);
+
+    }
+
+    TTransaction::close();
+
   }
 
 
