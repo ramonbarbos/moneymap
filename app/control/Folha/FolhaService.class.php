@@ -52,16 +52,48 @@ class FolhaService
     TTransaction::open('sample');
     $repo1 = new TRepository('Folha');
     $criteria = new TCriteria;
+    $folhaService = new FolhaService();
 
     if ($param['cpf']) {
       $criteria->add(new TFilter('cpf', 'like', $param['cpf']));
+
 
 
       $folhas = $repo1->load($criteria);
 
       if ($folhas) {
 
-        $folhas = Folha::where('cpf', 'like', $param['cpf'])->load();
+        $folhas = Folha::where('cpf', 'like', $param['cpf'])->orderBy(1)->load();
+
+        $parcelasUnicas = new \Ds\Set();  // Certifique-se de instanciar o conjunto antes de utilizá-lo
+
+        // Verificar se o CPF contém parcelas
+        foreach ($folhas as $folha) {
+            $itemfolha = ItemFolha::where('folha_id', '=', $folha->id)
+                ->orderBy('parcela', 'ASC')->LOAD();
+            
+            foreach ($itemfolha as $item) {
+                if (isset($item->parcela)) {
+                    $parcela = $item->parcela;
+                    $partesParcela = explode('/', $parcela);
+                    $ultimoDigito = end($partesParcela);
+                    $primeiroDigito = reset($partesParcela);
+
+                    // Transforme $parcelas em um conjunto
+                    $parcelasSet = new \Ds\Set([$primeiroDigito]);
+        
+                    // Verifica o status das parcelas e exibe o resultado
+                    $resultadoVerificacao = $folhaService->verificarStatusParcelas($parcelasSet, $ultimoDigito);
+                    TToast::show('info', "o Evento: ". $item->evento_id ." " .$resultadoVerificacao);
+        
+                    break;
+                }
+            }
+        }
+        
+
+
+
 
         $anoMesUtilizados = [];
 
@@ -98,6 +130,25 @@ class FolhaService
     TTransaction::close();
   }
 
+  function verificarStatusParcelas($parcelasPorEvento, $quantidadeTotalParcelas)
+{
+    // Itera sobre as parcelas por evento
+    foreach ($parcelasPorEvento as $evento_id => $ultimaParcela) {
+        // Calcula a diferença entre a quantidade total e o último número de parcela para cada evento
+        $diferencaParcelas = $quantidadeTotalParcelas[$evento_id] - $ultimaParcela;
+
+        if ($diferencaParcelas > 0) {
+            // Ainda há parcelas a serem criadas para o evento_id
+            return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.";
+        } elseif ($diferencaParcelas === 0) {
+            // Todas as parcelas foram quitadas para o evento_id
+            return  "Todas as parcelas para o evento_id $evento_id foram quitadas.";
+        } else {
+            // A quantidade total de parcelas é menor do que o último número de parcela para o evento_id (situação incomum)
+            return "A quantidade total de parcelas para o evento_id $evento_id é menor do que o último número de parcela.";
+        }
+    }
+}
 
   public static function onFormula($param)
   {
@@ -137,10 +188,10 @@ class FolhaService
 
 
         // Feedback ao usuário
-         TToast::show('info', "Resultado do cálculo: $resultado");
+        // TToast::show('info', "Resultado do cálculo: $resultado");
 
-      }else{
-        TToast::show('info', 'Sem formula');
+      } else {
+        //TToast::show('info', 'Sem formula');
 
       }
 

@@ -28,6 +28,7 @@ class ComposerStaticInitc9c4554746f9331a3d1f3f9923e91a0d
         ),
         'D' => 
         array (
+            'Ds\\' => 3,
             'Dompdf\\' => 7,
             'DASPRiD\\Enum\\' => 13,
         ),
@@ -69,6 +70,10 @@ class ComposerStaticInitc9c4554746f9331a3d1f3f9923e91a0d
         'Firebase\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+        ),
+        'Ds\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-ds/php-ds/src',
         ),
         'Dompdf\\' => 
         array (

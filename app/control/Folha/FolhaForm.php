@@ -100,8 +100,9 @@ class FolhaForm extends TPage
     $tipo      = new TEntry('tipo');
     $evento_descricao     = new TEntry('evento_descricao');
     $formula = new TEntry('formula');
-    $exit_action = new TAction(array('FolhaService', 'onFormula'));
-    $formula->setExitAction($exit_action);
+    $formula_action = new TAction(array('FolhaService', 'onFormula'));
+    $formula->setExitAction($formula_action);
+    $parcela      = new TEntry('parcela');
 
 
 
@@ -133,7 +134,7 @@ class FolhaForm extends TPage
     $this->form->addFields([$uniqid], [$detail_id],);
     $this->form->addFields([new TLabel('Evento (*)')], [$evento_id], [new TLabel('Descrição')], [$evento_descricao],);
     $this->form->addFields([new TLabel('Tipo')], [$tipo], [new TLabel('Valor (*)')], [$valor]);
-    $this->form->addFields([new TLabel('Formula')], [$formula],);
+    $this->form->addFields([new TLabel('Formula')], [$formula],[new TLabel('Parcela')], [$parcela],);
     $add_event = TButton::create('add_event', [$this, 'onEventAdd'], 'Registrar', 'fa:plus-circle green');
     $add_event->getAction()->setParameter('static', '1');
     $this->form->addFields([], [$add_event]);
@@ -146,7 +147,7 @@ class FolhaForm extends TPage
     $tipo->setEditable(false);
     $valor->setSize('100%');
     $valor->setNumericMask(4, '.', '', true);
-    $formula->setSize('40%');
+    $formula->setSize('100%');
     $formula->setEditable(false);
 
 
@@ -164,6 +165,7 @@ class FolhaForm extends TPage
     $col_evento  = new TDataGridColumn('evento_id', 'Evento', 'center', '10%');
     $col_desc = new TDataGridColumn('evento_id', 'Descrição', 'left', '30%');
     $col_tipo = new TDataGridColumn('tipo', 'Tipo', 'left', '30%');
+    $col_parcela = new TDataGridColumn('parcela', 'Parcela', 'left', '15%%');
     $col_valor  = new TDataGridColumn('valor', 'Valor', 'right', '15%');
 
     $this->eventos_list->addColumn($col_uniq);
@@ -171,6 +173,7 @@ class FolhaForm extends TPage
     $this->eventos_list->addColumn($col_evento);
     $this->eventos_list->addColumn($col_desc);
     $this->eventos_list->addColumn($col_tipo);
+    $this->eventos_list->addColumn($col_parcela);
     $this->eventos_list->addColumn($col_valor);
 
     $col_desc->setTransformer(function ($value) {
@@ -299,6 +302,7 @@ class FolhaForm extends TPage
             $item->valor      = (float) $param['eventos_list_valor'][$key];
             $item->folha_id = $folha->id;
             $item->tipo = $param['eventos_list_tipo'][$key];
+            $item->parcela = $param['eventos_list_parcela'][$key];
             $item->store();
             $total += ($evento->incidencia == 'P') ? $item->valor : 0;
           }
@@ -324,6 +328,8 @@ class FolhaForm extends TPage
             $item->valor      = (float) $param['eventos_list_valor'][$key];
             $item->folha_id = $folha->id;
             $item->tipo = $param['eventos_list_tipo'][$key];
+            $item->parcela = $param['eventos_list_parcela'][$key];
+
             $item->store();
             $total += ($evento->incidencia == 'P') ? $item->valor : 0;
           }
@@ -421,6 +427,7 @@ class FolhaForm extends TPage
         'evento_id'  => $data->evento_id,
         'evento_descricao'      => $data->evento_descricao,
         'tipo'      => $data->tipo,
+        'parcela'      => $data->parcela,
         'valor'  => $data->valor,
 
       ];
@@ -438,7 +445,9 @@ class FolhaForm extends TPage
       $data->evento_id = '';
       $data->evento_descricao       = '';
       $data->tipo       = '';
+      $data->parcela       = '';
       $data->valor     = '';
+      $data->formula     = '';
 
 
 
@@ -461,6 +470,7 @@ class FolhaForm extends TPage
     $data->evento_id = $param['evento_id'];
     $data->evento_descricao       = $param['evento_id'];
     $data->tipo       = $param['tipo'];
+    @$data->parcela       = $param['parcela'];
     $data->valor     = $param['valor'];
 
 
@@ -476,7 +486,9 @@ class FolhaForm extends TPage
     $data->evento_id = '';
     $data->evento_descricao       = '';
     $data->tipo       = '';
+    $data->parcela       = '';
     $data->valor     = '';
+    $data->formula     = '';
 
     // send data, do not fire change/exit events
     TForm::sendData('form_folha', $data, false, false);
@@ -520,33 +532,4 @@ class FolhaForm extends TPage
 
 
 
-
-  // public function onReload($param = NULL)
-  // {
-  //   try {
-  //     $objFolha = new FolhaForm();
-  //     $objFolha->eventos_list->clear(); // clear datagrid
-  //     // Convertendo $item_folhas em uma representação JSON
-  //     $object = TSession::getValue('items');
-  //     foreach ($object as $item) {
-  //      $item->uniqid =  uniqid();
-  //         $row = $objFolha->eventos_list->addItem((object) $item);
-  //           $row->id = $item->uniqid;
-  //    }
-  //     print_r($object);
-
-  //     $this->loaded = true;
-  //   } catch (Exception $e) // in case of exception
-  //   {
-  //     new TMessage('error', $e->getMessage());
-  //   }
-  // }
-  // public function show()
-  // {
-  //     if (!$this->loaded)
-  //     {
-  //         $this->onReload( func_get_arg(0) );
-  //     }
-  //     parent::show();
-  // }
 }

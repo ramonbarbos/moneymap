@@ -17,6 +17,7 @@ class ItemFolha extends TRecord
         parent::addAttribute('folha_id');
         parent::addAttribute('evento_id');
         parent::addAttribute('tipo');
+        parent::addAttribute('parcela');
         parent::addAttribute('valor');
 
     }

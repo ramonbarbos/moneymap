@@ -12,7 +12,8 @@
     "adianti/pdfdesigner": "dev-master",
     "pablodalloglio/ole": "dev-master",
     "pablodalloglio/spreadsheet_excel_writer": "dev-master",
-    "pablodalloglio/fpdf": "dev-master"
+    "pablodalloglio/fpdf": "dev-master",
+    "php-ds/php-ds": "^1.4"
   },
   "config": {
     "preferred-install": {
