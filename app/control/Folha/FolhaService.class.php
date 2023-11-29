@@ -64,38 +64,32 @@ class FolhaService
 
         $folhas = Folha::where('cpf', 'like', $param['cpf'])->orderBy(1)->load();
 
-        $parcelasUnicas = new \Ds\Set();  // Certifique-se de instanciar o conjunto antes de utilizá-lo
         $eventoParcelas = [];
         $eventos = [];
         $folha_id = 0;
-        
+
         // Verificar se o CPF contém parcelas
         foreach ($folhas as $folha) {
-            $itemfolha = ItemFolha::where('folha_id', '=', $folha->id)
-                ->orderBy('parcela', 'ASC')->LOAD();
-            
-            foreach ($itemfolha as $item) {
-                if (isset($item->parcela)) {
-                    $parcela = $item->parcela;
-                    $partesParcela = explode('/', $parcela);
-                    $ultimoDigito = end($partesParcela);
-                    $primeiroDigito = reset($partesParcela);
-                    $parcelasSet = new \Ds\Set([$primeiroDigito]);
-                    $resultadoVerificacao = $folhaService->verificarStatusParcelas($parcelasSet, $ultimoDigito);
-             
-                      $folha_id = $folha->id;
-                      $eventos[] = $item->evento_id;
-                      $eventoParcelas[$item->evento_id] = $resultadoVerificacao;
-                 
-                   
+          $itemfolha = ItemFolha::where('folha_id', '=', $folha->id)
+            ->orderBy('parcela', 'ASC')->LOAD();
 
-                  
-                }
-                
+          foreach ($itemfolha as $item) {
+            if (isset($item->parcela)) {
+              $parcela = $item->parcela;
+              $partesParcela = explode('/', $parcela);
+              $ultimoDigito = end($partesParcela);
+              $primeiroDigito = reset($partesParcela);
+              $parcelasSet = new \Ds\Set([$primeiroDigito]);
+              $resultadoVerificacao = $folhaService->verificarStatusParcelas($parcelasSet, $ultimoDigito);
+
+              $folha_id = $folha->id;
+              $eventos[] = $item->evento_id;
+              $eventoParcelas[$item->evento_id] = $resultadoVerificacao;
             }
+          }
         }
-        $folhaform->onLoad($folha_id,$eventoParcelas,$eventos);
-        
+        $folhaform->onLoad($folha_id, $eventoParcelas, $eventos);
+
         $anoMesUtilizados = [];
 
         foreach ($folhas as $folha) {
@@ -132,27 +126,27 @@ class FolhaService
   }
 
   function verificarStatusParcelas($parcelasPorEvento, $quantidadeTotalParcelas)
-{
+  {
     // Itera sobre as parcelas por evento
     foreach ($parcelasPorEvento as $evento_id => $ultimaParcela) {
-        // Calcula a diferença entre a quantidade total e o último número de parcela para cada evento
-        $diferencaParcelas = $quantidadeTotalParcelas[$evento_id] - $ultimaParcela;
+      // Calcula a diferença entre a quantidade total e o último número de parcela para cada evento
+      $diferencaParcelas = $quantidadeTotalParcelas[$evento_id] - $ultimaParcela;
 
-        $parcela = $ultimaParcela+1;
+      $parcela = $ultimaParcela + 1;
 
-        if ($diferencaParcelas > 0) {
-            // Ainda há parcelas a serem criadas para o evento_id
-           // return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.  Parcela: $parcela/$quantidadeTotalParcelas[$evento_id] ";
-            return "$parcela/$quantidadeTotalParcelas[$evento_id]";
-        } elseif ($diferencaParcelas === 0) {
-            // Todas as parcelas foram quitadas para o evento_id
-            return  null;
-        } else {
-            // A quantidade total de parcelas é menor do que o último número de parcela para o evento_id (situação incomum)
-            return "A quantidade total de parcelas para o evento_id $evento_id é menor do que o último número de parcela.";
-        }
+      if ($diferencaParcelas > 0) {
+        // Ainda há parcelas a serem criadas para o evento_id
+        // return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.  Parcela: $parcela/$quantidadeTotalParcelas[$evento_id] ";
+        return "$parcela/$quantidadeTotalParcelas[$evento_id]";
+      } elseif ($diferencaParcelas === 0) {
+        // Todas as parcelas foram quitadas para o evento_id
+        return  null;
+      } else {
+        // A quantidade total de parcelas é menor do que o último número de parcela para o evento_id (situação incomum)
+        return "A quantidade total de parcelas para o evento_id $evento_id é menor do que o último número de parcela.";
+      }
     }
-}
+  }
 
   public static function onFormula($param)
   {
@@ -162,7 +156,7 @@ class FolhaService
       if ($param['formula']) {
         $folhaService = new FolhaService();
 
-        $expressao = preg_replace('/[^0-9+\-.*\/()\sSP]/', '', $param['formula']);
+        $expressao = preg_replace('/[^0-9+\-.*\/()\sSPVL]/', '', $param['formula']);
 
         $salario = 0;
 
@@ -174,26 +168,39 @@ class FolhaService
           }
         }
 
-        // Mapeia eventos para valores
+        // Convertendo para uma string no formato "YYYY-MM"
+       // $dataFormatada = substr($param['anoMes'], 0, 4) . '-' . substr($param['anoMes'], 4, 2);
+       // TToast::show('info','chegou' );
+
+        // Obtendo o ano e o mês da data formatada
+      //  $ano = date('Y', strtotime($dataFormatada));
+      //  $mes = date('m', strtotime($dataFormatada));
+
         $eventos = [
           'S' => $salario,
-          'P' => $folhaService->calcularINSS($salario) //INSS
+          'P' => $folhaService->calcularINSS($salario), //INSS
+          'VL' => 36*22//$folhaService->calcularDiasUteis($ano, $mes, $feriados = array('2023-01-01')) //obterFeriadosDoMes($ano=2023, $mes=11,)
         ];
+        if ($param['evento_id'] == 6) {
+          // Mapeia eventos para valores
+          $aliquotas = TSession::getValue('aliquotas_inss');
+          if ($aliquotas) {
+              TForm::sendData('form_folha', (object) ['ref' => $aliquotas[0]['aliquota_percentual']]);
+          }
 
-        TForm::sendData('form_folha', (object) ['valor' =>  $eventos['P']]);
+          TForm::sendData('form_folha', (object) ['valor' =>  $eventos['P']]);
 
-        // Substitui os eventos pelos valores correspondentes na expressão
-        foreach ($eventos as $evento => $valor) {
-          $expressao = str_replace($evento, $valor, $expressao);
+        } else if ($param['evento_id'] == 4) {
+          // Substitui os eventos pelos valores correspondentes na expressão
+
+
+          TForm::sendData('form_folha', (object) ['valor' =>  $eventos['VL']]);
+        } else {
+
+          $resultado = eval("return $expressao;");
+
+          TForm::sendData('form_folha', (object) ['valor' =>  $resultado]);
         }
-
-        // Avalia a expressão
-        $resultado = eval("return $expressao;");
-
-
-        // Feedback ao usuário
-        // TToast::show('info', "Resultado do cálculo: $resultado");
-
       } else {
         //TToast::show('info', 'Sem formula');
 
@@ -217,19 +224,36 @@ class FolhaService
       ['limite_inferior' => 1320.01, 'limite_superior' => 2571.29, 'aliquota' => 0.09],  //Faixa 2
       ['limite_inferior' => 2571.30, 'limite_superior' => 3856.94, 'aliquota' => 0.12], //Faixa 3
       ['limite_inferior' => 3856.95, 'limite_superior' => 7507.49, 'aliquota' => 0.14], //Faixa 4
-      // Adicione mais faixas conforme necessário
+
     ];
 
     $contribuicao_total = 0;
 
     foreach ($faixas as $faixa) {
-      // Calcula a contribuição para cada faixa
       $contribuicao_faixa = max(0, min($faixa['limite_superior'], $salario) - $faixa['limite_inferior']) * $faixa['aliquota'];
-
-      // Adiciona à contribuição total
       $contribuicao_total += $contribuicao_faixa;
+      $aliquotas[] = ['faixa' => $faixa, 'aliquota_percentual' => $faixa['aliquota'] * 100];
     }
+    TSession::setValue('aliquotas_inss', $aliquotas);
+   /// TForm::sendData('form_folha', (object) ['ref' =>   $aliquotas['aliquota_percentual']]);
 
     return $contribuicao_total;
+  }
+  function calcularDiasUteis($ano, $mes, $feriados = array())
+  {
+    $diasUteis = 0;
+    $ultimoDia = date('t', strtotime("$ano-$mes-01"));
+
+    for ($dia = 1; $dia <= $ultimoDia; $dia++) {
+      $data = "$ano-$mes-$dia";
+      $diaSemana = date('N', strtotime($data));
+
+      // Excluir fins de semana (sábado e domingo) e feriados
+      if ($diaSemana < 6 && !in_array($data, $feriados)) {
+        $diasUteis++;
+      }
+    }
+
+    return $diasUteis;
   }
 }

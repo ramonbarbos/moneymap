@@ -103,6 +103,7 @@ class FolhaForm extends TPage
     $formula_action = new TAction(array('FolhaService', 'onFormula'));
     $formula->setExitAction($formula_action);
     $parcela      = new TEntry('parcela');
+    $ref      = new THidden('ref');
 
 
 
@@ -135,6 +136,8 @@ class FolhaForm extends TPage
     $this->form->addFields([new TLabel('Evento (*)')], [$evento_id], [new TLabel('Descrição')], [$evento_descricao],);
     $this->form->addFields([new TLabel('Tipo')], [$tipo], [new TLabel('Valor (*)')], [$valor]);
     $this->form->addFields([new TLabel('Formula')], [$formula],[new TLabel('Parcela')], [$parcela],);
+    $this->form->addFields([$ref],);
+
     $add_event = TButton::create('add_event', [$this, 'onEventAdd'], 'Registrar', 'fa:plus-circle green');
     $add_event->getAction()->setParameter('static', '1');
     $this->form->addFields([], [$add_event]);
@@ -164,7 +167,8 @@ class FolhaForm extends TPage
     $col_id     = new TDataGridColumn('id', 'ID', 'center', '10%');
     $col_evento  = new TDataGridColumn('evento_id', 'Evento', 'center', '10%');
     $col_desc = new TDataGridColumn('evento_id', 'Descrição', 'left', '30%');
-    $col_tipo = new TDataGridColumn('tipo', 'Tipo', 'left', '30%');
+    $col_tipo = new TDataGridColumn('tipo', 'Tipo', 'left', '15%');
+    $col_ref = new TDataGridColumn('ref', 'Ref', 'left', '15%');
     $col_parcela = new TDataGridColumn('parcela', 'Parcela', 'left', '15%%');
     $col_valor  = new TDataGridColumn('valor', 'Valor', 'right', '15%');
 
@@ -173,6 +177,7 @@ class FolhaForm extends TPage
     $this->eventos_list->addColumn($col_evento);
     $this->eventos_list->addColumn($col_desc);
     $this->eventos_list->addColumn($col_tipo);
+    $this->eventos_list->addColumn($col_ref);
     $this->eventos_list->addColumn($col_parcela);
     $this->eventos_list->addColumn($col_valor);
 
@@ -252,8 +257,6 @@ class FolhaForm extends TPage
         $descricao = $eventos->descricao ?? '';
         $incidencia = $eventos->incidencia ?? '';
         $formula = $eventos->formula ?? '';
-
-
 
         // Consolidar as atualizações em uma única chamada
         TForm::sendData('form_folha', (object) [
@@ -429,10 +432,6 @@ class FolhaForm extends TPage
         throw new Exception('Para incluir é necessario informar o evento.');
       }
 
-
-
-     
-
       $uniqid = !empty($data->uniqid) ? $data->uniqid : uniqid();
 
       $grid_data = [
@@ -442,6 +441,7 @@ class FolhaForm extends TPage
         'evento_descricao'      => $data->evento_descricao,
         'tipo'      => $data->tipo,
         'parcela'      => $data->parcela,
+        'ref'      => $data->ref,
         'valor'  => $data->valor,
 
       ];
@@ -462,6 +462,7 @@ class FolhaForm extends TPage
       $data->parcela       = '';
       $data->valor     = '';
       $data->formula     = '';
+      $data->ref     = '';
 
 
 
@@ -503,6 +504,7 @@ class FolhaForm extends TPage
     $data->parcela       = '';
     $data->valor     = '';
     $data->formula     = '';
+    $data->ref     = '';
 
     // send data, do not fire change/exit events
     TForm::sendData('form_folha', $data, false, false);

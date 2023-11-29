@@ -129,7 +129,6 @@ class DespesaService
 
 
               foreach ($item_despesas as $item) {
-                TFieldList::addRows('my_field_list',1);
                 $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
 
                 $data->id_item[] = $item->id_item;
@@ -138,6 +137,7 @@ class DespesaService
                 $data->descricao[] = $item->descricao;
                 $data->valor[] = $item->valor;
                 $data->saldo[] = $item->saldo;      
+                TFieldList::addRows('my_field_list',1);
 
               }
               TForm::sendData('my_form', (object) $data, false, true, 300);
@@ -150,18 +150,18 @@ class DespesaService
               //verificar se existe desconto vinculado ao cpf
               $folha  =  Folha::where('cpf', 'like', $params['cpf'])->first();
               $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
-                ->where('tipo', 'like', 'D')
+                ->where('tipo', 'like', 'D')->orderby(1)
                 ->load();
 
               if ($item_folhas || $folha) {
                 TFieldList::clear('my_field_list');
-                TFieldList::addRows('my_field_list', 1);
 
                 $dataF = new stdClass;
                 $dataF->evento_id = [];
                 $dataF->valor = [];
 
                 foreach ($item_folhas as $item) {
+                  TFieldList::addRows('my_field_list', 1);
 
                   $dataF->evento_id[] = $item->evento_id;
                   $dataF->valor[] = $item->valor;
