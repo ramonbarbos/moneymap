@@ -526,24 +526,31 @@ class FolhaForm extends TPage
   {
     TScript::create("Template.closeRightPanel()");
   }
-  public function onLoad($key)
+  public function onLoad($folha_id, $resultadoVerificacao, $eventos)
   {
-    TTransaction::open('sample');
-    TToast::show('info', 'chegou');
-    $object = new Folha($key);
-    $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
-    
+      TTransaction::open('sample');
+      $object = new Folha($folha_id);
+      $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
+  
+      foreach ($item_folhas as $item) {
+          $item->uniqid = uniqid();
+  
+          // Adicione apenas os itens cujo evento_id está na lista de eventos verificados
+          if (in_array($item->evento_id, $eventos)) {
 
-    foreach ($item_folhas as $item) {
-      $item->uniqid = uniqid();
-      $row = $this->eventos_list->addItem($item);
-      $row->id = $item->uniqid;
-      //TDataGrid::replaceRowById('eventos_list', $item->uniqid, $row);
+            if (isset($resultadoVerificacao[$item->evento_id])) {
+              $item->parcela = $resultadoVerificacao[$item->evento_id];
+               //$item->parcela = $resultadoVerificacao;
+               $row = $this->eventos_list->addItem($item);
+               $row->id = $item->uniqid;
+                TDataGrid::replaceRowById('eventos_list', $item->uniqid, $row);
+          }
 
-    }
-
-    TTransaction::close();
-
+           
+          }
+      }
+  
+      TTransaction::close();
   }
 
 

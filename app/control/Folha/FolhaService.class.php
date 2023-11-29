@@ -65,7 +65,10 @@ class FolhaService
         $folhas = Folha::where('cpf', 'like', $param['cpf'])->orderBy(1)->load();
 
         $parcelasUnicas = new \Ds\Set();  // Certifique-se de instanciar o conjunto antes de utilizá-lo
-
+        $eventoParcelas = [];
+        $eventos = [];
+        $folha_id = 0;
+        
         // Verificar se o CPF contém parcelas
         foreach ($folhas as $folha) {
             $itemfolha = ItemFolha::where('folha_id', '=', $folha->id)
@@ -77,25 +80,21 @@ class FolhaService
                     $partesParcela = explode('/', $parcela);
                     $ultimoDigito = end($partesParcela);
                     $primeiroDigito = reset($partesParcela);
-
-                    // Transforme $parcelas em um conjunto
                     $parcelasSet = new \Ds\Set([$primeiroDigito]);
-        
-                    // Verifica o status das parcelas e exibe o resultado
                     $resultadoVerificacao = $folhaService->verificarStatusParcelas($parcelasSet, $ultimoDigito);
-                    TToast::show('info', "o Evento: ". $item->evento_id ." " .$resultadoVerificacao);
-        
-                    $eventoParcelas = [];
-
+             
+                      $folha_id = $folha->id;
+                      $eventos[] = $item->evento_id;
+                      $eventoParcelas[$item->evento_id] = $resultadoVerificacao;
+                 
                    
 
-                    $folhaform->onLoad($folha->id);
-                    
+                  
                 }
                 
             }
-           
         }
+        $folhaform->onLoad($folha_id,$eventoParcelas,$eventos);
         
         $anoMesUtilizados = [];
 
@@ -116,7 +115,7 @@ class FolhaService
       } else {
 
 
-        $anoMes = AnoMes::where('descricao', '<>', '999999')->load();
+        $anoMes = AnoMes::where('descricao', '<>', '999999')->orderBy(1)->load();
 
         $options = array();
         if ($anoMes) {
@@ -143,10 +142,11 @@ class FolhaService
 
         if ($diferencaParcelas > 0) {
             // Ainda há parcelas a serem criadas para o evento_id
-            return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.  Parcela: $parcela/$quantidadeTotalParcelas[$evento_id] ";
+           // return "Ainda é necessário criar $diferencaParcelas parcela(s) para o evento_id $evento_id.  Parcela: $parcela/$quantidadeTotalParcelas[$evento_id] ";
+            return "$parcela/$quantidadeTotalParcelas[$evento_id]";
         } elseif ($diferencaParcelas === 0) {
             // Todas as parcelas foram quitadas para o evento_id
-            return  "Todas as parcelas para o evento_id $evento_id foram quitadas.";
+            return  null;
         } else {
             // A quantidade total de parcelas é menor do que o último número de parcela para o evento_id (situação incomum)
             return "A quantidade total de parcelas para o evento_id $evento_id é menor do que o último número de parcela.";
