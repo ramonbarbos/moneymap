@@ -411,10 +411,27 @@ class FolhaForm extends TPage
     try {
       $this->form->validate();
       $data = $this->form->getData();
+      TTransaction::open('sample');
+
+      
+      foreach($param['eventos_list_evento_id'] as $evento_id){
+        $evento = Evento::where('id', '=', $evento_id)->first();
+          if ($data->evento_id == $evento_id && $evento->fixo == 1) {
+              throw new Exception('O evento fixo '. $data->evento_id. ' ja foi adicionado');
+            
+          }
+        }
+
+        TTransaction::close();
+       
 
       if ((!$data->evento_id) || (!$data->evento_descricao) || (!$data->valor)) {
         throw new Exception('Para incluir é necessario informar o evento.');
       }
+
+
+
+     
 
       $uniqid = !empty($data->uniqid) ? $data->uniqid : uniqid();
 
