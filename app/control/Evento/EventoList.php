@@ -45,6 +45,7 @@ class EventoList extends TPage
         $this->setLimit(10);
 
         $this->addFilterField('fixo', '=', 'fixo');
+        $this->addFilterField('incidencia', 'like', 'incidencia');
         $this->addFilterField('descricao', 'like', 'descricao');
 
         //Criação do formulario 
@@ -55,9 +56,12 @@ class EventoList extends TPage
         $campo1 = new TCombo('fixo');
         $campo1->addItems(['0' => 'Não', '1' => 'Sim']);
         $campo2 = new TEntry('descricao');
+        $campo3 = new TCombo('incidencia');
+        $campo3->addItems(['P' => 'Provento', 'D' => 'Desconto']);
 
         $this->form->addFields( [new TLabel('Fixo')], [ $campo1 ]  );
         $this->form->addFields( [new TLabel('Descricão')], [ $campo2 ]  );
+        $this->form->addFields( [new TLabel('Incidencia')], [ $campo3 ]  );
 
         //Tamanho dos fields
         $campo1->setSize('100%');
