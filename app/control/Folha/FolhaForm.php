@@ -45,6 +45,7 @@ class FolhaForm extends TPage
   private $form;
   private $eventos_list;
   private $loaded;
+  private $edit= 0;
 
   use Adianti\base\AdiantiStandardFormTrait;
 
@@ -367,6 +368,7 @@ class FolhaForm extends TPage
     try {
       TTransaction::open('sample');
 
+      TSession::setValue('edit',0);
 
       if (isset($param['key'])) {
         $key = $param['key'];
@@ -412,16 +414,25 @@ class FolhaForm extends TPage
   public function onEventAdd($param)
   {
     try {
+      $folhaForm = new FolhaForm($param);
       $this->form->validate();
       $data = $this->form->getData();
       TTransaction::open('sample');
 
-      
+
+      $edit = TSession::getValue('edit');
+
+      TToast::show('info',"Entrou ".$edit );
+
       foreach($param['eventos_list_evento_id'] as $evento_id){
         $evento = Evento::where('id', '=', $evento_id)->first();
-          if ($data->evento_id == $evento_id && $evento->fixo == 1) {
+          if ($data->evento_id == $evento_id && $evento->fixo == 1 && $edit == 0) {
+            TSession::setValue('edit',0);
+             TToast::show('info',"Saiu ".$edit );
               throw new Exception('O evento fixo '. $data->evento_id. ' ja foi adicionado');
             
+             
+
           }
         }
 
@@ -451,6 +462,7 @@ class FolhaForm extends TPage
       $row->id = $uniqid;
 
       TDataGrid::replaceRowById('eventos_list', $uniqid, $row);
+      TSession::setValue('edit',0);
 
 
       // clear product form fields after add
@@ -479,6 +491,7 @@ class FolhaForm extends TPage
 
   public static function onEditItemProduto($param)
   {
+    $folhaForm = new FolhaForm($param);
     $data = new stdClass;
     $data->uniqid     = $param['uniqid'];
     $data->detail_id         = $param['id'];
@@ -487,6 +500,10 @@ class FolhaForm extends TPage
     $data->tipo       = $param['tipo'];
     @$data->parcela       = $param['parcela'];
     $data->valor     = $param['valor'];
+    @$data->ref     = $param['ref'];
+
+    TSession::setValue('edit',1);
+    //TToast::show('info', 'Edit');
 
 
     TForm::sendData('form_folha', $data, false, false);
