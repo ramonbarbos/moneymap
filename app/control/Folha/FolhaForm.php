@@ -78,7 +78,7 @@ class FolhaForm extends TPage
 
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
     if (isset($param['key'])) {
-      $anoMes         = new TEntry('anoMes[]');
+      $anoMes         = new TEntry('anoMes');
       $anoMes->setEditable(false);
     } else {
       // $dados_param = array('key'=>$param['key']);
