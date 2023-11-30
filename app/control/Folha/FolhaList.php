@@ -20,6 +20,7 @@ use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Util\TDropDown;
 use Adianti\Widget\Util\TXMLBreadCrumb;
 use Adianti\Widget\Wrapper\TDBCombo;
+use Adianti\Widget\Wrapper\TDBUniqueSearch;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
@@ -45,18 +46,24 @@ class FolhaList extends TPage
         $this->setLimit(10);
 
         $this->addFilterField('cpf', 'like', 'cpf');
+        $this->addFilterField('anoMes', 'like', 'anoMes');
+        $this->addFilterField('tp_folha', '=', 'tp_folha');
 
         //Criação do formulario 
         $this->form = new BootstrapFormBuilder('form_search_folha');
         $this->form->setFormTitle('Folhas');
 
         //Criação de fields
-        $campo1 = new TEntry('cpf');
+        $campo1 =  new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
+        $campo2         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
 
         $this->form->addFields( [new TLabel('CPF')], [ $campo1 ]  );
+        $this->form->addFields( [new TLabel('Ano Mes')], [ $campo2 ]  );
 
         //Tamanho dos fields
         $campo1->setSize('100%');
+        $campo1->setMinLength(0);
+        $campo2->setMinLength(0);
 
         $this->form->setData( TSession::getValue( __CLASS__.'_filter_data') );
 
@@ -72,10 +79,18 @@ class FolhaList extends TPage
         //Criando colunas da datagrid
         $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
         $column_2 = new TDataGridColumn('cpf', 'CPF', 'left', );
+        $column_2 = new TDataGridColumn('folha->descricao', 'Tipo', 'left', );
         $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left', );
         $column_4 = new TDataGridColumn('vl_salario', 'Salario', 'left', );
 
-      
+        $formato_vl_salario = function ($value) {
+            if (is_numeric($value)) {
+                return 'R$ ' . number_format($value, 2, ',', '.');
+            }
+            return $value;
+        };
+        $column_4->setTransformer($formato_vl_salario);
+
      
 
         //add coluna da datagrid

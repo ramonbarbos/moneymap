@@ -45,7 +45,7 @@ class DespesaView extends TPage
     $this->form = new BootstrapFormBuilder('my_form');
     $this->form->setFormTitle('Novas Despesas');
     $this->form->setClientValidation(true);
-    $this->form->setColumnClasses(3, ['col-sm-3', 'col-sm-3', 'col-sm-3','col-sm-3']);
+    $this->form->setColumnClasses(3, ['col-sm-3', 'col-sm-3', 'col-sm-3', 'col-sm-3']);
 
     $this->setDatabase('sample');
     $this->setActiveRecord('Despesa');
@@ -54,21 +54,22 @@ class DespesaView extends TPage
     // Criação de fields
     $id = new TEntry('id');
 
+    $tp_folha         = new TDBUniqueSearch('tp_folha', 'sample', 'TipoFolha', 'id', 'descricao');
+    $tp_folha->addValidation('anoMes', new TRequiredValidator);
+    $tp_folha->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
+
     $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'anoMes', 'descricao', 'descricao');
     $anoMes->addValidation('anoMes', new TRequiredValidator);
-    //$anoMes->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
     $anoMes->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
 
 
     if (isset($param['key'])) {
       $cpf         = new TEntry('cpf');
       $cpf->setEditable(false);
-
     } else {
 
       $cpf         = new TCombo('cpf');
       $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
-
     }
 
 
@@ -76,19 +77,21 @@ class DespesaView extends TPage
     $vl_salario = new TEntry('vl_salario');
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id]);
-    $this->form->addFields([new TLabel('Mês (*)')], [$anoMes],[new TLabel('CPF (*)')], [$cpf]);
+    $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('Folha')], [$tp_folha]);
+    $this->form->addFields([new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Despesa')], [$vl_despesa]);
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
     $id->setSize('100%');
+    $tp_folha->setSize('100%');
+    $tp_folha->setMinLength(0);
     $cpf->addValidation('cpf', new TRequiredValidator);
-   // $cpf->setMinLength(0);
+    // $cpf->setMinLength(0);
     //$cpf->setMask('<b>{cpf}</b>');
     $cpf->setSize('100%');
     $anoMes->setMinLength(0);
-    
+
     $anoMes->setSize('100%');
 
     $vl_despesa->setEditable(false);
@@ -122,7 +125,7 @@ class DespesaView extends TPage
     $saldo->style = 'text-align: right';
 
     $dt_despesa = new TDate('dt_despesa[]');
-    $dt_despesa->setMask('dd/mm/yyyy',false);
+    $dt_despesa->setMask('dd/mm/yyyy', false);
     //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
 
@@ -147,7 +150,7 @@ class DespesaView extends TPage
     $this->form->addField($saldo);
     $this->form->addField($dt_despesa);
 
-    $dt_despesa->addValidation('Data', new TRequiredListValidator);
+    //$dt_despesa->addValidation('Data', new TRequiredListValidator);
     $evento_id->addValidation('Centro de custo', new TRequiredListValidator);
     $descricao->addValidation('Descrição', new TRequiredListValidator);
     $valor->addValidation('Valor', new TRequiredListValidator);
@@ -192,7 +195,6 @@ class DespesaView extends TPage
     // $win->add('<pre>' . str_replace("\n", '<br>', print_r($param, true)) . '</pre>');
     // $win->show();
     TToast::show('info', 'Linha removida.');
-
   }
 
   public static function showRow($param)
@@ -228,10 +230,14 @@ class DespesaView extends TPage
 
         if (!empty($param['evento_id'])) {
           foreach ($param['evento_id'] as $key => $item_id) {
-            $dataOriginal = $param['dt_despesa'][$key];
-            $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
-            $dataFormatada = $dateTime->format('Y-m-d');
-            TToast::show('info', $dataFormatada);
+            if ($param['dt_despesa'][$key]) {
+              $dataOriginal = $param['dt_despesa'][$key];
+              $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
+              $dataFormatada = $dateTime->format('Y-m-d');
+            } else {
+              $dataFormatada = '';
+            }
+
 
             $item = new ItemDespesa;
             $item->despesa_id   = $despesa->id;
@@ -242,12 +248,14 @@ class DespesaView extends TPage
             $item->saldo      = (float) $param['saldo'][$key];
             $item->store();
             $total +=  $item->valor;
+            $saldo =  $item->saldo;
           }
         }
         $despesa->vl_despesa = $total;
+        $despesa->saldo =  $saldo;
         $despesa->store();
 
-        new TMessage('info', 'Alterado com sucesso',$this->afterSaveAction); //$this->afterSaveAction
+        new TMessage('info', 'Alterado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
 
       } else {
         $despesa->store();
@@ -258,9 +266,13 @@ class DespesaView extends TPage
 
         if (!empty($param['evento_id'])) {
           foreach ($param['evento_id'] as $key => $item_id) {
-            $dataOriginal = $param['dt_despesa'][$key];
-            $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
-            $dataFormatada = $dateTime->format('Y-m-d');
+            if ($param['dt_despesa'][$key]) {
+              $dataOriginal = $param['dt_despesa'][$key];
+              $dateTime = DateTime::createFromFormat('d/m/Y', $dataOriginal);
+              $dataFormatada = $dateTime->format('Y-m-d');
+            } else {
+              $dataFormatada = '';
+            }
 
             $item = new ItemDespesa;
             $item->despesa_id   = $despesa->id;
@@ -279,7 +291,7 @@ class DespesaView extends TPage
         $despesa->store();
 
         TForm::sendData('my_form', (object) ['id' => $despesa->id]);
-        new TMessage('info', 'Registos Salvos',$this->afterSaveAction); //
+        new TMessage('info', 'Registos Salvos', $this->afterSaveAction); //
       }
 
       TTransaction::close();
@@ -290,7 +302,7 @@ class DespesaView extends TPage
     }
   }
 
-  
+
   public function onEdit($param)
   {
     try {
@@ -302,9 +314,10 @@ class DespesaView extends TPage
 
         $object = new Despesa($key);
         $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->orderBy(1)->load();
-        $folha   =  Folha::where('cpf', '=', $object->cpf)->first();
-
+        $folha   =  Folha::where('cpf', '=', $object->cpf)
+          ->where('tp_folha', '=', $object->tp_folha)->first();
         $this->form->getField('anoMes')->setEditable(false);
+        $this->form->getField('tp_folha')->setEditable(false);
         //$this->form->getField('cpf')->setEditable(false);
 
 
@@ -321,8 +334,12 @@ class DespesaView extends TPage
 
           TFieldList::addRows('my_field_list', 1);
 
-            // Formatando a data para o formato desejado
+          if ($item->dt_despesa) {
             $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
+          } else {
+            $dt_despesa_formatada = $item->dt_despesa;
+          }
+
 
           $data->id_item[] = $item->id_item;
           $data->dt_despesa[] = $dt_despesa_formatada;
@@ -332,9 +349,9 @@ class DespesaView extends TPage
           $data->saldo[] = $item->saldo;
 
           TForm::sendData('my_form', $data);
-
         }
         TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
+        TForm::sendData('my_form', (object) ['saldo' => '']);
 
         $this->form->setData($object);
         TTransaction::close();
@@ -346,6 +363,4 @@ class DespesaView extends TPage
       TTransaction::rollback();
     }
   }
- 
-
 }

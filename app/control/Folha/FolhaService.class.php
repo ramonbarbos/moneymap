@@ -55,15 +55,16 @@ class FolhaService
     $folhaService = new FolhaService();
     $folhaform = new FolhaForm($param);
 
-    if ($param['cpf']) {
+    if ($param['tp_folha']) {
       $criteria->add(new TFilter('cpf', 'like', $param['cpf']));
+      $criteria->add(new TFilter('tp_folha', '=', $param['tp_folha']));
 
       $folhas = $repo1->load($criteria);
 
       if ($folhas) {
 
-        $folhas = Folha::where('cpf', 'like', $param['cpf'])->orderBy(1)->load();
-
+        $folhas = Folha::where('cpf', 'like', $param['cpf'])
+                         ->where('tp_folha', '=', $param['tp_folha'])->orderBy(1)->load();
         $eventoParcelas = [];
         $eventos = [];
         $folha_id = 0;
@@ -192,13 +193,9 @@ class FolhaService
 
         } else if ($param['evento_id'] == 4) {
           // Substitui os eventos pelos valores correspondentes na expressão
-
-
           TForm::sendData('form_folha', (object) ['valor' =>  $eventos['VL']]);
         } else {
-
           $resultado = eval("return $expressao;");
-
           TForm::sendData('form_folha', (object) ['valor' =>  $resultado]);
         }
       } else {

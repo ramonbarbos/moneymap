@@ -70,14 +70,13 @@ class FolhaForm extends TPage
 
     // Criação de fields
     $id = new TEntry('id');
-    $criteria_cpf = new TCriteria();
-    $criteria_cpf->setProperty('order', 'id');
-    //$criteria_cpf->add(new TFilter('cpf', '<>', cpf));
+    $criteria_folha = new TCriteria();
+    $criteria_folha->setProperty('order', 'id');
     // $cpf         = new TCombo('cpf');
+    $tp_folha         = new TDBUniqueSearch('tp_folha', 'sample', 'TipoFolha', 'id', 'descricao',null,$criteria_folha);
+    $tp_folha->setChangeAction(new TAction(array('FolhaService', 'onCheckCPF')));
+
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
-    $cpf->setChangeAction(new TAction(array('FolhaService', 'onCheckCPF')));
-
-
     if (isset($param['key'])) {
       $anoMes         = new TEntry('anoMes[]');
       $anoMes->setEditable(false);
@@ -86,8 +85,6 @@ class FolhaForm extends TPage
       // $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
       $anoMes         = new TCombo('anoMes');
     }
-
-
     $vl_salario = new TEntry('vl_salario');
     $vl_desconto = new TEntry('vl_desconto');
 
@@ -108,13 +105,16 @@ class FolhaForm extends TPage
 
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id],);
-    $this->form->addFields([new TLabel('CPF (*)')], [$cpf], [new TLabel('Mês (*)')], [$anoMes]);
+    $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('CPF (*)')], [$cpf],);
+    $this->form->addFields([new TLabel('Folha')], [$tp_folha], [new TLabel('Mês (*)')], [$anoMes]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Desconto')], [$vl_desconto],);
     $this->form->addContent([new TFormSeparator('Eventos')]);
 
     $id->setEditable(false);
     $id->setSize('100%');
+    $tp_folha->setSize('100%');
+    $tp_folha->setMinLength(0);
+    $tp_folha->addValidation('tp_folha', new TRequiredValidator);
     $cpf->addValidation('cpf', new TRequiredValidator);
     $cpf->setMinLength(0);
     $cpf->setMask('<b>{cpf}</b> - {nome}');
@@ -376,6 +376,7 @@ class FolhaForm extends TPage
         $object = new Folha($key);
         $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
         $this->form->getField('cpf')->setEditable(false);
+        $this->form->getField('tp_folha')->setEditable(false);
         //$this->form->getField('anoMes')->setEditable(false);
 
         foreach ($item_folhas as $item) {
@@ -419,22 +420,19 @@ class FolhaForm extends TPage
       $data = $this->form->getData();
       TTransaction::open('sample');
 
-
       $edit = TSession::getValue('edit');
 
-      TToast::show('info',"Entrou ".$edit );
-
+      if (!empty($param['eventos_list_evento_id'])) {
       foreach($param['eventos_list_evento_id'] as $evento_id){
         $evento = Evento::where('id', '=', $evento_id)->first();
           if ($data->evento_id == $evento_id && $evento->fixo == 1 && $edit == 0) {
             TSession::setValue('edit',0);
-             TToast::show('info',"Saiu ".$edit );
+           
               throw new Exception('O evento fixo '. $data->evento_id. ' ja foi adicionado');
-            
-             
-
+          
           }
         }
+      }
 
         TTransaction::close();
        
@@ -477,10 +475,7 @@ class FolhaForm extends TPage
       $data->ref     = '';
 
 
-
       TForm::sendData('form_folha', $data, false, false);
-
-
 
       TTransaction::close();
     } catch (Exception $e) {

@@ -6,9 +6,6 @@
   </menuitem>
   <menuitem label="Despesas">
     <menu>
-      <menuitem label="AnoMes">
-        <action>AnoMesList</action>
-      </menuitem>
       <menuitem label="Ficha Cadastral">
         <action>FichaCadastralList</action>
       </menuitem>
@@ -20,6 +17,16 @@
       </menuitem>
       <menuitem label="Despesas">
         <action>DespesaList</action>
+      </menuitem>
+      <menuitem label="Configurações">
+        <menu>
+          <menuitem label="Ano Mes">
+            <action>AnoMesList</action>
+          </menuitem>
+          <menuitem label="Tipo de Folha">
+            <action>TipoFolhaList</action>
+          </menuitem>
+        </menu>
       </menuitem>
     </menu>
   </menuitem>
