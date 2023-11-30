@@ -170,17 +170,17 @@ class FolhaService
         }
 
         // Convertendo para uma string no formato "YYYY-MM"
-       // $dataFormatada = substr($param['anoMes'], 0, 4) . '-' . substr($param['anoMes'], 4, 2);
+       @ $dataFormatada = substr($param['anoMes'], 0, 4) . '-' . substr($param['anoMes'], 4, 2);
        // TToast::show('info','chegou' );
 
         // Obtendo o ano e o mês da data formatada
-      //  $ano = date('Y', strtotime($dataFormatada));
-      //  $mes = date('m', strtotime($dataFormatada));
+        $ano = date('Y', strtotime($dataFormatada));
+        $mes = date('m', strtotime($dataFormatada));
 
         $eventos = [
           'S' => $salario,
           'P' => $folhaService->calcularINSS($salario), //INSS
-          'VL' => 36*22//$folhaService->calcularDiasUteis($ano, $mes, $feriados = array('2023-01-01')) //obterFeriadosDoMes($ano=2023, $mes=11,)
+          'VL' => $folhaService->calcularDiasUteis($ano, $mes, $feriados = array('2023-01-01')) //obterFeriadosDoMes($ano=2023, $mes=11,)
         ];
         if ($param['evento_id'] == 6) {
           // Mapeia eventos para valores
@@ -192,9 +192,17 @@ class FolhaService
           TForm::sendData('form_folha', (object) ['valor' =>  $eventos['P']]);
 
         } else if ($param['evento_id'] == 4) {
-          // Substitui os eventos pelos valores correspondentes na expressão
-          TForm::sendData('form_folha', (object) ['valor' =>  $eventos['VL']]);
+          foreach ($eventos as $evento => $valor) {
+            $expressao = str_replace($evento, $valor, $expressao);
+          }
+          $resultado = eval("return $expressao;");
+
+          TForm::sendData('form_folha', (object) ['valor' =>   $resultado]);
+
         } else {
+          foreach ($eventos as $evento => $valor) {
+            $expressao = str_replace($evento, $valor, $expressao);
+          }
           $resultado = eval("return $expressao;");
           TForm::sendData('form_folha', (object) ['valor' =>  $resultado]);
         }
