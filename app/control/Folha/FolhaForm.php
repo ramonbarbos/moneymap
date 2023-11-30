@@ -45,7 +45,7 @@ class FolhaForm extends TPage
   private $form;
   private $eventos_list;
   private $loaded;
-  private $edit= 0;
+  private $edit = 0;
 
   use Adianti\base\AdiantiStandardFormTrait;
 
@@ -73,7 +73,7 @@ class FolhaForm extends TPage
     $criteria_folha = new TCriteria();
     $criteria_folha->setProperty('order', 'id');
     // $cpf         = new TCombo('cpf');
-    $tp_folha         = new TDBUniqueSearch('tp_folha', 'sample', 'TipoFolha', 'id', 'descricao',null,$criteria_folha);
+    $tp_folha         = new TDBUniqueSearch('tp_folha', 'sample', 'TipoFolha', 'id', 'descricao', null, $criteria_folha);
     $tp_folha->setChangeAction(new TAction(array('FolhaService', 'onCheckCPF')));
 
     $cpf         = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
@@ -105,7 +105,7 @@ class FolhaForm extends TPage
 
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('CPF (*)')], [$cpf],);
+    $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('CPF (*)')], [$cpf],);
     $this->form->addFields([new TLabel('Folha')], [$tp_folha], [new TLabel('Mês (*)')], [$anoMes]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Desconto')], [$vl_desconto],);
     $this->form->addContent([new TFormSeparator('Eventos')]);
@@ -136,7 +136,7 @@ class FolhaForm extends TPage
     $this->form->addFields([$uniqid], [$detail_id],);
     $this->form->addFields([new TLabel('Evento (*)')], [$evento_id], [new TLabel('Descrição')], [$evento_descricao],);
     $this->form->addFields([new TLabel('Tipo')], [$tipo], [new TLabel('Valor (*)')], [$valor]);
-    $this->form->addFields([new TLabel('Formula')], [$formula],[new TLabel('Parcela')], [$parcela],);
+    $this->form->addFields([new TLabel('Formula')], [$formula], [new TLabel('Parcela')], [$parcela],);
     $this->form->addFields([$ref],);
 
     $add_event = TButton::create('add_event', [$this, 'onEventAdd'], 'Registrar', 'fa:plus-circle green');
@@ -187,9 +187,11 @@ class FolhaForm extends TPage
     });
     $format_tipo = function ($value, $object, $row) {
       if ($value == 'P') {
-        return "<span style='color:green'>Provento</span>";
-      } else {
+        return  "<span style='color:green'>Provento</span>";
+      } else if ($value == 'D') {
         return "<span style='color:red'>Desconto</span>";
+      } else if ($value == 'DD') {
+        return "<span style='color:orange'>Dedução</span>";
       }
     };
 
@@ -246,7 +248,7 @@ class FolhaForm extends TPage
     parent::add($container);
   }
 
-  
+
   public static function onEventChange($params)
   {
     if (!empty($params['evento_id'])) {
@@ -296,6 +298,7 @@ class FolhaForm extends TPage
         ItemFolha::where('folha_id', '=', $folha->id)->delete();
 
         $total = 0;
+        $totalDeducao = 0;
 
         if (!empty($param['eventos_list_evento_id'])) {
 
@@ -309,10 +312,12 @@ class FolhaForm extends TPage
             $item->parcela = $param['eventos_list_parcela'][$key];
             $item->store();
             $total += ($evento->incidencia == 'P') ? $item->valor : 0;
+            $totalDeducao += ($evento->incidencia == 'DD') ? $item->valor : 0;
           }
         }
 
-        $folha->vl_salario = $total;
+        $folha->vl_salario = $total - $totalDeducao;
+
         $folha->store();
         new TMessage('info', 'Alterado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
 
@@ -322,7 +327,7 @@ class FolhaForm extends TPage
         ItemFolha::where('folha_id', '=', $folha->id)->delete();
 
         $total = 0;
-
+        $totalDeducao = 0;
         if (!empty($param['eventos_list_evento_id'])) {
 
           foreach ($param['eventos_list_evento_id'] as $key => $item_id) {
@@ -336,9 +341,11 @@ class FolhaForm extends TPage
 
             $item->store();
             $total += ($evento->incidencia == 'P') ? $item->valor : 0;
+            $totalDeducao += ($evento->incidencia == 'DD') ? $item->valor : 0;
           }
         }
-        $folha->vl_salario = $total;
+        $folha->vl_salario = $total - $totalDeducao;
+
         $folha->store();
 
         TForm::sendData('form_folha', (object) ['id' => $folha->id]);
@@ -368,7 +375,7 @@ class FolhaForm extends TPage
     try {
       TTransaction::open('sample');
 
-      TSession::setValue('edit',0);
+      TSession::setValue('edit', 0);
 
       if (isset($param['key'])) {
         $key = $param['key'];
@@ -422,26 +429,23 @@ class FolhaForm extends TPage
       $edit = TSession::getValue('edit');
 
       if (!empty($param['eventos_list_evento_id'])) {
-      foreach($param['eventos_list_evento_id'] as $evento_id){
+        foreach ($param['eventos_list_evento_id'] as $evento_id) {
 
-      
-        
-        $evento = Evento::where('id', '=', $evento_id)->first();
-        
+
+
+          $evento = Evento::where('id', '=', $evento_id)->first();
+
           if ($data->evento_id == $evento_id && $evento->fixo == 1 && $edit == 0) {
-            TSession::setValue('edit',0);
-              throw new Exception('O evento fixo '. $data->evento_id. ' ja foi adicionado');
+            TSession::setValue('edit', 0);
+            throw new Exception('O evento fixo ' . $data->evento_id . ' ja foi adicionado');
           }
-          
-          
-
         }
       }
 
 
 
-        TTransaction::close();
-       
+      TTransaction::close();
+
 
       if ((!$data->evento_id) || (!$data->evento_descricao) || (!$data->valor)) {
         throw new Exception('Para incluir é necessario informar o evento.');
@@ -466,7 +470,7 @@ class FolhaForm extends TPage
       $row->id = $uniqid;
 
       TDataGrid::replaceRowById('eventos_list', $uniqid, $row);
-      TSession::setValue('edit',0);
+      TSession::setValue('edit', 0);
 
 
       // clear product form fields after add
@@ -503,7 +507,7 @@ class FolhaForm extends TPage
     $data->valor     = $param['valor'];
     @$data->ref     = $param['ref'];
 
-    TSession::setValue('edit',1);
+    TSession::setValue('edit', 1);
     //TToast::show('info', 'Edit');
 
 
@@ -538,6 +542,7 @@ class FolhaForm extends TPage
 
       $totalP = 0;
       $totalD = 0;
+      $totalDeducao = 0;
 
       if (@$param['list_data']) {
         foreach (@$param['list_data'] as $row) {
@@ -545,14 +550,16 @@ class FolhaForm extends TPage
 
           $totalP += ($evento->incidencia == 'P') ? floatval($row['valor']) : 0;
           $totalD += ($evento->incidencia == 'D') ? floatval($row['valor']) : 0;
+          $totalDeducao += ($evento->incidencia == 'DD') ?  floatval($row['valor']): 0;
         }
       } else {
       }
+      $valorSalario = $totalP -  $totalDeducao;
 
 
-      TForm::sendData('form_folha', (object) ['vl_salario' => $totalP]);
+      TForm::sendData('form_folha', (object) ['vl_salario' => $valorSalario]);
       TForm::sendData('form_folha', (object) ['vl_desconto' => $totalD]);
-      TToast::show('info', 'Total: <b>' . 'R$ ' . number_format($totalP, 2, ',', '.') . '</b>', 'bottom right');
+      TToast::show('info', 'Total: <b>' . 'R$ ' . number_format($valorSalario, 2, ',', '.') . '</b>', 'bottom right');
     } catch (Exception $e) {
       new TMessage('error', $e->getMessage());
       TTransaction::rollback();
@@ -565,31 +572,26 @@ class FolhaForm extends TPage
   }
   public function onLoad($folha_id, $resultadoVerificacao, $eventos)
   {
-      TTransaction::open('sample');
-      $object = new Folha($folha_id);
-      $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
-  
-      foreach ($item_folhas as $item) {
-          $item->uniqid = uniqid();
-  
-          // Adicione apenas os itens cujo evento_id está na lista de eventos verificados
-          if (in_array($item->evento_id, $eventos)) {
+    TTransaction::open('sample');
+    $object = new Folha($folha_id);
+    $item_folhas = ItemFolha::where('folha_id', '=', $object->id)->orderBy(1)->load();
 
-            if (isset($resultadoVerificacao[$item->evento_id])) {
-              $item->parcela = $resultadoVerificacao[$item->evento_id];
-               //$item->parcela = $resultadoVerificacao;
-               $row = $this->eventos_list->addItem($item);
-               $row->id = $item->uniqid;
-                TDataGrid::replaceRowById('eventos_list', $item->uniqid, $row);
-          }
+    foreach ($item_folhas as $item) {
+      $item->uniqid = uniqid();
 
-           
-          }
+      // Adicione apenas os itens cujo evento_id está na lista de eventos verificados
+      if (in_array($item->evento_id, $eventos)) {
+
+        if (isset($resultadoVerificacao[$item->evento_id])) {
+          $item->parcela = $resultadoVerificacao[$item->evento_id];
+          //$item->parcela = $resultadoVerificacao;
+          $row = $this->eventos_list->addItem($item);
+          $row->id = $item->uniqid;
+          TDataGrid::replaceRowById('eventos_list', $item->uniqid, $row);
+        }
       }
-  
-      TTransaction::close();
+    }
+
+    TTransaction::close();
   }
-
-
-
 }
