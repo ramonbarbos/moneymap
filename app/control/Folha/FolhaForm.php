@@ -415,7 +415,6 @@ class FolhaForm extends TPage
   public function onEventAdd($param)
   {
     try {
-      $folhaForm = new FolhaForm($param);
       $this->form->validate();
       $data = $this->form->getData();
       TTransaction::open('sample');
@@ -424,15 +423,22 @@ class FolhaForm extends TPage
 
       if (!empty($param['eventos_list_evento_id'])) {
       foreach($param['eventos_list_evento_id'] as $evento_id){
+
+      
+        
         $evento = Evento::where('id', '=', $evento_id)->first();
+        
           if ($data->evento_id == $evento_id && $evento->fixo == 1 && $edit == 0) {
             TSession::setValue('edit',0);
-           
               throw new Exception('O evento fixo '. $data->evento_id. ' ja foi adicionado');
-          
           }
+          
+          
+
         }
       }
+
+
 
         TTransaction::close();
        

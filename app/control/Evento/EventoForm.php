@@ -62,7 +62,7 @@ class EventoForm extends TPage
     $fixo = new TCombo('fixo');
     $fixo->addItems(['0' => 'Não', '1' => 'Sim']);
     $incidencia = new TCombo('incidencia');
-    $incidencia->addItems(['D' => 'Desconto', 'P' => 'Provento']);
+    $incidencia->addItems(['DD' => 'Dedução','D' => 'Desconto', 'P' => 'Provento']);
     $formula = new TEntry('formula');
   
     $a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia}', 'red', 12, 'bi');

@@ -168,7 +168,7 @@ class FolhaService
             }
           }
         }
-        TToast::show('info', $param['anoMes']);
+   
 
         // Convertendo para uma string no formato "YYYY-MM"
         $dataFormatada = substr($param['anoMes'], 0, 4) . '-' . substr($param['anoMes'], 4, 2);

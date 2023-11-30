@@ -89,7 +89,13 @@ class EventoList extends TPage
       });
 
         $column_4->setTransformer(function ($value, $object, $row) {
-          return ($value == 'P') ? "<span style='color:green'>Provento</span>" : "<span style='color:red'>Desconto</span>";
+          if($value == 'P'){
+            return  "<span style='color:green'>Provento</span>";
+          }else if($value == 'D'){
+            return "<span style='color:red'>Desconto</span>";
+          }else if($value == 'DD'){
+            return "<span style='color:orange'>Dedução</span>";
+          }
       });
 
         //add coluna da datagrid
