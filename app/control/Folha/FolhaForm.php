@@ -213,7 +213,7 @@ class FolhaForm extends TPage
     // add the actions to the datagrid
     $this->eventos_list->addAction($action1, _t('Edit'), 'far:edit blue');
     $this->eventos_list->addAction($action2, _t('Delete'), 'far:trash-alt red');
-    $this->form->addAction('Generate', new TAction([$this, 'onGenerator'], ['static' => 1]), 'fa:cogs');
+    $this->form->addAction('Generate', new TAction(['RelatorioFolha','onGenerator'], ['static' => 1]), 'fa:cogs');
 
 
     $format_value = function ($value) {
@@ -600,101 +600,6 @@ class FolhaForm extends TPage
   }
 
 
-  public function onGenerator()
-  {
-      try
-      {
-          TTransaction::open('sample');
-          $data = $this->form->getData();
-
-          //$customer = Customer::find($data->customer_id);
-          $this->pdf = new FPDF('P', 'pt');
-          $this->pdf->SetMargins(2,2,2); // define margins
-          $this->pdf->AddPage();
-          $this->pdf->Ln();
-         // $this->pdf->Image('app/images/logo.png', 10, 20, 200);
-          $this->pdf->SetLineWidth(1);
-          $this->pdf->SetTextColor(0,0,0);
-          $this->pdf->SetFont('Arial','B',10);
-          
-          $this->pdf->SetXY(470, 27);
-          $this->pdf->Cell(100, 20, 'FOLHA: ' . $data->id, 1, 0, 'L');
-          $this->addCabecalhoProduto();
-          
-          if ($data->id)
-          {
-            $itemFolha = ItemFolha::where('folha_id','=',$data->id)->load();
-              foreach($itemFolha as $index =>  $item)
-              {
-               
-                  $this->AddEvento($item,$data);
-              }
-          }
-          
-          $file = 'app/output/danfe.pdf';
-          
-          if (!file_exists($file) OR is_writable($file))
-          {
-              $this->pdf->Output($file);
-              
-              $window = TWindow::create(_t('Designed Danfe'), 0.8, 0.8);
-              $object = new TElement('object');
-              $object->data  = $file;
-              $object->type  = 'application/pdf';
-              $object->style = "width: 100%; height:calc(100% - 10px)";
-              $object->add('O navegador não suporta a exibição deste conteúdo, <a style="color:#007bff;" target=_newwindow href="'.$object->data.'"> clique aqui para baixar</a>...');
-  
-              $window->add($object);
-              $window->show();
-          }
-          else
-          {
-              throw new Exception(_t('Permission denied') . ': ' . $file);
-          }
-          
-          TTransaction::close();
-      }
-      catch(Exception $e)
-      {
-          TTransaction::rollback();
-          new TMessage('error', $e->getMessage());
-      }
-  }
-  public function addCabecalhoProduto()
-  {
-      $this->pdf->SetY(220);
-      
-      $this->pdf->SetFont('Arial','',8);
-      $this->pdf->SetTextColor(0,0,0);
-      $this->pdf->SetX(20);
-      $this->pdf->Cell(300, 12, 'ITENS DA FOLHA: ', 0, 0, 'L');
-      
-      $this->pdf->Ln(12);
-      $this->pdf->SetX(20);
-      $this->pdf->SetFillColor(230,230,230);
-      $this->pdf->Cell(40,  12, utf8_decode('Evento'),     1, 0, 'L', 1);
-      $this->pdf->Cell(330, 12, utf8_decode('Descrição'),  1, 0, 'L', 1);
-      $this->pdf->Cell(45,  12, 'Tipo', 1, 0, 'L', 1);
-      $this->pdf->Cell(50,  12, 'Ref',      1, 0, 'L', 1);
-      $this->pdf->Cell(55,  12, 'Parcelas',      1, 0, 'L', 1);
-      $this->pdf->Cell(30,  12, 'Valor',       1, 0, 'L', 1);
-  }
-  public function AddEvento($itemFolha)
-    {
-    TTransaction::open('sample');
-      $evento = new Evento($itemFolha->evento_id);
-        $this->pdf->Ln(12);
-        $this->pdf->SetX(20);
-        $this->pdf->SetFillColor(230,230,230);
-        
-        $this->pdf->Cell(40,  12, $itemFolha->id, 'LR', 0, 'C');
-        $this->pdf->Cell(330, 12, $evento->descricao, 'LR', 0, 'L');
-        $this->pdf->Cell(45,  12, $itemFolha->tipo, 'LR', 0, 'C');
-        $this->pdf->Cell(45,  12, $itemFolha->ref, 'LR', 0, 'C');
-        $this->pdf->Cell(45,  12, $itemFolha->parcela, 'LR', 0, 'C');
-        $this->pdf->Cell(50,  12, number_format($itemFolha->valor, 2), 'LR', 0, 'R');
-        
-    }
 }
 
 

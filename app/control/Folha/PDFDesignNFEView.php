@@ -321,7 +321,7 @@ class PDFDesignNFEView extends TPage
                 $this->pdf->Ln(12);
                 $this->pdf->SetX(20);
                 $this->pdf->Cell(40,  12, '', 'LR', 0, 'C');
-                $this->pdf->Cell(330, 12, '', 'LR', 0, 'L');
+                $this->pdf->Cell(300, 12, '', 'LR', 0, 'L');
                 $this->pdf->Cell(45,  12, '', 'LR', 0, 'C');
                 $this->pdf->Cell(50,  12, '', 'LR', 0, 'R');
                 $this->pdf->Cell(55,  12, '', 'LR', 0, 'R');
