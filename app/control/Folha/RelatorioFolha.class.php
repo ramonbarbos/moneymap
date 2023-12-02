@@ -64,7 +64,7 @@ class RelatorioFolha
       $this->pdf->SetMargins(2, 2, 2); // define margins
       $this->pdf->AddPage();
       $this->pdf->Ln();
-      // $this->pdf->Image('app/images/logo.png', 10, 20, 200);
+      $this->pdf->Image('app/images/logo_vs1.png', 25, 25, 100);
       $this->pdf->SetLineWidth(1);
       $this->pdf->SetTextColor(0, 0, 0);
       $this->pdf->SetFont('Arial', 'B', 10);
@@ -83,7 +83,7 @@ class RelatorioFolha
         }
       }
       $this->addRodapeFolha();
-
+      $this->addRodapeNota();
       $file = 'app/output/danfe.pdf';
 
       if (!file_exists($file) or is_writable($file)) {
@@ -151,7 +151,7 @@ class RelatorioFolha
 
     $this->pdf->SetFont('Arial', '', 8);
     $this->pdf->SetTextColor(0, 0, 0);
-    $this->pdf->SetX(50);
+    $this->pdf->SetX(20);
     $this->pdf->Cell(300, 12, 'ITENS DA FOLHA: ', 0, 0, 'L');
 
     $this->pdf->Ln(12);
@@ -207,4 +207,31 @@ class RelatorioFolha
     $this->pdf->Ln(12);
     $this->pdf->Line(20, $this->pdf->GetY(), 570, $this->pdf->GetY());
   }
+
+  public function addRodapeNota()
+  {
+      $this->pdf->Ln(20);
+      
+      $this->pdf->SetFont('Arial','',8);
+      $this->pdf->SetTextColor(0,0,0);
+      $this->pdf->SetX(20);
+      $this->pdf->Cell(300, 12, 'DADOS ADICIONAIS: ', 0, 0, 'L');
+      
+      $this->pdf->Ln(12);
+      $this->pdf->SetTextColor(100,100,100);
+      $this->pdf->SetX(20);
+      $this->pdf->Cell(280, 12, utf8_decode('Informações complementares'), 'LTR', 0, 'L');
+      $this->pdf->Cell(270, 12, 'Reservado', 'LTR', 0, 'L');
+      
+      $this->pdf->Ln(8);
+      
+      $this->pdf->SetTextColor(0,0,0);
+      $this->pdf->SetX(20);
+      $this->pdf->Cell(280, 48, '', 'LBR', 0, 'L');
+      $this->pdf->Cell(270, 48, '', 'LBR', 0, 'L');
+      
+      $this->pdf->Ln(52);
+    
+  }
+  
 }
