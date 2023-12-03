@@ -5,9 +5,11 @@ use Adianti\Control\TAction;
 use Adianti\Control\TPage;
 use Adianti\Control\TWindow;
 use Adianti\Core\AdiantiCoreApplication;
+use Adianti\Core\AdiantiCoreTranslator;
 use Adianti\Database\TCriteria;
 use Adianti\Database\TFilter;
 use Adianti\Database\TRepository;
+use Adianti\Database\TSqlSelect;
 use Adianti\Database\TTransaction;
 use Adianti\Registry\TSession;
 use Adianti\Validator\TincidenciaValidator;
@@ -52,7 +54,7 @@ class DespesaMap  extends TPage
     private $datagrid;
     private $pdf;
 
-
+    use Adianti\base\AdiantiStandardListTrait;
     public function __construct()
     {
         parent::__construct();
@@ -99,8 +101,7 @@ class DespesaMap  extends TPage
         $panel = new TPanelGroup('Mapa de Despesas');
         $panel->add($this->datagrid);
         $panel->addHeaderActionLink('Save as PDF', new TAction([$this, 'exportAsPDF'], ['static' => 1]), 'far:file-pdf red');
-        $panel->addHeaderActionLink('Save as CSV', new TAction([$this, 'exportAsCSV'], ['static' => 1]), 'fa:table blue');
-
+        $panel->addHeaderActionLink('Save as CSV', new TAction([$this, 'onExportCSV'], ['static' => 1]), 'fa:table blue');
         // wrap the page content using vertical box
         $vbox = new TVBox;
         $vbox->style = 'width: 100%';
@@ -171,30 +172,46 @@ class DespesaMap  extends TPage
     }
 
 
-    public function exportAsCSV($param)
+
+    public static function onExportCSV($param)
     {
-        try {
-            // get datagrid raw data
-            $data = $this->datagrid->getOutputData();
-
-            if ($data) {
-                $file    = 'app/output/cash-register.csv';
-                $handler = fopen($file, 'w');
-                foreach ($data as $row) {
-                    fputcsv($handler, $row);
+        try
+        {
+            TTransaction::open('sample');
+    
+            $id = TSession::getValue('id_despesa');
+    
+            $table = 'item_despesa';
+    
+            if (!is_writable('tmp')) {
+                throw new Exception(_t('Permission denied') . ': tmp');
+            }
+    
+            $result = ItemDespesa::where('despesa_id', '=', $id)->load();
+    
+            $file = 'tmp/' . $table . '.csv';
+            $handler = fopen($file, 'w');
+            $first_row = $result[0];
+            if ($first_row) {
+                // CSV headers
+                fputcsv($handler, array_keys($first_row->toArray()));
+    
+                // Adicionar todas as linhas
+                foreach ($result as $row) {
+                    fputcsv($handler, $row->toArray());
                 }
-
+    
                 fclose($handler);
                 parent::openFile($file);
             }
-        } catch (Exception $e) {
+            TTransaction::close();
+        }
+        catch (Exception $e)
+        {
             new TMessage('error', $e->getMessage());
         }
     }
-
-    /**
-     * Load the data into the datagrid
-     */
+   
     public function onReload($param)
     {
         try {
@@ -226,6 +243,7 @@ class DespesaMap  extends TPage
 
                 $this->datagrid->addItem($item);
             }
+            return $itemDespesa;
             TTransaction::close();
         } catch (Exception $e) {
             new TMessage('error', $e->getMessage(), $this->afterSaveAction);
