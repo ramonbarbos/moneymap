@@ -65,7 +65,7 @@ class EventoForm extends TPage
     $incidencia->addItems(['DD' => 'Dedução','D' => 'Desconto', 'P' => 'Provento']);
     $formula = new TEntry('formula');
   
-    $a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia}', 'red', 12, 'bi');
+    $a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia} | {VL - Vale A/R}', 'red', 12, 'bi');
 
     $this->form->addFields([new TLabel('Codigo (*)')], [$id],);
     $this->form->addFields(  [new TLabel('Descricao (*)')], [$descricao], [new TLabel('Fixo')], [$fixo]);

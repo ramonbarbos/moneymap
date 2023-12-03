@@ -163,7 +163,7 @@ class FolhaService
 
         if (isset($param['eventos_list_evento_id'])) {
           foreach ($param['eventos_list_evento_id'] as $key => $evento) {
-            if ($evento == 2) {
+            if ($evento == 1) {
               $salario = $param['eventos_list_valor'][$key];
             }
           }
@@ -183,7 +183,7 @@ class FolhaService
           'P' => $folhaService->calcularINSS($salario), //INSS
           'VL' => $folhaService->calcularDiasUteis($ano, $mes, $feriados = array('2023-01-01')) //obterFeriadosDoMes($ano=2023, $mes=11,)
         ];
-        if ($param['evento_id'] == 6) {
+        if ($param['evento_id'] == 2) {
           // Mapeia eventos para valores
           $aliquotas = TSession::getValue('aliquotas_inss');
           if ($aliquotas) {
