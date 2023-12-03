@@ -121,10 +121,12 @@ class DespesaList extends TPage
 
         $action1 = new TDataGridAction(['DespesaView', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([ $this, 'onDelete'], ['id'=> '{id}']);
+        $action3 = new TDataGridAction([ 'DespesaMap', 'onReload'], ['id'=> '{id}']);
 
         //Adicionando a ação na tela
         $this->datagrid->addAction($action1, _t('Edit'), 'fa:edit blue' );
         $this->datagrid->addAction($action2, _t('Delete'), 'fa:trash-alt red' );
+        $this->datagrid->addAction($action3, 'Mapa', 'fa:light fa-map green' );
 
 
         //Criar datagrid 

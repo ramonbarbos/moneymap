@@ -16,7 +16,17 @@
         <action>FolhaList</action>
       </menuitem>
       <menuitem label="Despesas">
-        <action>DespesaList</action>
+        <menu>
+          <menuitem label="Listagem">
+            <action>DespesaList</action>
+          </menuitem>
+          <menuitem label="Nova Despesa">
+            <action>DespesaView</action>
+          </menuitem>
+        </menu>
+      </menuitem>
+      <menuitem label="Mapa">
+        <action>DespesaMap</action>
       </menuitem>
       <menuitem label="Configurações">
         <menu>
@@ -80,14 +90,6 @@
       <menuitem label="System Information">
         <action>SystemInformationView</action>
         <icon>fas:desktop fa-fw</icon>
-      </menuitem>
-      <menuitem label="Paginas">
-        <icon>far:folder-open fa-fw</icon>
-        <menu>
-          <menuitem label="Cadastro Despesa">
-            <action>DespesaView</action>
-          </menuitem>
-        </menu>
       </menuitem>
       <menuitem label="_t{Preferences}">
         <action>SystemPreferenceForm#method=onEdit</action>

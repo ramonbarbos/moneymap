@@ -84,12 +84,12 @@ class RelatorioFolha
       }
       $this->addRodapeFolha();
       $this->addRodapeNota();
-      $file = 'app/output/danfe.pdf';
+      $file = 'app/output/ResumoFolha.pdf';
 
       if (!file_exists($file) or is_writable($file)) {
         $this->pdf->Output($file);
 
-        $window = TWindow::create(_t('Designed Danfe'), 0.8, 0.8);
+        $window = TWindow::create('Resumo da Folha', 0.8, 0.8);
         $object = new TElement('object');
         $object->data  = $file;
         $object->type  = 'application/pdf';

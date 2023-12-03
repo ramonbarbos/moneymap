@@ -213,7 +213,6 @@ class FolhaForm extends TPage
     // add the actions to the datagrid
     $this->eventos_list->addAction($action1, _t('Edit'), 'far:edit blue');
     $this->eventos_list->addAction($action2, _t('Delete'), 'far:trash-alt red');
-    $this->form->addAction('Generate', new TAction(['RelatorioFolha','onGenerator'], ['static' => 1]), 'fa:cogs');
 
 
     $format_value = function ($value) {
@@ -240,6 +239,7 @@ class FolhaForm extends TPage
 
     // Adicionar link para criar um novo registro
     $this->form->addActionLink(_t('New'), new TAction([$this, 'onEdit']), 'fa:eraser red');
+    $this->form->addAction('Relatorio', new TAction(['RelatorioFolha','onGenerator'], ['static' => 1]), 'fa:cogs');
 
     // Adicionar link para fechar o formulário
     $this->form->addHeaderActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
