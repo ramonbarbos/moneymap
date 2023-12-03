@@ -14,6 +14,7 @@ use Adianti\Widget\Datagrid\TDataGridAction;
 use Adianti\Widget\Datagrid\TDataGridColumn;
 use Adianti\Widget\Datagrid\TPageNavigation;
 use Adianti\Widget\Dialog\TMessage;
+use Adianti\Widget\Dialog\TQuestion;
 use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
@@ -146,27 +147,50 @@ class FolhaList extends TPage
 
     }
    
-    public function onDelete($param)
-    {
-        try {
-            if (isset($param['key'])) {
+  public function onDelete($param)
+  {
+    try {
+      if (isset($param['key'])) {
+        $id = $param['key'];
 
-                $id = $param['key'];
+        // Exiba uma mensagem de confirmação antes de excluir
+        $action = new TAction(array($this, 'delete'));
+        $action->setParameter('id', $id);
 
-                TTransaction::open('sample');
-                $folha = new Folha($id);
+        new TQuestion('Deseja excluir?', $action);
+      }
+    } catch (Exception $e) {
+      new TMessage('error', $e->getMessage(), $this->afterSaveAction);
+      TTransaction::rollback();
+    }
+  }
+
+  public function delete($param)
+{
+    try {
+        TTransaction::open('sample');
+
+        if (isset($param['id'])) {
+            $id = $param['id'];
+
+            $folha = new Folha($id);
+            $Despesa = Despesa::where('folha_id', '=', $folha->id)->load();
+
+            if (count($Despesa) > 0) {
+                new TMessage('warning', 'Não é possível excluir. Vínculo com despesas!');
+            } else {
                 ItemFolha::where('folha_id', '=', $folha->id)->delete();
                 $folha->delete();
-                
+                new TMessage('info', 'Registro excluído');
+                $this->onReload([]);
             }
-            new TMessage('info', 'Deletado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
-
-            TTransaction::close();
-        } catch (Exception $e) {
-            new TMessage('error', $e->getMessage(), $this->afterSaveAction);
-            TTransaction::rollback();
         }
-    }
 
+        TTransaction::close();
+    } catch (Exception $e) {
+        new TMessage('error', $e->getMessage(), $this->afterSaveAction);
+        TTransaction::rollback();
+    }
+}
   
 }

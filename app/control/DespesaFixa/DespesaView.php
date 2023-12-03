@@ -221,7 +221,10 @@ class DespesaView extends TPage
 
       $despesa = new Despesa;
       $despesa->fromArray((array) $data);
+      $folha = Folha::where('cpf','=', $data->cpf)
+                   ->where('anoMes','=', $data->anoMes)->first();
 
+      
 
       if (!empty($despesa->id)) {
         ItemDespesa::where('despesa_id', '=', $despesa->id)->delete();
@@ -288,6 +291,7 @@ class DespesaView extends TPage
 
 
         $despesa->vl_despesa = $total;
+        $despesa->folha_id = $folha->id;
         $despesa->store();
 
         TForm::sendData('my_form', (object) ['id' => $despesa->id]);
