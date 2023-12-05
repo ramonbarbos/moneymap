@@ -305,16 +305,16 @@ class DespesaMap  extends TPage
         $this->pdf->SetFont('Arial', '', 8);
         $this->pdf->SetTextColor(0, 0, 0);
         $this->pdf->SetX(20);
-        $this->pdf->Cell(300, 12, 'ITENS DA FOLHA: ', 0, 0, 'L');
+        $this->pdf->Cell(300, 12, 'ITENS DA DESPESA: ', 0, 0, 'L');
 
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
-        $this->pdf->Cell(65,  12, utf8_decode('Data'),     1, 0, 'L', 1);
-        $this->pdf->Cell(140, 12, utf8_decode('Centro de Custo'),  1, 0, 'L', 1);
-        $this->pdf->Cell(215,  12, utf8_decode('Descrição'), 1, 0, 'L', 1);
-        $this->pdf->Cell(65,  12, 'Valor',      1, 0, 'L', 1);
-        $this->pdf->Cell(65,  12, 'Saldo',      1, 0, 'L', 1);
+        $this->pdf->Cell(65,  12, utf8_decode('Data'),     1, 0, 'C', 1);
+        $this->pdf->Cell(140, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
+        $this->pdf->Cell(215,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, 'Valor',      1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, 'Saldo',      1, 0, 'C', 1);
     }
     public function AddEvento($item)
     {

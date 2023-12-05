@@ -1870,7 +1870,7 @@ body.skin-green .main-header .navbar .sidebar-toggle:hover
 
 body:not([class*="light"]) .wrapper, body:not([class*="light"]) .main-sidebar, body .left-side
 {
-    background-color: #363F4E !important;
+    background-color: #3A3CA6 !important;
 }
 
 body .main-header .logo
@@ -1904,7 +1904,7 @@ ul.dropdown-menu>li>a
 
 body:not([class*="light"]) .sidebar .sidebar-menu>li>ul>li.active>a
 {
-    background: #2B313F;
+    background: #30317c;
 }
 
 body[class*="light"] .sidebar .sidebar-menu>li>ul>li.active>a

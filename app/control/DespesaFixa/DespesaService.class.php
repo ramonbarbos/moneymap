@@ -50,45 +50,46 @@ class DespesaService
 
   public static function onValorChange($param)
   {
-      try {
-          TTransaction::open('sample');
-  
-          if (!empty($param['cpf'])) {
-              $folha = Folha::where('cpf', '=', $param['cpf'])
-                  ->where('anoMes', '=', $param['anoMes'])
-                  ->where('tp_folha', '=', $param['tp_folha'])->first();
-              $data = new stdClass;
-              $data->saldo = [];
-  
-              $acumulado = 0; // Nova variável para acumular os valores retirados
-  
-              if (!empty($param['evento_id'])) {
-                  $formatter = new NumberFormatter('pt_BR', NumberFormatter::CURRENCY);
-                  foreach ($param['evento_id'] as $key => $item) {
-                    $acumulado += (float) $param['valor'][$key];
-                
-                    $saldoAtual = $folha->vl_salario - $acumulado;
-                
-                    // Formatação do saldo sem o "R$"
-                    $saldoFormatado = number_format($saldoAtual, 2, '.', '');
-                    
-                    self::$saldos[$param['cpf']][$item] = $saldoAtual;
-                
-                    $data->saldo[] = $saldoFormatado;
-                }
-              }
-  
-              // Envia os saldos calculados e formatados para a interface do usuário
-              TForm::sendData('my_form', (object) $data);
+    try {
+      TTransaction::open('sample');
+
+      if (!empty($param['cpf'])) {
+        $folha = Folha::where('cpf', '=', $param['cpf'])
+          ->where('anoMes', '=', $param['anoMes'])
+          ->where('tp_folha', '=', $param['tp_folha'])->first();
+
+        $data = new stdClass;
+        $data->saldo = [];
+
+        $acumulado = 0; // Nova variável para acumular os valores retirados
+
+        if (!empty($param['evento_id'])) {
+          $formatter = new NumberFormatter('pt_BR', NumberFormatter::CURRENCY);
+          foreach ($param['evento_id'] as $key => $item) {
+            $acumulado += (float) $param['valor'][$key];
+
+            $saldoAtual = $folha->vl_salario - $acumulado;
+
+            // Formatação do saldo sem o "R$"
+            $saldoFormatado = number_format($saldoAtual, 2, '.', '');
+
+            self::$saldos[$param['cpf']][$item] = $saldoAtual;
+
+            $data->saldo[] = $saldoFormatado;
           }
-  
-          TTransaction::close();
-      } catch (Exception $e) {
-          new TMessage('error', $e->getMessage());
-          TTransaction::rollback();
+        }
+
+        // Envia os saldos calculados e formatados para a interface do usuário
+        TForm::sendData('my_form', (object) $data);
       }
+
+      TTransaction::close();
+    } catch (Exception $e) {
+      new TMessage('error', $e->getMessage());
+      TTransaction::rollback();
+    }
   }
-  
+
   public static function onCPFChange($params)
   {
     if (!empty($params['cpf'])) {
@@ -97,20 +98,28 @@ class DespesaService
 
         if ($params['anoMes'] && $params['cpf']) {
 
-          
+
           $folhas = Folha::where('cpf', 'like', $params['cpf'])
             ->where('anoMes', 'like', $params['anoMes'])
             ->where('tp_folha', '=', $params['tp_folha'])->first();
 
-          if (@$folhas->cpf == $params['cpf'] && @$folhas->anoMes == $params['anoMes'] && @$folhas->tp_folha ==$params['tp_folha'] ) {
+          if (@$folhas->cpf == $params['cpf'] && @$folhas->anoMes == $params['anoMes'] && @$folhas->tp_folha == $params['tp_folha']) {
             TFieldList::enableField('my_field_list');
 
-            $despesa = Despesa::where('cpf', '=', $params['cpf'])->first();
+            TToast::show('info', 'Achou');
+
+
+            $despesa = Despesa::where('cpf', '=', $params['cpf'])
+              ->where('anoMes', '=', $params['anoMes'])
+              ->where('tp_folha', '=', $params['tp_folha'])->first();
+
             $folha   =  Folha::where('cpf', '=', $params['cpf'])
-            ->where('tp_folha', '=', $params['tp_folha'])->first();
-            if (@$folha->cpf ==  @$despesa->cpf && @$despesa->tp_folha ==$params['tp_folha']) { //Já existe despesa  com o CPF
+              ->where('anoMes', '=', $params['anoMes'])
+              ->where('tp_folha', '=', $params['tp_folha'])->first();
+
+            if (@$folha->cpf ==  @$despesa->cpf && @$folha->anoMes ==  @$despesa->anoMes && @$despesa->tp_folha == $params['tp_folha']) { //Já existe despesa  com o CPF
               $despesa = Despesa::where('cpf', '=', $params['cpf'])
-                         ->where('tp_folha', '=', $params['tp_folha'])->first();
+                ->where('tp_folha', '=', $params['tp_folha'])->first();
               $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->orderBy(1)->load();
 
               $data = new stdClass;
@@ -119,8 +128,8 @@ class DespesaService
               $data->evento_id = [];
               $data->descricao = [];
               $data->valor = [];
-              if(!empty($data->cpf)){
-                 $data->anoMes = $despesa->anoMes;
+              if (!empty($data->cpf)) {
+                $data->anoMes = $despesa->anoMes;
                 $data->cpf = $despesa->cpf;
               }
               $data->id = $despesa->id;
@@ -136,9 +145,8 @@ class DespesaService
                 $data->evento_id[] = $item->evento_id;
                 $data->descricao[] = $item->descricao;
                 $data->valor[] = $item->valor;
-                $data->saldo[] = $item->saldo;      
-                TFieldList::addRows('my_field_list',1);
-
+                $data->saldo[] = $item->saldo;
+                TFieldList::addRows('my_field_list', 1);
               }
               TForm::sendData('my_form', (object) $data, false, true, 300);
 
@@ -149,7 +157,8 @@ class DespesaService
 
               //verificar se existe desconto vinculado ao cpf
               $folha  =  Folha::where('cpf', 'like', $params['cpf'])
-                            ->where('tp_folha', '=', $params['tp_folha'])->first();
+              ->where('anoMes', '=', $params['anoMes'])
+                ->where('tp_folha', '=', $params['tp_folha'])->first();
               $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
                 ->where('tipo', 'like', 'D')->orderby(1)
                 ->load();
@@ -166,7 +175,6 @@ class DespesaService
 
                   $dataF->evento_id[] = $item->evento_id;
                   $dataF->valor[] = $item->valor;
-
                 }
                 TForm::sendData('my_form',  $dataF,  false, true, 300);
 
@@ -200,7 +208,7 @@ class DespesaService
   public static function onCheckCPF($param)
   {
     TTransaction::open('sample');
-   
+
     $repo1 = new TRepository('Folha');
     $criteria = new TCriteria;
 
@@ -215,23 +223,22 @@ class DespesaService
         TFieldList::clear('my_field_list');
 
         $folhasF = Folha::where('anoMes', 'like', $param['anoMes'])
-                         ->where('tp_folha', '=', $param['tp_folha'])->load();
+          ->where('tp_folha', '=', $param['tp_folha'])->load();
         $options = array();
 
         $options[''] = 'Selecione uma opção';
 
-        foreach($folhasF as $item){
+        foreach ($folhasF as $item) {
           $options[$item->cpf] = $item->cpf;
         }
         TCombo::reload('my_form', 'cpf', $options);
-        
-      } else{
+      } else {
         TFieldList::clear('my_field_list');
 
         TCombo::reload('my_form', 'cpf', '');
       }
     }
-  
+
     TTransaction::close();
   }
 }

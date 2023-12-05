@@ -23,10 +23,10 @@
           <menuitem label="Nova Despesa">
             <action>DespesaView</action>
           </menuitem>
+          <menuitem label="Mapa">
+            <action>DespesaMap</action>
+          </menuitem>
         </menu>
-      </menuitem>
-      <menuitem label="Mapa">
-        <action>DespesaMap</action>
       </menuitem>
       <menuitem label="Configurações">
         <menu>
