@@ -5,6 +5,7 @@
     <icon>fas:home fa-fw fa-fw</icon>
   </menuitem>
   <menuitem label="Despesas">
+    <icon>fas:edit fa-fw</icon>
     <menu>
       <menuitem label="Ficha Cadastral">
         <action>FichaCadastralList</action>

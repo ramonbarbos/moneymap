@@ -94,9 +94,15 @@
 .skin-black .sidebar-menu > li > a {
   border-left: 3px solid transparent;
 }
-.skin-black .sidebar-menu > li:hover > a,
-.skin-black  {
+.skin-black .sidebar-menu > li:hover > a{
+  background: #30317c;
+  border-left-color: #ffffff;
   color: #ffffff;
+
+}
+.skin-black  {
+  color: #000000;
+
   background: #30317c;
   border-left-color: #ffffff;
 }
