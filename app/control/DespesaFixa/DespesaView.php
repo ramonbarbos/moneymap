@@ -319,7 +319,8 @@ class DespesaView extends TPage
         $object = new Despesa($key);
         $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->orderBy(1)->load();
         $folha   =  Folha::where('cpf', '=', $object->cpf)
-          ->where('tp_folha', '=', $object->tp_folha)->first();
+                    ->where('anoMes', '=', $object->anoMes)
+                    ->where('tp_folha', '=', $object->tp_folha)->first();
         $this->form->getField('anoMes')->setEditable(false);
         $this->form->getField('tp_folha')->setEditable(false);
         //$this->form->getField('cpf')->setEditable(false);
