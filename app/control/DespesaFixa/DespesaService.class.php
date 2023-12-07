@@ -148,7 +148,7 @@ class DespesaService
                 $data->saldo[] = $item->saldo;
                 TFieldList::addRows('my_field_list', 1);
               }
-              TForm::sendData('my_form', (object) $data, false, true, 300);
+              TForm::sendData('my_form', (object) $data, false, true, 200);
 
               TToast::show('info', 'Dados Encontrado.');
             } else if (!$folha) { //Quando nao tiver folha encontrada
