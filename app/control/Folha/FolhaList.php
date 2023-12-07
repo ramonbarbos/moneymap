@@ -27,126 +27,154 @@ use Adianti\Wrapper\BootstrapFormBuilder;
 
 class FolhaList extends TPage
 {
-    private $form;
-    private $datagrid;
-    private $pageNavigation;
-    private $formgrid;
-    private $deleteButton;
+  private $form;
+  private $datagrid;
+  private $pageNavigation;
+  private $formgrid;
+  private $deleteButton;
 
-    use Adianti\base\AdiantiStandardListTrait;
-    
-    public function __construct(){
+  use Adianti\base\AdiantiStandardListTrait;
 
-        parent::__construct();
+  public function __construct()
+  {
 
-
-        //Conexão com a tabela
-        $this->setDatabase('sample');
-        $this->setActiveRecord('Folha');
-        $this->setDefaultOrder('id', 'asc');
-        $this->setLimit(10);
-
-        $this->addFilterField('cpf', 'like', 'cpf');
-        $this->addFilterField('anoMes', 'like', 'anoMes');
-        $this->addFilterField('tp_folha', '=', 'tp_folha');
-
-        //Criação do formulario 
-        $this->form = new BootstrapFormBuilder('form_search_folha');
-        $this->form->setFormTitle('Folhas');
-
-        //Criação de fields
-        $campo1 =  new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
-        $campo2         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
-
-        $this->form->addFields( [new TLabel('CPF')], [ $campo1 ]  );
-        $this->form->addFields( [new TLabel('Ano Mes')], [ $campo2 ]  );
-
-        //Tamanho dos fields
-        $campo1->setSize('100%');
-        $campo1->setMinLength(0);
-        $campo2->setMinLength(0);
-
-        $this->form->setData( TSession::getValue( __CLASS__.'_filter_data') );
-
-        //Adicionar field de busca
-        $btn = $this->form->addAction(_t('Find'), new TAction([$this, 'onSearch']), 'fa:search');
-        $btn->class = 'btn btn-sm btn-primary';
-        $this->form->addActionLink(_t('New'), new TAction(['FolhaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
-
-        //Criando a data grid
-        $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
-        $this->datagrid->style = 'width: 100%';
-
-        //Criando colunas da datagrid
-        $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
-        $column_2 = new TDataGridColumn('cpf', 'CPF', 'left', );
-        $column_2 = new TDataGridColumn('folha->descricao', 'Tipo', 'left', );
-        $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left', );
-        $column_4 = new TDataGridColumn('vl_salario', 'Salario', 'left', );
-
-        $formato_vl_salario = function ($value) {
-            if (is_numeric($value)) {
-                return 'R$ ' . number_format($value, 2, ',', '.');
-            }
-            return $value;
-        };
-        $column_4->setTransformer($formato_vl_salario);
-
-     
-
-        //add coluna da datagrid
-        $this->datagrid->addColumn($column_1);
-        $this->datagrid->addColumn($column_2);
-        $this->datagrid->addColumn($column_3);
-        $this->datagrid->addColumn($column_4);
-
-        //Criando ações para o datagrid
-        $column_1->setAction(new TAction([$this, 'onReload']), ['order'=> 'id']);
-        $column_2->setAction(new TAction([$this, 'onReload']), ['order'=> 'cpf']);
-
-        $action1 = new TDataGridAction(['FolhaForm', 'onEdit'], ['id'=> '{id}', 'register_state' => 'false']);
-        $action2 = new TDataGridAction([ $this, 'onDelete'], ['id'=> '{id}']);
-
-        //Adicionando a ação na tela
-        $this->datagrid->addAction($action1, _t('Edit'), 'fa:edit blue' );
-        $this->datagrid->addAction($action2, _t('Delete'), 'fa:trash-alt red' );
+    parent::__construct();
 
 
-        //Criar datagrid 
-        $this->datagrid->createModel();
+    //Conexão com a tabela
+    $this->setDatabase('sample');
+    $this->setActiveRecord('Folha');
+    $this->setDefaultOrder('id', 'asc');
+    $this->setLimit(10);
 
-        //Criação de paginador
-        $this->pageNavigation = new TPageNavigation;
-        $this->pageNavigation->setAction(new TAction([$this, 'onReload']));
+    $this->addFilterField('cpf', 'like', 'cpf');
+    $this->addFilterField('anoMes', 'like', 'anoMes');
+    $this->addFilterField('tp_folha', '=', 'tp_folha');
 
-      
+    //Criação do formulario 
+    $this->form = new BootstrapFormBuilder('form_search_folha');
+    $this->form->setFormTitle('Folhas');
 
-        //Enviar para tela
-        $panel = new TPanelGroup('', 'white');
-        $panel->add($this->datagrid);
-        $panel->addFooter($this->pageNavigation);
+    //Criação de fields
+    $campo1 =  new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
+    $campo2         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
 
-          //Exportar
-          $drodown = new TDropDown('Exportar', 'fa:list');
-          $drodown->setPullSide('right');
-          $drodown->setButtonClass('btn btn-default waves-effect dropdown-toggle');
-          $drodown->addAction('Salvar como CSV', new TAction([$this, 'onExportCSV'], ['register_state' => 'false', 'static'=>'1']), 'fa:table green');
-          $drodown->addAction('Salvar como PDF', new TAction([$this, 'onExportPDF'], ['register_state' => 'false',  'static'=>'1']), 'fa:file-pdf red');
-          $panel->addHeaderWidget( $drodown);
+    $this->form->addFields([new TLabel('CPF')], [$campo1]);
+    $this->form->addFields([new TLabel('Ano Mes')], [$campo2]);
 
-        //Vertical container
-        $container = new TVBox;
-        $container->style = 'width: 100%';
-        $container->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
-        $container->add($this->form);
-        $container->add($panel);
-    
-        parent::add($container);
+    //Tamanho dos fields
+    $campo1->setSize('100%');
+    $campo1->setMinLength(0);
+    $campo2->setMinLength(0);
 
-       
+    $this->form->setData(TSession::getValue(__CLASS__ . '_filter_data'));
 
-    }
-   
+    //Adicionar field de busca
+    $btn = $this->form->addAction(_t('Find'), new TAction([$this, 'onSearch']), 'fa:search');
+    $btn->class = 'btn btn-sm btn-primary';
+    $this->form->addActionLink(_t('New'), new TAction(['FolhaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green');
+
+    //Criando a data grid
+    $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
+    $this->datagrid->style = 'width: 100%';
+
+    //Criando colunas da datagrid
+    $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
+    $column_2 = new TDataGridColumn('cpf', 'CPF', 'left',);
+    $column_2 = new TDataGridColumn('folha->descricao', 'Tipo', 'left',);
+    $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left',);
+    $column_4 = new TDataGridColumn('vl_salario', 'Salario', 'left',);
+
+    $column_3->setTransformer(function ($value, $object, $row) {
+      // Verifica se os dois últimos caracteres da string são '01'
+      if (substr($value, -2) === '01') {
+        return "<span style='color:black'>JANEIRO</span>";
+      } else if (substr($value, -2) === '02') {
+        return "<span style='color:black'>FERVEREIRO</span>";
+      } else if (substr($value, -2) === '03') {
+        return "<span style='color:black'>MARÇO</span>";
+      } else if (substr($value, -2) === '04') {
+        return "<span style='color:black'>ABRIL</span>";
+      }else if (substr($value, -2) === '05') {
+        return "<span style='color:black'>MAIO</span>";
+      }else if (substr($value, -2) === '06') {
+        return "<span style='color:black'>JUNHO</span>";
+      }else if (substr($value, -2) === '07') {
+        return "<span style='color:black'>JULHO</span>";
+      }else if (substr($value, -2) === '08') {
+        return "<span style='color:black'>AGOSTO</span>";
+      }else if (substr($value, -2) === '09') {
+        return "<span style='color:black'>SETEMBRO</span>";
+      }else if (substr($value, -2) === '10') {
+        return "<span style='color:black'>OUTUBRO</span>";
+      }else if (substr($value, -2) === '11') {
+        return "<span style='color:black'>NOVEMBRO</span>";
+      }else if (substr($value, -2) === '12') {
+        return "<span style='color:black'>DEZEMBRO</span>";
+      }
+    });
+
+
+    $formato_vl_salario = function ($value) {
+      if (is_numeric($value)) {
+        return 'R$ ' . number_format($value, 2, ',', '.');
+      }
+      return $value;
+    };
+    $column_4->setTransformer($formato_vl_salario);
+
+
+
+    //add coluna da datagrid
+    $this->datagrid->addColumn($column_1);
+    $this->datagrid->addColumn($column_2);
+    $this->datagrid->addColumn($column_3);
+    $this->datagrid->addColumn($column_4);
+
+    //Criando ações para o datagrid
+    $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
+    $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'cpf']);
+
+    $action1 = new TDataGridAction(['FolhaForm', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
+    $action2 = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
+
+    //Adicionando a ação na tela
+    $this->datagrid->addAction($action1, _t('Edit'), 'fa:edit blue');
+    $this->datagrid->addAction($action2, _t('Delete'), 'fa:trash-alt red');
+
+
+    //Criar datagrid 
+    $this->datagrid->createModel();
+
+    //Criação de paginador
+    $this->pageNavigation = new TPageNavigation;
+    $this->pageNavigation->setAction(new TAction([$this, 'onReload']));
+
+
+
+    //Enviar para tela
+    $panel = new TPanelGroup('', 'white');
+    $panel->add($this->datagrid);
+    $panel->addFooter($this->pageNavigation);
+
+    //Exportar
+    $drodown = new TDropDown('Exportar', 'fa:list');
+    $drodown->setPullSide('right');
+    $drodown->setButtonClass('btn btn-default waves-effect dropdown-toggle');
+    $drodown->addAction('Salvar como CSV', new TAction([$this, 'onExportCSV'], ['register_state' => 'false', 'static' => '1']), 'fa:table green');
+    $drodown->addAction('Salvar como PDF', new TAction([$this, 'onExportPDF'], ['register_state' => 'false',  'static' => '1']), 'fa:file-pdf red');
+    $panel->addHeaderWidget($drodown);
+
+    //Vertical container
+    $container = new TVBox;
+    $container->style = 'width: 100%';
+    $container->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+    $container->add($this->form);
+    $container->add($panel);
+
+    parent::add($container);
+  }
+
   public function onDelete($param)
   {
     try {
@@ -166,31 +194,30 @@ class FolhaList extends TPage
   }
 
   public function delete($param)
-{
+  {
     try {
-        TTransaction::open('sample');
+      TTransaction::open('sample');
 
-        if (isset($param['id'])) {
-            $id = $param['id'];
+      if (isset($param['id'])) {
+        $id = $param['id'];
 
-            $folha = new Folha($id);
-            $Despesa = Despesa::where('folha_id', '=', $folha->id)->load();
+        $folha = new Folha($id);
+        $Despesa = Despesa::where('folha_id', '=', $folha->id)->load();
 
-            if (count($Despesa) > 0) {
-                new TMessage('warning', 'Não é possível excluir. Vínculo com despesas!');
-            } else {
-                ItemFolha::where('folha_id', '=', $folha->id)->delete();
-                $folha->delete();
-                new TMessage('info', 'Registro excluído');
-                $this->onReload([]);
-            }
+        if (count($Despesa) > 0) {
+          new TMessage('warning', 'Não é possível excluir. Vínculo com despesas!');
+        } else {
+          ItemFolha::where('folha_id', '=', $folha->id)->delete();
+          $folha->delete();
+          new TMessage('info', 'Registro excluído');
+          $this->onReload([]);
         }
+      }
 
-        TTransaction::close();
+      TTransaction::close();
     } catch (Exception $e) {
-        new TMessage('error', $e->getMessage(), $this->afterSaveAction);
-        TTransaction::rollback();
+      new TMessage('error', $e->getMessage(), $this->afterSaveAction);
+      TTransaction::rollback();
     }
-}
-  
+  }
 }

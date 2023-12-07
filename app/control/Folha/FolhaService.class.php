@@ -106,6 +106,7 @@ class FolhaService
         $anoMesNaoUtilizados = array_diff($anoMesTodosArray, $anoMesUtilizados);
 
         $options = array_combine($anoMesNaoUtilizados, $anoMesNaoUtilizados);
+        
         TCombo::reload('form_folha', 'anoMes', $options);
       } else {
 

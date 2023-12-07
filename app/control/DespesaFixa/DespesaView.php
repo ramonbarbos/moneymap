@@ -9,6 +9,7 @@ use Adianti\Database\TTransaction;
 use Adianti\Validator\TRequiredListValidator;
 use Adianti\Validator\TRequiredValidator;
 use Adianti\Widget\Container\TVBox;
+use Adianti\Widget\Datagrid\TDataGridAction;
 use Adianti\Widget\Dialog\TMessage;
 use Adianti\Widget\Dialog\TToast;
 use Adianti\Widget\Form\TButton;
@@ -178,6 +179,8 @@ class DespesaView extends TPage
     $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaList');");
     $this->form->addAction('Save', new TAction([$this, 'onSave'], ['static' => '1']), 'fa:save blue');
     $this->form->addAction('Clear', new TAction([$this, 'onClear']), 'fa:eraser red');
+    $this->form->addAction('Mapa', new TAction(['DespesaMap', 'onReload'], ['id' => '{id}']), 'fa:light fa-map green');
+
 
     // wrap the page content using vertical box
     $vbox = new TVBox;

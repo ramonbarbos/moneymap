@@ -109,6 +109,35 @@ class DespesaList extends TPage
         };
         $column_5->setTransformer($formato_vl_saldo);
 
+        $column_3->setTransformer(function ($value, $object, $row) {
+            // Verifica se os dois últimos caracteres da string são '01'
+            if (substr($value, -2) === '01') {
+              return "<span style='color:black'>JANEIRO</span>";
+            } else if (substr($value, -2) === '02') {
+              return "<span style='color:black'>FERVEREIRO</span>";
+            } else if (substr($value, -2) === '03') {
+              return "<span style='color:black'>MARÇO</span>";
+            } else if (substr($value, -2) === '04') {
+              return "<span style='color:black'>ABRIL</span>";
+            }else if (substr($value, -2) === '05') {
+              return "<span style='color:black'>MAIO</span>";
+            }else if (substr($value, -2) === '06') {
+              return "<span style='color:black'>JUNHO</span>";
+            }else if (substr($value, -2) === '07') {
+              return "<span style='color:black'>JULHO</span>";
+            }else if (substr($value, -2) === '08') {
+              return "<span style='color:black'>AGOSTO</span>";
+            }else if (substr($value, -2) === '09') {
+              return "<span style='color:black'>SETEMBRO</span>";
+            }else if (substr($value, -2) === '10') {
+              return "<span style='color:black'>OUTUBRO</span>";
+            }else if (substr($value, -2) === '11') {
+              return "<span style='color:black'>NOVEMBRO</span>";
+            }else if (substr($value, -2) === '12') {
+              return "<span style='color:black'>DEZEMBRO</span>";
+            }
+          });
+
 
         //add coluna da datagrid
         $this->datagrid->addColumn($column_1);
