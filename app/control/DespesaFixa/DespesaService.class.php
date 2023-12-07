@@ -106,9 +106,6 @@ class DespesaService
           if (@$folhas->cpf == $params['cpf'] && @$folhas->anoMes == $params['anoMes'] && @$folhas->tp_folha == $params['tp_folha']) {
             TFieldList::enableField('my_field_list');
 
-            TToast::show('info', 'Achou');
-
-
             $despesa = Despesa::where('cpf', '=', $params['cpf'])
               ->where('anoMes', '=', $params['anoMes'])
               ->where('tp_folha', '=', $params['tp_folha'])->first();
@@ -118,8 +115,7 @@ class DespesaService
               ->where('tp_folha', '=', $params['tp_folha'])->first();
 
             if (@$folha->cpf ==  @$despesa->cpf && @$folha->anoMes ==  @$despesa->anoMes && @$despesa->tp_folha == $params['tp_folha']) { //Já existe despesa  com o CPF
-              $despesa = Despesa::where('cpf', '=', $params['cpf'])
-                ->where('tp_folha', '=', $params['tp_folha'])->first();
+             
               $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->orderBy(1)->load();
 
               $data = new stdClass;
