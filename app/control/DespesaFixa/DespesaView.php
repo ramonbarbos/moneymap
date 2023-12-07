@@ -135,15 +135,15 @@ class DespesaView extends TPage
     //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
 
-    $fl_pago = new TCombo('fl_pago[]');
+    $fl_situacao = new TCombo('fl_situacao[]');
 
-    //$fl_pago  = new TDBCheckGroup('fl_pago', 'sample', 'ItemDespesa', 'fl_pago', 'fl_pago');
+    //$fl_situacao  = new TDBCheckGroup('fl_situacao', 'sample', 'ItemDespesa', 'fl_situacao', 'fl_situacao');
     $items = [0 => 'Pendente', 1 => 'Pago'];
-    $fl_pago->setSize('100%');
+    $fl_situacao->setSize('100%');
 
-    $fl_pago->setValue(0);
-    $fl_pago->addItems($items);
-    // $fl_pago->setUseSwitch(true, 'blue');
+    $fl_situacao->setValue(0);
+    $fl_situacao->addItems($items);
+    // $fl_situacao->setUseSwitch(true, 'blue');
 
 
     $this->fieldlist = new TFieldList;
@@ -151,7 +151,7 @@ class DespesaView extends TPage
     $this->fieldlist->width = '100%';
     $this->fieldlist->name  = 'my_field_list';
     $this->fieldlist->addField('<b>Unniq</b>',  $uniq,   ['width' => '0%', 'uniqid' => true]);
-    $this->fieldlist->addField('<b>Situação</b>',   $fl_pago,   ['width' => '10%']);
+    $this->fieldlist->addField('<b>Situação</b>',   $fl_situacao,   ['width' => '10%']);
     $this->fieldlist->addField('<b>Data</b>',   $dt_despesa,   ['width' => '15%']);
     $this->fieldlist->addField('<b>C.Custo</b>',  $evento_id,  ['width' => '25%']);
     $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '25%']);
@@ -162,7 +162,7 @@ class DespesaView extends TPage
 
     $this->fieldlist->enableSorting();
 
-    $this->form->addField($fl_pago);
+    $this->form->addField($fl_situacao);
     $this->form->addField($evento_id);
     $this->form->addField($descricao);
     $this->form->addField($valor);
@@ -254,7 +254,7 @@ class DespesaView extends TPage
 
         if (!empty($param['evento_id'])) {
           foreach ($param['evento_id'] as $key => $item_id) {
-            //  new TMessage('info', $param['fl_pago'][$key]); //
+            //  new TMessage('info', $param['fl_situacao'][$key]); //
 
             if ($param['dt_despesa'][$key]) {
               $dataOriginal = $param['dt_despesa'][$key];
@@ -264,10 +264,10 @@ class DespesaView extends TPage
               $dataFormatada = '';
             }
 
-            if( $param['fl_pago'][$key]){
-              $fl_pago =  $param['fl_pago'][$key];
+            if( $param['fl_situacao'][$key]){
+              $fl_situacao =  $param['fl_situacao'][$key];
             }else{
-              $fl_pago = 0;
+              $fl_situacao = 0;
             }
 
            
@@ -278,7 +278,7 @@ class DespesaView extends TPage
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
             $item->saldo      = (float) $param['saldo'][$key];
-            $item->fl_pago      =      $fl_pago;
+            $item->fl_situacao      =      $fl_situacao;
 
             $item->store();
             $total +=  $item->valor;
@@ -311,10 +311,10 @@ class DespesaView extends TPage
             }
 
 
-            if ($param['fl_pago'][$key]) {
-              $fl_pago =  $param['fl_pago'][$key];
+            if ($param['fl_situacao'][$key]) {
+              $fl_situacao =  $param['fl_situacao'][$key];
             } else {
-              $fl_pago = 0;
+              $fl_situacao = 0;
             }
 
             $item = new ItemDespesa;
@@ -324,7 +324,7 @@ class DespesaView extends TPage
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
             $item->saldo      = (float) $param['saldo'][$key];
-            $item->fl_pago      =  $fl_pago;
+            $item->fl_situacao      =  $fl_situacao;
             $item->store();
             $total +=  $item->valor;
           }
@@ -374,7 +374,7 @@ class DespesaView extends TPage
         $data->descricao = [];
         $data->valor = [];
         $data->saldo = [];
-        $data->fl_pago = [];
+        $data->fl_situacao = [];
 
 
         foreach ($item_despesas as $item) {
@@ -394,7 +394,7 @@ class DespesaView extends TPage
           $data->descricao[] = $item->descricao;
           $data->valor[] = $item->valor;
           $data->saldo[] = $item->saldo;
-          $data->fl_pago[] =  $item->fl_pago;
+          $data->fl_situacao[] =  $item->fl_situacao;
 
       
           TForm::sendData('my_form', $data);

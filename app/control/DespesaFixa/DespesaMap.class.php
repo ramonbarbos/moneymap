@@ -66,6 +66,7 @@ class DespesaMap  extends TPage
         $this->datagrid->style = 'width: 100%';
 
         // create the datagrid columns
+        $fl_situacao    = new TDataGridColumn('fl_situacao',  'Situação',       'center',  '20%');
         $data    = new TDataGridColumn('dt_despesa',  'Data',       'center',  '20%');
         $evento_id   = new TDataGridColumn('evento_id',          'Centro de Custo',      'center',  '20%');
         $descricao  = new TDataGridColumn('descricao',          'Descrição',     'center', '20%');
@@ -78,10 +79,19 @@ class DespesaMap  extends TPage
             return "<span style='color:red'>" . number_format($value, 2, ',', '.') . "</span>";
         });
 
+        $fl_situacao->setTransformer(function ($value, $object, $row) {
+            if ($value == 1) {
+              return  "<span style='color:green'>Pago</span>";
+            } else if ($value == 0) {
+              return "<span style='color:blue'>Pendente</span>";
+            }
+          });
+
 
 
 
         // add the columns to the datagrid
+        $this->datagrid->addColumn($fl_situacao);
         $this->datagrid->addColumn($data);
         $this->datagrid->addColumn($evento_id);
         $this->datagrid->addColumn($descricao);
@@ -235,6 +245,7 @@ class DespesaMap  extends TPage
                 }
 
                 $item = new StdClass;
+                $item->fl_situacao     = $row->fl_situacao;
                 $item->dt_despesa = $dt_despesa_formatada;
                 $item->evento_id     = $evento->descricao;
                 $item->descricao         = $row->descricao;
@@ -310,9 +321,10 @@ class DespesaMap  extends TPage
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
+        $this->pdf->Cell(65,  12, utf8_decode('Situação'),     1, 0, 'C', 1);
         $this->pdf->Cell(65,  12, utf8_decode('Data'),     1, 0, 'C', 1);
-        $this->pdf->Cell(140, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
-        $this->pdf->Cell(215,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
+        $this->pdf->Cell(135, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
+        $this->pdf->Cell(155,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
         $this->pdf->Cell(65,  12, 'Valor',      1, 0, 'C', 1);
         $this->pdf->Cell(65,  12, 'Saldo',      1, 0, 'C', 1);
     }
@@ -327,13 +339,21 @@ class DespesaMap  extends TPage
             $dt_despesa_formatada = $item->dt_despesa;
         }
 
+        if ($item->fl_situacao == 1) {
+            $fl_situacao = 'Pago';
+          } else if ($item->fl_situacao == 0) {
+            $fl_situacao = 'Pendente';
+
+          }
+
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
 
+        $this->pdf->Cell(65,  12,  $fl_situacao, 'LR', 0, 'C');
         $this->pdf->Cell(65,  12,   $dt_despesa_formatada, 'LR', 0, 'C');
-        $this->pdf->Cell(140, 12, utf8_decode($evento->descricao), 'LR', 0, 'C');
-        $this->pdf->Cell(215,  12,   utf8_decode($item->descricao), 'LR', 0, 'C');
+        $this->pdf->Cell(135, 12, utf8_decode($evento->descricao), 'LR', 0, 'C');
+        $this->pdf->Cell(155,  12,   utf8_decode($item->descricao), 'LR', 0, 'C');
         $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->valor, 2), 'LR', 0, 'C');
         $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->saldo, 2), 'LR', 0, 'C');
 
@@ -346,8 +366,9 @@ class DespesaMap  extends TPage
                 $this->pdf->Ln(12);
                 $this->pdf->SetX(20);
                 $this->pdf->Cell(65,  12, '', 'LR', 0, 'C');
-                $this->pdf->Cell(140, 12, '', 'LR', 0, 'L');
-                $this->pdf->Cell(215,  12, '', 'LR', 0, 'C');
+                $this->pdf->Cell(65,  12, '', 'LR', 0, 'C');
+                $this->pdf->Cell(135, 12, '', 'LR', 0, 'L');
+                $this->pdf->Cell(155,  12, '', 'LR', 0, 'C');
                 $this->pdf->Cell(65,  12, '', 'LR', 0, 'R');
                 $this->pdf->Cell(65,  12, '', 'LR', 0, 'R');
             }

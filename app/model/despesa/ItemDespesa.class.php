@@ -20,7 +20,7 @@ class ItemDespesa extends TRecord
         parent::addAttribute('descricao');
         parent::addAttribute('valor');
         parent::addAttribute('saldo');
-        parent::addAttribute('fl_pago');
+        parent::addAttribute('fl_situacao');
 
     }
 }
