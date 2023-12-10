@@ -115,15 +115,17 @@ class DespesaService
               ->where('tp_folha', '=', $params['tp_folha'])->first();
 
             if (@$folha->cpf ==  @$despesa->cpf && @$folha->anoMes ==  @$despesa->anoMes && @$despesa->tp_folha == $params['tp_folha']) { //Já existe despesa  com o CPF
-             
+
               $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->orderBy(1)->load();
 
               $data = new stdClass;
               $data->id_item = [];
+              $data->fl_situacao = [];
               $data->dt_despesa = [];
               $data->evento_id = [];
               $data->descricao = [];
               $data->valor = [];
+
               if (!empty($data->cpf)) {
                 $data->anoMes = $despesa->anoMes;
                 $data->cpf = $despesa->cpf;
@@ -142,6 +144,7 @@ class DespesaService
                 $data->descricao[] = $item->descricao;
                 $data->valor[] = $item->valor;
                 $data->saldo[] = $item->saldo;
+                $data->fl_situacao[] = $item->fl_situacao;
                 TFieldList::addRows('my_field_list', 1);
               }
               TForm::sendData('my_form', (object) $data, false, true, 200);
@@ -153,7 +156,7 @@ class DespesaService
 
               //verificar se existe desconto vinculado ao cpf
               $folha  =  Folha::where('cpf', 'like', $params['cpf'])
-              ->where('anoMes', '=', $params['anoMes'])
+                ->where('anoMes', '=', $params['anoMes'])
                 ->where('tp_folha', '=', $params['tp_folha'])->first();
               $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
                 ->where('tipo', 'like', 'D')->orderby(1)

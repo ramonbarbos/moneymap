@@ -64,7 +64,7 @@ class DespesaView extends TPage
     $tp_folha->addValidation('anoMes', new TRequiredValidator);
     $tp_folha->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
 
-    $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'anoMes', 'descricao', 'descricao');
+    $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
     $anoMes->addValidation('anoMes', new TRequiredValidator);
     $anoMes->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
 
@@ -266,8 +266,11 @@ class DespesaView extends TPage
 
             if( $param['fl_situacao'][$key]){
               $fl_situacao =  $param['fl_situacao'][$key];
+
+              
             }else{
               $fl_situacao = 0;
+             
             }
 
            
@@ -278,7 +281,7 @@ class DespesaView extends TPage
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
             $item->saldo      = (float) $param['saldo'][$key];
-            $item->fl_situacao      =      $fl_situacao;
+            $item->fl_situacao      =  $fl_situacao;
 
             $item->store();
             $total +=  $item->valor;
