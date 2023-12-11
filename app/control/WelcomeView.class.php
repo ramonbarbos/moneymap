@@ -30,28 +30,9 @@ class WelcomeView extends TPage
             TTransaction::open('sample');
 
 
-                $conn = TTransaction::get();
-                $sqlQuant = "SELECT SUM(quantidade) as total_quantidade FROM estoque";
-                $result = $conn->query($sqlQuant);
-
+           
             
-                if ($result) {
-                    $row = $result->fetch(PDO::FETCH_ASSOC);
-                    $estoqueTotal = $row['total_quantidade'];
-                } else {
-                    $estoqueTotal = 0;
-                }
-
-                $sqlVal = "SELECT SUM(valor_total) as total_valor FROM estoque";
-                $resultVal = $conn->query($sqlVal);
-
-
-                if ($resultVal) {
-                    $row = $resultVal->fetch(PDO::FETCH_ASSOC);
-                    $valorTotal = $row['total_valor'];
-                } else {
-                    $valorTotal = 0;
-                }
+               
 
         
 
@@ -61,16 +42,16 @@ class WelcomeView extends TPage
             $indicator2 = new THtmlRenderer('app/templates/theme3/info-box.html');
             $indicator3 = new THtmlRenderer('app/templates/theme3/info-box.html');
 
-            $estoqueZero = Estoque::where('quantidade', '=', 0)->count();
+            $saldoAtual = new Despesa(1);
 
 
-            $indicator1->enableSection('main', ['title' => 'Estoque',    'icon' => 'cube', 'background' => 'orange', 'text' => 'PRODUTO COM ESTOQUE BAIXO', 'value' => $estoqueZero]);
+            $indicator1->enableSection('main', ['title' => 'Folha',    'icon' => 'cube', 'background' => 'orange', 'text' => 'SALDO ATUAL', 'value' => $saldoAtual->saldo]);
 
-            $indicator2->enableSection('main', ['title' => 'Estoque',    'icon' => 'box', 'background' => 'blue', 'text' => 'QUANTIDADE DE PRODUTO NO ESTOQUE', 'value' => $estoqueTotal]);
+          //  $indicator2->enableSection('main', ['title' => 'Estoque',    'icon' => 'box', 'background' => 'blue', 'text' => 'QUANTIDADE DE PRODUTO NO ESTOQUE', 'value' => $estoqueTotal]);
 
-            $indicator3->enableSection('main', ['title' => 'Estoque',    'icon' => 'dollar-sign', 'background' => 'green', 'text' => 'CUSTO TOTAL DE PRODUTOS', 'value' =>   'R$ '.$valorTotal]);
+           // $indicator3->enableSection('main', ['title' => 'Estoque',    'icon' => 'dollar-sign', 'background' => 'green', 'text' => 'CUSTO TOTAL DE PRODUTOS', 'value' =>   'R$ '.$valorTotal]);
 
-            $html->enableSection('main', ['indicator1' => $indicator1, 'indicator2' => $indicator2,  'indicator3' => $indicator3]);
+            $html->enableSection('main', ['indicator1' => $indicator1]);
 
             $container = new TVBox;
             $container->style = 'width: 100%';

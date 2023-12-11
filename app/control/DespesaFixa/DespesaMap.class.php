@@ -26,7 +26,6 @@ use Adianti\Widget\Datagrid\TDataGridAction;
 use Adianti\Widget\Datagrid\TDataGridColumn;
 use Adianti\Widget\Dialog\TAlert;
 use Adianti\Widget\Dialog\TMessage;
-use Adianti\Widget\Dialog\TToast;
 use Adianti\Widget\Form\TButton;
 use Adianti\Widget\Form\TCheckList;
 use Adianti\Widget\Form\TCombo;
@@ -281,10 +280,10 @@ class DespesaMap  extends TPage
         $this->pdf->SetTextColor(100, 100, 100);
         $this->pdf->SetX(20);
         $this->pdf->Cell(150, 12, utf8_decode('CPF: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, 'Tipo de Folha: ', 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, utf8_decode('Tipo de Folha: '), 'LTR', 0, 'L');
         $this->pdf->Cell(100, 12, utf8_decode('Ano Mês: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, 'Despesas: ', 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, 'Saldo: ', 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, utf8_decode('Despesas: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, utf8_decode('Saldo: '), 'LTR', 0, 'L');
 
         $this->pdf->Ln(8);
 
@@ -325,8 +324,8 @@ class DespesaMap  extends TPage
         $this->pdf->Cell(65,  12, utf8_decode('Data'),     1, 0, 'C', 1);
         $this->pdf->Cell(135, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
         $this->pdf->Cell(155,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, 'Valor',      1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, 'Saldo',      1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, utf8_decode('Valor'),      1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, utf8_decode('Saldo'),      1, 0, 'C', 1);
     }
     public function AddEvento($item)
     {
@@ -390,7 +389,7 @@ class DespesaMap  extends TPage
       $this->pdf->SetTextColor(100,100,100);
       $this->pdf->SetX(20);
       $this->pdf->Cell(280, 12, utf8_decode('Informações complementares'), 'LTR', 0, 'L');
-      $this->pdf->Cell(270, 12, 'Reservado', 'LTR', 0, 'L');
+      $this->pdf->Cell(270, 12, utf8_decode('Reservado'), 'LTR', 0, 'L');
       
       $this->pdf->Ln(8);
       
