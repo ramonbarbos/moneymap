@@ -10,11 +10,18 @@
       <menuitem label="Ficha Cadastral">
         <action>FichaCadastralList</action>
       </menuitem>
+      <menuitem label="Folhas">
+        <action>FolhaList</action>
+      </menuitem>
       <menuitem label="Eventos">
         <action>EventoList</action>
       </menuitem>
-      <menuitem label="Folhas">
-        <action>FolhaList</action>
+      <menuitem label="Cartão de Credito">
+        <menu>
+          <menuitem label="Cadastro de Cartão">
+            <action>CartaoList</action>
+          </menuitem>
+        </menu>
       </menuitem>
       <menuitem label="Despesas">
         <menu>
@@ -36,6 +43,9 @@
           </menuitem>
           <menuitem label="Tipo de Folha">
             <action>TipoFolhaList</action>
+          </menuitem>
+          <menuitem label="Banco">
+            <action>BancoList</action>
           </menuitem>
         </menu>
       </menuitem>
