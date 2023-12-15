@@ -21,8 +21,8 @@ class DespesaCartao extends TRecord
 
     }
 
-    public function get_folha()
+    public function get_cartao()
     {
-        return TipoFolha::find($this->tp_folha);
+        return CartoesCredito::find($this->id_cartao_credito);
     }
 }

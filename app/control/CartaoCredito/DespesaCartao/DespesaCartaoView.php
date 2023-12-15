@@ -175,7 +175,7 @@ class DespesaCartaoView extends TPage
     $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaCartaoList');");
     $this->form->addAction('Save', new TAction([$this, 'onSave'], ['static' => '1']), 'fa:save blue');
     $this->form->addAction('Clear', new TAction([$this, 'onClear']), 'fa:eraser red');
-    $this->form->addAction('Mapa', new TAction(['DespesaMap', 'onReload'], ['id' => '{id}']), 'fa:light fa-map green');
+    $this->form->addAction('Mapa', new TAction(['DespesaCartaoMap', 'onReload'], ['id' => '{id}']), 'fa:light fa-map green');
 
 
     // wrap the page content using vertical box
@@ -220,8 +220,8 @@ class DespesaCartaoView extends TPage
 
       $despesa = new DespesaCartao;
       $despesa->fromArray((array) $data);
-      $cartao = CartoesCredito::where('cpf', '=', $data->cpf)->first();
-
+      $cartao = CartoesCredito::where('cpf', '=', $data->cpf)
+                                ->where('id', '=', $data->id_cartao_credito)->first();
 
 
       if (!empty($despesa->id)) {

@@ -48,7 +48,7 @@ use Adianti\Widget\Wrapper\TDBUniqueSearch;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class DespesaMap  extends TPage
+class DespesaCartaoMap  extends TPage
 {
     private $datagrid;
     private $pdf;
@@ -65,12 +65,10 @@ class DespesaMap  extends TPage
         $this->datagrid->style = 'width: 100%';
 
         // create the datagrid columns
-        $fl_situacao    = new TDataGridColumn('fl_situacao',  'Situação',       'center',  '20%');
         $data    = new TDataGridColumn('dt_despesa',  'Data',       'center',  '20%');
         $evento_id   = new TDataGridColumn('evento_id',          'Centro de Custo',      'center',  '20%');
         $descricao  = new TDataGridColumn('descricao',          'Descrição',     'center', '20%');
         $valor   = new TDataGridColumn('valor',          'Valor',      'center', '20%');
-        $saldo = new TDataGridColumn('saldo',          'Saldo',    'center', '20%');
 
 
         $valor->setTransformer(function ($value, $object, $row, $cell, $previous_row) {
@@ -78,24 +76,16 @@ class DespesaMap  extends TPage
             return "<span style='color:red'>" . number_format($value, 2, ',', '.') . "</span>";
         });
 
-        $fl_situacao->setTransformer(function ($value, $object, $row) {
-            if ($value == 1) {
-              return  "<span style='color:green'>Pago</span>";
-            } else if ($value == 0) {
-              return "<span style='color:blue'>Pendente</span>";
-            }
-          });
+     
 
 
 
 
         // add the columns to the datagrid
-        $this->datagrid->addColumn($fl_situacao);
         $this->datagrid->addColumn($data);
         $this->datagrid->addColumn($evento_id);
         $this->datagrid->addColumn($descricao);
         $this->datagrid->addColumn($valor);
-        $this->datagrid->addColumn($saldo);
 
         // creates the datagrid model
         $this->datagrid->createModel();
@@ -105,9 +95,9 @@ class DespesaMap  extends TPage
         $bt5b->style = 'background-color: grey; color: white';
 
         $bt5b->setLabel('Voltar');
-        $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaList');");
+        $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaCartaoList');");
 
-        $panel = new TPanelGroup('Mapa de Despesas');
+        $panel = new TPanelGroup('Mapa de Despesas do Cartão');
         $panel->add($this->datagrid);
         $panel->addHeaderActionLink('Save as PDF', new TAction([$this, 'exportAsPDF'], ['static' => 1]), 'far:file-pdf red');
         $panel->addHeaderActionLink('Save as CSV', new TAction([$this, 'onExportCSV'], ['static' => 1]), 'fa:table blue');
@@ -129,9 +119,9 @@ class DespesaMap  extends TPage
         try {
             TTransaction::open('sample');
 
-            $id = TSession::getValue('id_despesa');
+            $id = TSession::getValue('id_despesa_cartao');
 
-            $despesa = new Despesa($id);
+            $despesa = new DespesaCartao($id);
 
 
             $this->pdf = new FPDF('P', 'pt');
@@ -143,11 +133,11 @@ class DespesaMap  extends TPage
             $this->pdf->SetTextColor(0, 0, 0);
             $this->pdf->SetFont('Arial', 'B', 10);
 
-            $this->addCabecalhoNota($despesa->cpf, $despesa->tp_folha, $despesa->anoMes, $despesa->vl_despesa, $despesa->saldo);
+            $this->addCabecalhoNota($despesa->cpf,$despesa->id_cartao_credito, $despesa->anoMes, $despesa->valor_total);
             $this->addCabecalhoProduto();
 
             if ($id) {
-                $itemDespesa = ItemDespesa::where('despesa_id', '=', $id)->orderby(1)->load();
+                $itemDespesa = ItemDespesaCartao::where('despesa_cartao_id', '=', $id)->orderby(1)->load();
                 foreach ($itemDespesa as $index =>  $item) {
                     $this->AddEvento($item);
                 }
@@ -188,7 +178,7 @@ class DespesaMap  extends TPage
         {
             TTransaction::open('sample');
     
-            $id = TSession::getValue('id_despesa');
+            $id = TSession::getValue('id_despesa_cartao');
     
             $table = 'item_despesa';
     
@@ -228,9 +218,9 @@ class DespesaMap  extends TPage
 
             //$this->datagrid->clear();
 
-            TSession::setValue('id_despesa', @$param['id']);
+            TSession::setValue('id_despesa_cartao', @$param['id']);
 
-            $itemDespesa =  ItemDespesa::where('despesa_id', '=', @$param['id'])->orderby(1)->load();
+            $itemDespesa =  ItemDespesaCartao::where('despesa_cartao_id', '=', @$param['id'])->orderby(1)->load();
 
 
 
@@ -244,12 +234,10 @@ class DespesaMap  extends TPage
                 }
 
                 $item = new StdClass;
-                $item->fl_situacao     = $row->fl_situacao;
                 $item->dt_despesa = $dt_despesa_formatada;
                 $item->evento_id     = $evento->descricao;
                 $item->descricao         = $row->descricao;
                 $item->valor         = $row->valor;
-                $item->saldo         = $row->saldo;
 
                 $this->datagrid->addItem($item);
             }
@@ -270,39 +258,32 @@ class DespesaMap  extends TPage
         parent::show();
     }
 
-    public function addCabecalhoNota($cpf, $tp_folha, $anoMes, $vl_salario, $vl_despesas)
+    public function addCabecalhoNota($cpf, $id_cartao, $anoMes, $valor_total)
     {
-        $tipoFolha = new TipoFolha($tp_folha);
+        $cartoes = new CartoesCredito($id_cartao);
 
         $this->pdf->SetY(80);
 
         $this->pdf->SetFont('Arial', '', 8);
         $this->pdf->SetTextColor(100, 100, 100);
         $this->pdf->SetX(20);
-        $this->pdf->Cell(150, 12, utf8_decode('CPF: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Tipo de Folha: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Ano Mês: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Despesas: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Saldo: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(140, 12, utf8_decode('CPF: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(135, 12, utf8_decode('Cartão: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(135, 12, utf8_decode('Ano Mês: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(135, 12, utf8_decode('Total: '), 'LTR', 0, 'L');
 
         $this->pdf->Ln(8);
 
         $this->pdf->SetTextColor(0, 0, 0);
         $this->pdf->SetX(20);
-        $this->pdf->Cell(150, 16, $cpf, 'LBR', 0, 'L');
-        $this->pdf->Cell(100,  16, $tipoFolha->descricao, 'LBR', 0, 'L');
-        $this->pdf->Cell(100, 16, $anoMes, 'LBR', 0, 'L');
+        $this->pdf->Cell(140, 16, $cpf, 'LBR', 0, 'L');
+        $this->pdf->Cell(135,  16, $cartoes->nome_cartao, 'LBR', 0, 'L');
+        $this->pdf->Cell(135, 16, $anoMes, 'LBR', 0, 'L');
 
-        if (empty($vl_salario)) {
-            $this->pdf->Cell(100, 16, 'R$ 0,00', 'LBR', 0, 'L');
+        if (empty($valor_total)) {
+            $this->pdf->Cell(135, 16, 'R$ 0,00', 'LBR', 0, 'L');
         } else {
-            $this->pdf->Cell(100, 16, 'R$ ' . $vl_salario, 'LBR', 0, 'L');
-        }
-
-        if (empty($vl_despesas)) {
-            $this->pdf->Cell(100, 16, 'R$ 0,00', 'LBR', 0, 'L');
-        } else {
-            $this->pdf->Cell(100, 16, 'R$ ' . $vl_despesas, 'LBR', 0, 'L');
+            $this->pdf->Cell(135, 16, 'R$ ' . $valor_total, 'LBR', 0, 'L');
         }
 
         $this->pdf->Ln(16);
@@ -320,12 +301,10 @@ class DespesaMap  extends TPage
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
-        $this->pdf->Cell(65,  12, utf8_decode('Situação'),     1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, utf8_decode('Data'),     1, 0, 'C', 1);
+        $this->pdf->Cell(140,  12, utf8_decode('Data'),     1, 0, 'C', 1);
         $this->pdf->Cell(135, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
-        $this->pdf->Cell(155,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, utf8_decode('Valor'),      1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, utf8_decode('Saldo'),      1, 0, 'C', 1);
+        $this->pdf->Cell(135,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
+        $this->pdf->Cell(135,  12, utf8_decode('Valor'),      1, 0, 'C', 1);
     }
     public function AddEvento($item)
     {
@@ -338,23 +317,14 @@ class DespesaMap  extends TPage
             $dt_despesa_formatada = $item->dt_despesa;
         }
 
-        if ($item->fl_situacao == 1) {
-            $fl_situacao = 'Pago';
-          } else if ($item->fl_situacao == 0) {
-            $fl_situacao = 'Pendente';
-
-          }
-
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
 
-        $this->pdf->Cell(65,  12,  $fl_situacao, 'LR', 0, 'C');
-        $this->pdf->Cell(65,  12,   $dt_despesa_formatada, 'LR', 0, 'C');
+        $this->pdf->Cell(140,  12,   $dt_despesa_formatada, 'LR', 0, 'C');
         $this->pdf->Cell(135, 12, utf8_decode($evento->descricao), 'LR', 0, 'C');
-        $this->pdf->Cell(155,  12,   utf8_decode($item->descricao), 'LR', 0, 'C');
-        $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->valor, 2), 'LR', 0, 'C');
-        $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->saldo, 2), 'LR', 0, 'C');
+        $this->pdf->Cell(135,  12,   utf8_decode($item->descricao), 'LR', 0, 'C');
+        $this->pdf->Cell(135,  12, 'R$ ' . number_format($item->valor, 2), 'LR', 0, 'C');
 
         $this->count_produtos++;
     }
@@ -364,16 +334,14 @@ class DespesaMap  extends TPage
             for ($n = 0; $n < 20 - $this->count_produtos; $n++) {
                 $this->pdf->Ln(12);
                 $this->pdf->SetX(20);
-                $this->pdf->Cell(65,  12, '', 'LR', 0, 'C');
-                $this->pdf->Cell(65,  12, '', 'LR', 0, 'C');
+                $this->pdf->Cell(140,  12, '', 'LR', 0, 'C');
                 $this->pdf->Cell(135, 12, '', 'LR', 0, 'L');
-                $this->pdf->Cell(155,  12, '', 'LR', 0, 'C');
-                $this->pdf->Cell(65,  12, '', 'LR', 0, 'R');
-                $this->pdf->Cell(65,  12, '', 'LR', 0, 'R');
+                $this->pdf->Cell(135,  12, '', 'LR', 0, 'C');
+                $this->pdf->Cell(135,  12, '', 'LR', 0, 'R');
             }
         }
         $this->pdf->Ln(12);
-        $this->pdf->Line(20, $this->pdf->GetY(), 570, $this->pdf->GetY());
+        $this->pdf->Line(20, $this->pdf->GetY(), 565, $this->pdf->GetY());
     }
 
     public function addRodapeNota()

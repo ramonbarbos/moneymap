@@ -24,10 +24,11 @@ class CartoesCredito extends TRecord
 
     }
 
-    
+           
     public function get_banco()
     {
         return Bancos::find($this->banco_associado);
     }
+ 
     
 }

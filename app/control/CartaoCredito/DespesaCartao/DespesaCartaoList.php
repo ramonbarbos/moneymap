@@ -88,7 +88,7 @@ class DespesaCartaoList extends TPage
         //Criando colunas da datagrid
         $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
         $column_2 = new TDataGridColumn('cpf', 'CPF', 'left',);
-        $column_3 = new TDataGridColumn('id_cartao_credito', 'Tipo', 'left',);
+        $column_3 = new TDataGridColumn('cartao->nome_cartao', 'Cartão', 'left',);
         $column_4 = new TDataGridColumn('anoMes', 'Mês', 'left',);
         $column_5 = new TDataGridColumn('valor_total', 'Despesas', 'left',);
 
@@ -116,7 +116,7 @@ class DespesaCartaoList extends TPage
 
         $action1 = new TDataGridAction(['DespesaCartaoView', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
-        $action3 = new TDataGridAction(['DespesaMap', 'onReload'], ['id' => '{id}']);
+        $action3 = new TDataGridAction(['DespesaCartaoMap', 'onReload'], ['id' => '{id}']);
 
         //Adicionando a ação na tela
         $this->datagrid->addAction($action1, _t('Edit'), 'fa:edit blue');

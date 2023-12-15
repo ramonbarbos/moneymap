@@ -10,11 +10,11 @@
       <menuitem label="Ficha Cadastral">
         <action>FichaCadastralList</action>
       </menuitem>
-      <menuitem label="Folhas">
-        <action>FolhaList</action>
-      </menuitem>
       <menuitem label="Eventos">
         <action>EventoList</action>
+      </menuitem>
+      <menuitem label="Folhas">
+        <action>FolhaList</action>
       </menuitem>
       <menuitem label="Cartão de Credito">
         <menu>
@@ -26,6 +26,9 @@
           </menuitem>
           <menuitem label="Nova Despesa">
             <action>DespesaCartaoView</action>
+          </menuitem>
+          <menuitem label="Mapa">
+            <action>DespesaCartaoMap</action>
           </menuitem>
         </menu>
       </menuitem>
