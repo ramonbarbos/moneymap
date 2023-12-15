@@ -32,7 +32,7 @@ use Adianti\Widget\Wrapper\TDBCombo;
 use Adianti\Widget\Wrapper\TDBUniqueSearch;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class DespesaView extends TPage
+class DespesaCartaoView extends TPage
 {
   private $form;
   private $fieldlist;
@@ -48,25 +48,27 @@ class DespesaView extends TPage
     parent::__construct();
 
     // create form and table container
-    $this->form = new BootstrapFormBuilder('my_form');
-    $this->form->setFormTitle('Novas Despesas');
+    $this->form = new BootstrapFormBuilder('my_form_despesa_cartao');
+    $this->form->setFormTitle('Novas Despesas do Cartão');
     $this->form->setClientValidation(true);
     $this->form->setColumnClasses(3, ['col-sm-3', 'col-sm-3', 'col-sm-3', 'col-sm-3']);
 
     $this->setDatabase('sample');
-    $this->setActiveRecord('Despesa');
+    $this->setActiveRecord('DespesaCartao');
 
 
     // Criação de fields
     $id = new TEntry('id');
 
-    $tp_folha         = new TDBUniqueSearch('tp_folha', 'sample', 'TipoFolha', 'id', 'descricao');
-    $tp_folha->addValidation('anoMes', new TRequiredValidator);
-    $tp_folha->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
+
+    $cartao         = new TDBUniqueSearch('id_cartao_credito', 'sample', 'CartoesCredito', 'id', 'id');
+    $cartao->addValidation('cartao', new TRequiredValidator);
+    $cartao->setChangeAction(new TAction(['DespesaCartaoService', 'onCheckCPF']));
 
     $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
     $anoMes->addValidation('anoMes', new TRequiredValidator);
-    $anoMes->setChangeAction(new TAction(['DespesaService', 'onCheckCPF']));
+    $anoMes->setChangeAction(new TAction(['DespesaCartaoService', 'onCheckCPF']));
+
 
 
     if (isset($param['key'])) {
@@ -75,36 +77,31 @@ class DespesaView extends TPage
     } else {
 
       $cpf         = new TCombo('cpf');
-      $cpf->setChangeAction(new TAction(['DespesaService', 'onCPFChange']));
+      $cpf->setChangeAction(new TAction(['DespesaCartaoService', 'onCPFChange']));
     }
 
 
-    $vl_despesa = new TEntry('vl_despesa');
-    $vl_salario = new TEntry('vl_salario');
+    $valor_total = new TEntry('valor_total');
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('Folha')], [$tp_folha]);
+    $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('Cartão')], [$cartao]);
     $this->form->addFields([new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
-    $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Despesa')], [$vl_despesa]);
+    $this->form->addFields([new TLabel('Total')], [$valor_total]);
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
     $id->setSize('100%');
-    $tp_folha->setSize('100%');
-    $tp_folha->setMinLength(0);
+
     $cpf->addValidation('cpf', new TRequiredValidator);
-    // $cpf->setMinLength(0);
     //$cpf->setMask('<b>{cpf}</b>');
     $cpf->setSize('100%');
     $anoMes->setMinLength(0);
+    $cartao->setMinLength(0);
 
     $anoMes->setSize('100%');
 
-    $vl_despesa->setEditable(false);
-    $vl_despesa->setNumericMask(2, '.', '', false);
-    $vl_salario->setEditable(false);
-    $vl_salario->setNumericMask(2, '.', '', false);
-
+    $valor_total->setEditable(false);
+    $valor_total->setNumericMask(2, '.', '', false);
 
     $uniq = new THidden('uniq[]');
 
@@ -120,30 +117,18 @@ class DespesaView extends TPage
 
     $valor = new TEntry('valor[]');
     $valor->setNumericMask(2, '.', '', false);
-    $exit_action = new TAction(array('DespesaService', 'onValorChange'));
-    $valor->setExitAction($exit_action);
+   
     $valor->setSize('100%');
     $valor->style = 'text-align: right';
 
-    $saldo = new TEntry('saldo[]');
-    $saldo->setNumericMask(2, '.', '', false);
-    $saldo->setSize('100%');
-    $saldo->style = 'text-align: right';
-
+   
     $dt_despesa = new TDate('dt_despesa[]');
     $dt_despesa->setMask('dd/mm/yyyy', false);
     //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
 
-    $fl_situacao = new TCombo('fl_situacao[]');
 
-    //$fl_situacao  = new TDBCheckGroup('fl_situacao', 'sample', 'ItemDespesa', 'fl_situacao', 'fl_situacao');
-    $items = [0 => 'Pendente', 1 => 'Pago'];
-    $fl_situacao->setSize('100%');
 
-    $fl_situacao->setValue(0);
-    $fl_situacao->addItems($items);
-    // $fl_situacao->setUseSwitch(true, 'blue');
 
 
     $this->fieldlist = new TFieldList;
@@ -151,22 +136,18 @@ class DespesaView extends TPage
     $this->fieldlist->width = '100%';
     $this->fieldlist->name  = 'my_field_list';
     $this->fieldlist->addField('<b>Unniq</b>',  $uniq,   ['width' => '0%', 'uniqid' => true]);
-    $this->fieldlist->addField('<b>Situação</b>',   $fl_situacao,   ['width' => '10%']);
     $this->fieldlist->addField('<b>Data</b>',   $dt_despesa,   ['width' => '15%']);
     $this->fieldlist->addField('<b>C.Custo</b>',  $evento_id,  ['width' => '25%']);
     $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '25%']);
     $this->fieldlist->addField('<b>Valor</b>', $valor, ['width' => '15%', 'sum' => true]);
-    $this->fieldlist->addField('<b>Saldo</b>', $saldo, ['width' => '25%']);
 
     // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'onTotalUpdate']));
 
     $this->fieldlist->enableSorting();
 
-    $this->form->addField($fl_situacao);
     $this->form->addField($evento_id);
     $this->form->addField($descricao);
     $this->form->addField($valor);
-    $this->form->addField($saldo);
     $this->form->addField($dt_despesa);
 
     //$dt_despesa->addValidation('Data', new TRequiredListValidator);
@@ -194,7 +175,7 @@ class DespesaView extends TPage
     $bt5b->style = 'background-color: grey; color: white';
 
     $bt5b->setLabel('Voltar');
-    $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaList');");
+    $bt5b->addFunction("__adianti_load_page('index.php?class=DespesaCartaoList');");
     $this->form->addAction('Save', new TAction([$this, 'onSave'], ['static' => '1']), 'fa:save blue');
     $this->form->addAction('Clear', new TAction([$this, 'onClear']), 'fa:eraser red');
     $this->form->addAction('Mapa', new TAction(['DespesaMap', 'onReload'], ['id' => '{id}']), 'fa:light fa-map green');
@@ -240,15 +221,14 @@ class DespesaView extends TPage
       $this->form->validate();
 
 
-      $despesa = new Despesa;
+      $despesa = new DespesaCartao;
       $despesa->fromArray((array) $data);
-      $folha = Folha::where('cpf', '=', $data->cpf)
-        ->where('anoMes', '=', $data->anoMes)->first();
+      $cartao = CartoesCredito::where('cpf', '=', $data->cpf)->first();
 
 
 
       if (!empty($despesa->id)) {
-        ItemDespesa::where('despesa_id', '=', $despesa->id)->delete();
+        ItemDespesaCartao::where('despesa_cartao_id', '=', $despesa->id)->delete();
 
         $total = 0;
 
@@ -263,33 +243,19 @@ class DespesaView extends TPage
             } else {
               $dataFormatada = '';
             }
-
-            if( $param['fl_situacao'][$key]){
-              $fl_situacao =  $param['fl_situacao'][$key];
-
-              
-            }else{
-              $fl_situacao = 0;
-             
-            }
-
            
-            $item = new ItemDespesa;
-            $item->despesa_id   = $despesa->id;
+            $item = new ItemDespesaCartao;
+            $item->despesa_cartao_id   = $despesa->id;
             $item->dt_despesa   = $dataFormatada;
             $item->evento_id   = $param['evento_id'][$key];
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
-            $item->saldo      = (float) $param['saldo'][$key];
-            $item->fl_situacao      =  $fl_situacao;
 
             $item->store();
             $total +=  $item->valor;
-            $saldo =  $item->saldo;
           }
         }
-        $despesa->vl_despesa = $total;
-        $despesa->saldo =  $saldo;
+        $despesa->valor_total = $total;
         $despesa->store();
 
         new TMessage('info', 'Alterado com sucesso', $this->afterSaveAction); //$this->afterSaveAction
@@ -297,7 +263,7 @@ class DespesaView extends TPage
       } else {
         $despesa->store();
 
-        ItemDespesa::where('despesa_id', '=', $despesa->id)->delete();
+        ItemDespesaCartao::where('despesa_cartao_id', '=', $despesa->id)->delete();
 
         $total = 0;
 
@@ -313,32 +279,23 @@ class DespesaView extends TPage
               $dataFormatada = '';
             }
 
-
-            if ($param['fl_situacao'][$key]) {
-              $fl_situacao =  $param['fl_situacao'][$key];
-            } else {
-              $fl_situacao = 0;
-            }
-
-            $item = new ItemDespesa;
-            $item->despesa_id   = $despesa->id;
+            $item = new ItemDespesaCartao;
+            $item->despesa_cartao_id   = $despesa->id;
             $item->dt_despesa   = $dataFormatada;
             $item->evento_id   = $param['evento_id'][$key];
             $item->descricao   = $param['descricao'][$key];
             $item->valor      = (float) $param['valor'][$key];
-            $item->saldo      = (float) $param['saldo'][$key];
-            $item->fl_situacao      =  $fl_situacao;
             $item->store();
             $total +=  $item->valor;
           }
         }
 
 
-        $despesa->vl_despesa = $total;
-        $despesa->folha_id = $folha->id;
+        $despesa->valor_total = $total;
+        $despesa->id_cartao_credito = $cartao->id;
         $despesa->store();
 
-        TForm::sendData('my_form', (object) ['id' => $despesa->id]);
+        TForm::sendData('my_form_despesa_cartao', (object) ['id' => $despesa->id]);
         new TMessage('info', 'Registos Salvos', $this->afterSaveAction); //
       }
 
@@ -360,13 +317,12 @@ class DespesaView extends TPage
       if (isset($param['key'])) {
         $key = $param['key'];
 
-        $object = new Despesa($key);
-        $item_despesas = ItemDespesa::where('despesa_id', '=', $object->id)->orderBy(1)->load();
-        $folha   =  Folha::where('cpf', '=', $object->cpf)
-          ->where('anoMes', '=', $object->anoMes)
-          ->where('tp_folha', '=', $object->tp_folha)->first();
+        $object = new DespesaCartao($key);
+        $item_despesas = ItemDespesaCartao::where('despesa_cartao_id', '=', $object->id)->orderBy(1)->load();
+ 
         $this->form->getField('anoMes')->setEditable(false);
-        $this->form->getField('tp_folha')->setEditable(false);
+        $this->form->getField('id_cartao_credito')->setEditable(false);
+
         //$this->form->getField('cpf')->setEditable(false);
 
 
@@ -377,7 +333,6 @@ class DespesaView extends TPage
         $data->descricao = [];
         $data->valor = [];
         $data->saldo = [];
-        $data->fl_situacao = [];
 
 
         foreach ($item_despesas as $item) {
@@ -396,15 +351,13 @@ class DespesaView extends TPage
           $data->evento_id[] = $item->evento_id;
           $data->descricao[] = $item->descricao;
           $data->valor[] = $item->valor;
-          $data->saldo[] = $item->saldo;
-          $data->fl_situacao[] =  $item->fl_situacao;
+         
 
       
-          TForm::sendData('my_form', $data);
+          TForm::sendData('my_form_despesa_cartao', $data);
         }
 
-        TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
-        TForm::sendData('my_form', (object) ['saldo' => '']);
+      
 
         $this->form->setData($object);
         TTransaction::close();

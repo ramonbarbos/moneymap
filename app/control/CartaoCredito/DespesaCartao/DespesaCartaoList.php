@@ -26,7 +26,7 @@ use Adianti\Widget\Wrapper\TDBUniqueSearch;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Wrapper\BootstrapFormBuilder;
 
-class DespesaList extends TPage
+class DespesaCartaoList extends TPage
 {
     private $form;
     private $datagrid;
@@ -44,18 +44,18 @@ class DespesaList extends TPage
 
         //Conexão com a tabela
         $this->setDatabase('sample');
-        $this->setActiveRecord('Despesa');
+        $this->setActiveRecord('DespesaCartao');
         $this->setDefaultOrder('id', 'asc');
         $this->setLimit(10);
 
         $this->addFilterField('cpf', 'like', 'cpf');
         $this->addFilterField('anoMes', 'like', 'anoMes');
-        $this->addFilterField('tp_folha', '=', 'tp_folha');
+        //$this->addFilterField('tp_folha', '=', 'tp_folha');
 
 
         //Criação do formulario 
         $this->form = new BootstrapFormBuilder('form_search_despesa');
-        $this->form->setFormTitle('Despesa');
+        $this->form->setFormTitle('Despesas do Cartão');
 
         //Criação de fields
         $campo1 =  new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
@@ -77,7 +77,7 @@ class DespesaList extends TPage
         $btn->class = 'btn btn-sm btn-primary';
         // $this->form->addActionLink(_t('New'), new TAction(['DespesaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus green'  );
 
-        $this->form->addActionLink(_t('New'), new TAction(['DespesaView', 'onEdit'], ['register_state' => 'false']), 'fa:plus green');
+        $this->form->addActionLink(_t('New'), new TAction(['DespesaCartaoView', 'onEdit'], ['register_state' => 'false']), 'fa:plus green');
 
 
 
@@ -88,10 +88,9 @@ class DespesaList extends TPage
         //Criando colunas da datagrid
         $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
         $column_2 = new TDataGridColumn('cpf', 'CPF', 'left',);
-        $column_2 = new TDataGridColumn('folha->descricao', 'Tipo', 'left',);
-        $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left',);
-        $column_4 = new TDataGridColumn('vl_despesa', 'Despesas', 'left',);
-        $column_5 = new TDataGridColumn('saldo', 'Saldo', 'left',);
+        $column_3 = new TDataGridColumn('id_cartao_credito', 'Tipo', 'left',);
+        $column_4 = new TDataGridColumn('anoMes', 'Mês', 'left',);
+        $column_5 = new TDataGridColumn('valor_total', 'Despesas', 'left',);
 
         $formato_vl_despesa = function ($value) {
             if (is_numeric($value)) {
@@ -99,44 +98,9 @@ class DespesaList extends TPage
             }
             return $value;
         };
-        $column_4->setTransformer($formato_vl_despesa);
+        $column_5->setTransformer($formato_vl_despesa);
 
-        $formato_vl_saldo = function ($value) {
-            if (is_numeric($value)) {
-                return 'R$ ' . number_format($value, 2, ',', '.');
-            }
-            return $value;
-        };
-        $column_5->setTransformer($formato_vl_saldo);
 
-        $column_3->setTransformer(function ($value, $object, $row) {
-            // Verifica se os dois últimos caracteres da string são '01'
-            if (substr($value, -2) === '01') {
-              return "<span style='color:black'>JANEIRO</span>";
-            } else if (substr($value, -2) === '02') {
-              return "<span style='color:black'>FERVEREIRO</span>";
-            } else if (substr($value, -2) === '03') {
-              return "<span style='color:black'>MARÇO</span>";
-            } else if (substr($value, -2) === '04') {
-              return "<span style='color:black'>ABRIL</span>";
-            }else if (substr($value, -2) === '05') {
-              return "<span style='color:black'>MAIO</span>";
-            }else if (substr($value, -2) === '06') {
-              return "<span style='color:black'>JUNHO</span>";
-            }else if (substr($value, -2) === '07') {
-              return "<span style='color:black'>JULHO</span>";
-            }else if (substr($value, -2) === '08') {
-              return "<span style='color:black'>AGOSTO</span>";
-            }else if (substr($value, -2) === '09') {
-              return "<span style='color:black'>SETEMBRO</span>";
-            }else if (substr($value, -2) === '10') {
-              return "<span style='color:black'>OUTUBRO</span>";
-            }else if (substr($value, -2) === '11') {
-              return "<span style='color:black'>NOVEMBRO</span>";
-            }else if (substr($value, -2) === '12') {
-              return "<span style='color:black'>DEZEMBRO</span>";
-            }
-          });
 
 
         //add coluna da datagrid
@@ -150,7 +114,7 @@ class DespesaList extends TPage
         $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
         $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'cpf']);
 
-        $action1 = new TDataGridAction(['DespesaView', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
+        $action1 = new TDataGridAction(['DespesaCartaoView', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
         $action3 = new TDataGridAction(['DespesaMap', 'onReload'], ['id' => '{id}']);
 
@@ -223,8 +187,8 @@ class DespesaList extends TPage
             if (isset($param['id'])) {
                 $id = $param['id'];
 
-                $despesa = new Despesa($id);
-                ItemDespesa::where('despesa_id', '=', $despesa->id)->delete();
+                $despesa = new DespesaCartao($id);
+                ItemDespesaCartao::where('despesa_cartao_id', '=', $despesa->id)->delete();
                 $despesa->delete();
                 new TMessage('info', 'Registo Excluido', $this->afterSaveAction); //$this->afterSaveAction
                 $this->onReload([]);

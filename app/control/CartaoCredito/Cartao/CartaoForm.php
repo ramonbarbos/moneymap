@@ -62,12 +62,13 @@ class CartaoForm extends TPage
     $numero_cartao = new TEntry('numero_cartao');
     $data_validade = new TDate('data_validade');
     $banco_associado = new TDBUniqueSearch('banco_associado', 'sample', 'Bancos', 'id', 'nome');
+    $cpf = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
     
   
 
-    $this->form->addFields([new TLabel('Codigo')], [$id],);
-    $this->form->addFields(  [new TLabel('Titular (*)')], [$nome_titular], [new TLabel('Numero (*)')], [$numero_cartao] );
-    $this->form->addFields( [new TLabel('Data')], [$data_validade], [new TLabel('Banco')],[$banco_associado],);
+    $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('Banco')],[$banco_associado]);
+    $this->form->addFields(  [new TLabel('Titular (*)')], [$nome_titular], [new TLabel('CPF (*)')], [$cpf] );
+    $this->form->addFields( [new TLabel('Numero (*)')], [$numero_cartao], [new TLabel('Data')], [$data_validade],);
     //$this->form->add($a);
   
 
@@ -79,6 +80,8 @@ class CartaoForm extends TPage
     $data_validade->setSize('100%');
     $banco_associado->setSize('100%');
     $banco_associado->setMinLength(0);
+    $cpf->setSize('100%');
+    $cpf->setMinLength(0);
 
     // Adicionar botão de salvar
     $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:plus green');

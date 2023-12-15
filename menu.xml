@@ -21,6 +21,12 @@
           <menuitem label="Cadastro de Cartão">
             <action>CartaoList</action>
           </menuitem>
+          <menuitem label="Listagem">
+            <action>DespesaCartaoList</action>
+          </menuitem>
+          <menuitem label="Nova Despesa">
+            <action>DespesaCartaoView</action>
+          </menuitem>
         </menu>
       </menuitem>
       <menuitem label="Despesas">

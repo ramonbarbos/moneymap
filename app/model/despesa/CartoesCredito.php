@@ -15,6 +15,7 @@ class CartoesCredito extends TRecord
     {
         parent::__construct($id, $callObjectLoad);
         parent::addAttribute('nome_titular');
+        parent::addAttribute('cpf');
         parent::addAttribute('numero_cartao');
         parent::addAttribute('data_validade');
         parent::addAttribute('banco_associado');

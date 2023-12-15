@@ -81,9 +81,10 @@ class CartaoList extends TPage
     //Criando colunas da datagrid
     $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
     $column_2 = new TDataGridColumn('nome_titular', 'Titular', 'left',);
-    $column_3 = new TDataGridColumn('numero_cartao', 'Numero', 'left',);
-    $column_4 = new TDataGridColumn('data_validade', 'Validade', 'left',);
-    $column_5 = new TDataGridColumn('banco->nome', 'Banco', 'left',);
+    $column_3 = new TDataGridColumn('cpf', 'CPF', 'left',);
+    $column_4 = new TDataGridColumn('numero_cartao', 'Numero', 'left',);
+    $column_5 = new TDataGridColumn('data_validade', 'Validade', 'left',);
+    $column_6 = new TDataGridColumn('banco->nome', 'Banco', 'left',);
     //$column_4 = new TDataGridColumn('incidencia', 'Incidencia', 'left',);
 
    
@@ -93,10 +94,12 @@ class CartaoList extends TPage
     $this->datagrid->addColumn($column_3);
     $this->datagrid->addColumn($column_4);
     $this->datagrid->addColumn($column_5);
+    $this->datagrid->addColumn($column_6);
 
     //Criando ações para o datagrid
     $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
     $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'nome_titular']);
+    $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'cpf']);
 
     $action1 = new TDataGridAction(['CartaoForm', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
     $action2 = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
