@@ -19,6 +19,9 @@ class CartoesCredito extends TRecord
         parent::addAttribute('numero_cartao');
         parent::addAttribute('data_validade');
         parent::addAttribute('banco_associado');
+        parent::addAttribute('nome_cartao');
+        parent::addAttribute('limite_credito');
+
     }
 
     

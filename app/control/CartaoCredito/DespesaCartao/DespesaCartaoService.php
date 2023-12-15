@@ -59,10 +59,10 @@ class DespesaCartaoService
 
 
           $cartao = CartoesCredito::where('cpf', 'like', $params['cpf'])
-                                 ->where('banco_associado', '=', $params['id_cartao_credito'])->first();
+                                 ->where('id', '=', $params['id_cartao_credito'])->first();
 
               //Validar banco
-          if (@$cartao->cpf == $params['cpf'] && @$cartao->banco_associado == $params['id_cartao_credito']) {
+          if (@$cartao->cpf == $params['cpf'] && @$cartao->id == $params['id_cartao_credito']) {
 
             TFieldList::enableField('my_field_list');
 
@@ -125,10 +125,19 @@ class DespesaCartaoService
                     $dataF->valor = [];
     
                     foreach ($item_folhas as $item) {
+
+                      //RESOLVER ESSA LOGICA
+
+                      $evento = Evento::where('id', '=', $item->evento_id)
+                                      ->where('cartao', '=', $params['id_cartao_credito'])->first();
+
+                      if(@$evento->id == $item->evento_id){
                       TFieldList::addRows('my_field_list', 1);
-    
-                      $dataF->evento_id[] = $item->evento_id;
-                      $dataF->valor[] = $item->valor;
+
+                        $dataF->evento_id[] = $item->evento_id;
+                        $dataF->valor[] = $item->valor;
+                      }
+                    
                     }
                     TForm::sendData('my_form_despesa_cartao',  $dataF,  false, true, 300);
     

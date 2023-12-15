@@ -18,7 +18,12 @@ class Evento extends TRecord
         parent::addAttribute('fixo');
         parent::addAttribute('incidencia');
         parent::addAttribute('formula');
+        parent::addAttribute('cartao');
     }
 
-    
+        
+    public function get_banco()
+    {
+        return CartoesCredito::find($this->cartao);
+    }
 }

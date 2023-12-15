@@ -25,6 +25,7 @@ use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TFieldList;
 use Adianti\Widget\Form\TForm;
 use Adianti\Widget\Form\TFormSeparator;
+use Adianti\Widget\Form\THidden;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Form\TPassword;
 use Adianti\Widget\Util\TTextDisplay;
@@ -63,12 +64,15 @@ class CartaoForm extends TPage
     $data_validade = new TDate('data_validade');
     $banco_associado = new TDBUniqueSearch('banco_associado', 'sample', 'Bancos', 'id', 'nome');
     $cpf = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
+    $nome_cartao = new THidden('nome_cartao');
     
   
 
     $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('Banco')],[$banco_associado]);
     $this->form->addFields(  [new TLabel('Titular (*)')], [$nome_titular], [new TLabel('CPF (*)')], [$cpf] );
     $this->form->addFields( [new TLabel('Numero (*)')], [$numero_cartao], [new TLabel('Data')], [$data_validade],);
+    $this->form->addFields([new TLabel('')], [$nome_cartao]);
+
     //$this->form->add($a);
   
 
@@ -101,8 +105,31 @@ class CartaoForm extends TPage
     parent::add($container);
   }
 
+  public function onSave($param)
+  {
+    try {
+      TTransaction::open('sample');
+
+      $data = $this->form->getData();
+      $this->form->validate();
 
 
+      $cartao = new CartoesCredito;
+      $cartao->fromArray((array) $data);
+      $banco = new Bancos($param['banco_associado']);
+      $cartao->nome_cartao = $banco->nome;
+      // if (!empty($cartao->id)) {
+
+      // }
+      $cartao->store();
+      new TMessage('info', 'Registos Salvos', $this->afterSaveAction); //
+      TTransaction::close();
+    } catch (Exception $e) {
+      new TMessage('error', $e->getMessage());
+      $this->form->setData($this->form->getData());
+      TTransaction::rollback();
+    }
+  }
 
   // Método fechar
   public function onClose($param)

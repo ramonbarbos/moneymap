@@ -61,7 +61,7 @@ class DespesaCartaoView extends TPage
     $id = new TEntry('id');
 
 
-    $cartao         = new TDBUniqueSearch('id_cartao_credito', 'sample', 'CartoesCredito', 'id', 'id');
+    $cartao         = new TDBUniqueSearch('id_cartao_credito', 'sample', 'CartoesCredito', 'id', 'nome_cartao');
     $cartao->addValidation('cartao', new TRequiredValidator);
     $cartao->setChangeAction(new TAction(['DespesaCartaoService', 'onCheckCPF']));
 
@@ -126,9 +126,6 @@ class DespesaCartaoView extends TPage
     $dt_despesa->setMask('dd/mm/yyyy', false);
     //$dt_despesa->setDatabaseMask('yyyy-mm-dd');
     $dt_despesa->setSize('100%');
-
-
-
 
 
     $this->fieldlist = new TFieldList;
