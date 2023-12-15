@@ -158,23 +158,56 @@ class DespesaService
               $folha  =  Folha::where('cpf', 'like', $params['cpf'])
                 ->where('anoMes', '=', $params['anoMes'])
                 ->where('tp_folha', '=', $params['tp_folha'])->first();
+
               $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
                 ->where('tipo', 'like', 'D')->orderby(1)
                 ->load();
 
+
+              $despesaCartao  =  DespesaCartao::where('cpf', 'like', $params['cpf'])
+                ->where('anoMes', '=', $params['anoMes'])->load();
+
+               
               if ($item_folhas || $folha) {
                 TFieldList::clear('my_field_list');
-
                 $dataF = new stdClass;
+             
+               
                 $dataF->evento_id = [];
                 $dataF->valor = [];
 
                 foreach ($item_folhas as $item) {
-                  TFieldList::addRows('my_field_list', 1);
 
-                  $dataF->evento_id[] = $item->evento_id;
-                  $dataF->valor[] = $item->valor;
+                  //NÃO ENTRAR PARCELAS DE CARTÃO
+                  $evento = Evento::where('id', '=', $item->evento_id)
+                    ->where('cartao', '=', ' ')->first();
+
+                  if (@$evento->id == $item->evento_id) {
+                    TFieldList::addRows('my_field_list', 1);
+
+                
+                      $dataF->evento_id[] = $item->evento_id;
+                      $dataF->valor[] = $item->valor;
+
+    
+                  }
+                  
+                 
                 }
+
+                foreach ($despesaCartao as $despesas){
+                  if($despesas){
+                    TFieldList::addRows('my_field_list', 1);
+                    
+                    $evento = Evento::where('cartao','=', $despesas->id_cartao_credito)->first();
+
+                    TToast::show('info', 'Despesa de cartão encontrado');
+                    $dataF->evento_id[] =  $evento->id;
+                    $dataF->valor[] = $despesas->valor_total;
+                   
+                  }
+                }
+                
                 TForm::sendData('my_form',  $dataF,  false, true, 300);
 
                 TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);

@@ -59,19 +59,19 @@ class DespesaCartaoService
 
 
           $cartao = CartoesCredito::where('cpf', 'like', $params['cpf'])
-                                 ->where('id', '=', $params['id_cartao_credito'])->first();
+            ->where('id', '=', $params['id_cartao_credito'])->first();
 
-              //Validar banco
+          //Validar banco
           if (@$cartao->cpf == $params['cpf'] && @$cartao->id == $params['id_cartao_credito']) {
 
             TFieldList::enableField('my_field_list');
 
             $despesa = DespesaCartao::where('cpf', '=', $params['cpf'])
-                   ->where('id_cartao_credito', '=', $params['id_cartao_credito'])->first();
+              ->where('id_cartao_credito', '=', $params['id_cartao_credito'])->first();
 
-          
 
-            if ($params['cpf'] ==  @$despesa->cpf &&  $params['id_cartao_credito'] == $despesa->id_cartao_credito&&  $params['anoMes'] == $despesa->anoMes) { 
+
+            if ($params['cpf'] ==  @$despesa->cpf &&  $params['id_cartao_credito'] == $despesa->id_cartao_credito &&  $params['anoMes'] == $despesa->anoMes) {
               //Já existe despesa  com o CPF
 
               $item_despesas = ItemDespesaCartao::where('despesa_cartao_id', '=', $despesa->id)->orderBy(1)->load();
@@ -108,48 +108,46 @@ class DespesaCartaoService
               TToast::show('info', 'Folha não encontrada');
             } else { //Quando tiver Folha mas não tem Despesa com o CPF
 
-                  //verificar se existe desconto vinculado ao cpf
-                  $folha  =  Folha::where('cpf', 'like', $params['cpf'])
-                  ->where('anoMes', '=', $params['anoMes'])->first();
+              //verificar se existe desconto vinculado ao cpf
+              $folha  =  Folha::where('cpf', 'like', $params['cpf'])
+                ->where('anoMes', '=', $params['anoMes'])->first();
 
-                $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
-                  ->where('parcela', '<>', ' ')
-                  ->where('tipo', 'like', 'D')->orderby(1)
-                  ->load();
+              $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
+                ->where('parcela', '<>', ' ')
+                ->where('tipo', 'like', 'D')->orderby(1)
+                ->load();
 
-                  if ($item_folhas || $folha) {
-                    TFieldList::clear('my_field_list');
-    
-                    $dataF = new stdClass;
-                    $dataF->evento_id = [];
-                    $dataF->valor = [];
-    
-                    foreach ($item_folhas as $item) {
+                
+              if ($item_folhas || $folha) {
+                TFieldList::clear('my_field_list');
 
-                      //RESOLVER ESSA LOGICA
+                $dataF = new stdClass;
+                $dataF->evento_id = [];
+                $dataF->valor = [];
 
-                      $evento = Evento::where('id', '=', $item->evento_id)
-                                      ->where('cartao', '=', $params['id_cartao_credito'])->first();
+                foreach ($item_folhas as $item) {
 
-                      if(@$evento->id == $item->evento_id){
-                      TFieldList::addRows('my_field_list', 1);
+                  // ENTRAR SOMENTE PARCELAS DE CARTAO
 
-                        $dataF->evento_id[] = $item->evento_id;
-                        $dataF->valor[] = $item->valor;
-                      }
-                    
-                    }
-                    TForm::sendData('my_form_despesa_cartao',  $dataF,  false, true, 300);
-    
-                    TForm::sendData('my_form_despesa_cartao', (object) ['id' => '']);
-                    TForm::sendData('my_form_despesa_cartao', (object) ['valor_total' => '']);
-                  } else {
-                    TFieldList::clear('my_field_list');
+                  $evento = Evento::where('id', '=', $item->evento_id)
+                    ->where('cartao', '=', $params['id_cartao_credito'])->first();
+
+                  if (@$evento->id == $item->evento_id) {
+                    TFieldList::addRows('my_field_list', 1);
+
+                    $dataF->evento_id[] = $item->evento_id;
+                    $dataF->valor[] = $item->valor;
                   }
-              
+                }
+                TForm::sendData('my_form_despesa_cartao',  $dataF,  false, true, 300);
+
+                TForm::sendData('my_form_despesa_cartao', (object) ['id' => '']);
+                TForm::sendData('my_form_despesa_cartao', (object) ['valor_total' => '']);
+              } else {
+                TFieldList::clear('my_field_list');
+              }
+
               TFieldList::clear('my_field_list');
-              
-             
             }
           } else {
             TFieldList::clear('my_field_list');
