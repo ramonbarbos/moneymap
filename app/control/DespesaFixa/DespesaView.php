@@ -112,6 +112,8 @@ class DespesaView extends TPage
     $criteria_event->setProperty('order', 'id');
     $criteria_event->add(new TFilter('incidencia', 'like', 'D'));
     $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao', null, $criteria_event);
+    $evento_id->setChangeAction(new TAction(['DespesaService', 'onCheckCartao']));
+
     $evento_id->enableSearch();
     $evento_id->setSize('100%');
 
@@ -416,4 +418,7 @@ class DespesaView extends TPage
       TTransaction::rollback();
     }
   }
+
+ 
+
 }

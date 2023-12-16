@@ -167,12 +167,12 @@ class DespesaService
               $despesaCartao  =  DespesaCartao::where('cpf', 'like', $params['cpf'])
                 ->where('anoMes', '=', $params['anoMes'])->load();
 
-               
+
               if ($item_folhas || $folha) {
                 TFieldList::clear('my_field_list');
                 $dataF = new stdClass;
-             
-               
+
+
                 $dataF->evento_id = [];
                 $dataF->valor = [];
 
@@ -185,29 +185,24 @@ class DespesaService
                   if (@$evento->id == $item->evento_id) {
                     TFieldList::addRows('my_field_list', 1);
 
-                
-                      $dataF->evento_id[] = $item->evento_id;
-                      $dataF->valor[] = $item->valor;
 
-    
+                    $dataF->evento_id[] = $item->evento_id;
+                    $dataF->valor[] = $item->valor;
                   }
-                  
-                 
                 }
 
-                foreach ($despesaCartao as $despesas){
-                  if($despesas){
+                foreach ($despesaCartao as $despesas) {
+                  if ($despesas) {
                     TFieldList::addRows('my_field_list', 1);
-                    
-                    $evento = Evento::where('cartao','=', $despesas->id_cartao_credito)->first();
+
+                    $evento = Evento::where('cartao', '=', $despesas->id_cartao_credito)->first();
 
                     TToast::show('info', 'Despesa de cartão encontrado');
                     $dataF->evento_id[] =  $evento->id;
                     $dataF->valor[] = $despesas->valor_total;
-                   
                   }
                 }
-                
+
                 TForm::sendData('my_form',  $dataF,  false, true, 300);
 
                 TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
@@ -272,5 +267,41 @@ class DespesaService
     }
 
     TTransaction::close();
+  }
+
+
+  public static function onCheckCartao($param)
+  {
+    try {
+      TTransaction::open('sample');
+
+
+      if ($param['evento_id']) {
+
+        var_dump($param['evento_id']);
+
+        foreach ($param['evento_id'] as $key => $item_id) {
+
+          $eventos = Evento::where('id','=', $key )->where('cartao', '<>', '0')->first();
+
+          $despesa = DespesaCartao::where('id_cartao_credito', '=', $eventos->cartao)->first();
+
+          TToast::show('info', 'Despesa de cartão encontrado');
+          $dataF = new stdClass;
+
+          $dataF->evento_id[] =  $eventos->id;
+          $dataF->valor[] = $despesa->valor_total;
+
+        }
+       // TForm::sendData('my_form',  $dataF,  false, true, 300);
+
+      }
+
+
+      TTransaction::close();
+    } catch (Exception $e) {
+      new TMessage('error', $e->getMessage());
+      TTransaction::rollback();
+    }
   }
 }

@@ -65,13 +65,14 @@ class CartaoForm extends TPage
     $banco_associado = new TDBUniqueSearch('banco_associado', 'sample', 'Bancos', 'id', 'nome');
     $cpf = new TDBUniqueSearch('cpf', 'sample', 'FichaCadastral', 'cpf', 'cpf');
     $nome_cartao = new THidden('nome_cartao');
+    $limite = new TEntry('limite_credito');
     
   
 
     $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('Banco')],[$banco_associado]);
     $this->form->addFields(  [new TLabel('Titular (*)')], [$nome_titular], [new TLabel('CPF (*)')], [$cpf] );
     $this->form->addFields( [new TLabel('Numero (*)')], [$numero_cartao], [new TLabel('Data')], [$data_validade],);
-    $this->form->addFields([new TLabel('')], [$nome_cartao]);
+    $this->form->addFields([new TLabel('Limite')], [$limite],[new TLabel('')], [$nome_cartao]);
 
     //$this->form->add($a);
   
@@ -81,12 +82,19 @@ class CartaoForm extends TPage
     $nome_titular->addValidation('nome_titular', new TRequiredValidator);
     $nome_titular->setSize('100%');
     $numero_cartao->setSize('100%');
-    $data_validade->setSize('100%');
+    $numero_cartao->addValidation('Numero', new TRequiredValidator);
+
     $banco_associado->setSize('100%');
     $banco_associado->setMinLength(0);
+    $banco_associado->addValidation('Banco', new TRequiredValidator);
     $cpf->setSize('100%');
     $cpf->setMinLength(0);
-
+    $cpf->addValidation('CPF', new TRequiredValidator);
+    $data_validade->addValidation('Validade', new TRequiredValidator);
+    $data_validade->setMask('yyyy/mm');
+    $data_validade->setDatabaseMask('yyyy-mm');
+    $data_validade->setSize('100%');
+    $limite->setNumericMask(2, '.', '', false);
     // Adicionar botão de salvar
     $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:plus green');
     $btn->class = 'btn btn-sm btn-primary';

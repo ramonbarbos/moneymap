@@ -51,7 +51,7 @@ class DespesaCartaoView extends TPage
     $this->form = new BootstrapFormBuilder('my_form_despesa_cartao');
     $this->form->setFormTitle('Novas Despesas do Cartão');
     $this->form->setClientValidation(true);
-    $this->form->setColumnClasses(3, ['col-sm-3', 'col-sm-3', 'col-sm-3', 'col-sm-3']);
+    $this->form->setColumnClasses(2, [ 'col-sm-6', 'col-sm-6']);
 
     $this->setDatabase('sample');
     $this->setActiveRecord('DespesaCartao');
@@ -84,15 +84,17 @@ class DespesaCartaoView extends TPage
     $valor_total = new TEntry('valor_total');
 
 
-    $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('Cartão')], [$cartao]);
+    $this->form->addFields([new TLabel('Codigo')], [$id],[new TLabel('Cartão (*)')], [$cartao]);
     $this->form->addFields([new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
-    $this->form->addFields([new TLabel('Total')], [$valor_total]);
+    $this->form->addFields([new TLabel('Total')], [$valor_total],[new TLabel('')]);
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
     $id->setSize('100%');
 
     $cpf->addValidation('cpf', new TRequiredValidator);
+    $anoMes->addValidation('mes', new TRequiredValidator);
+    $cartao->addValidation('cartao', new TRequiredValidator);
     //$cpf->setMask('<b>{cpf}</b>');
     $cpf->setSize('100%');
     $anoMes->setMinLength(0);

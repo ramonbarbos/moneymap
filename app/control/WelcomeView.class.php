@@ -64,17 +64,20 @@ class WelcomeView extends TPage
                 ->where('tp_folha', '=', $tp_folha)
                 ->where('cpf', '=', $cpf)->first();
 
-            $receita = $saldoAtual->saldo + $saldoAtual->vl_despesa;
+                if($saldoAtual){
+                    $receita = $saldoAtual->saldo + $saldoAtual->vl_despesa;
+
+                    $indicator1->enableSection('main', ['title' => 'Folha',    'icon' => 'cube', 'background' => 'orange', 'text' => 'SALDO ATUAL', 'value' => 'R$ ' . $saldoAtual->saldo]);
+
+                    $indicator2->enableSection('main', ['title' => 'Despesa',    'icon' => 'box', 'background' => 'blue', 'text' => 'RECEITAS', 'value' => 'R$ ' . $receita]);
+        
+                    $indicator3->enableSection('main', ['title' => 'Despesa',    'icon' => 'dollar-sign', 'background' => 'green', 'text' => 'DESPESAS', 'value' =>   'R$ ' . $saldoAtual->vl_despesa]);
+        
+                }
+
+                $html->enableSection('main', ['indicator1' => $indicator1, 'indicator2' => $indicator2, 'indicator3' => $indicator3]);
 
 
-
-            $indicator1->enableSection('main', ['title' => 'Folha',    'icon' => 'cube', 'background' => 'orange', 'text' => 'SALDO ATUAL', 'value' => 'R$ ' . $saldoAtual->saldo]);
-
-            $indicator2->enableSection('main', ['title' => 'Despesa',    'icon' => 'box', 'background' => 'blue', 'text' => 'RECEITAS', 'value' => 'R$ ' . $receita]);
-
-            $indicator3->enableSection('main', ['title' => 'Despesa',    'icon' => 'dollar-sign', 'background' => 'green', 'text' => 'DESPESAS', 'value' =>   'R$ ' . $saldoAtual->vl_despesa]);
-
-            $html->enableSection('main', ['indicator1' => $indicator1, 'indicator2' => $indicator2, 'indicator3' => $indicator3]);
 
             $container = new TVBox;
             $container->style = 'width: 100%';
