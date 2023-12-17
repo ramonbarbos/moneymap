@@ -407,7 +407,8 @@ class DespesaView extends TPage
           $data->fl_situacao[] =  $item->fl_situacao;
 
       
-          TForm::sendData('my_form', $data);
+          TForm::sendData('my_form', $data, false, true, 10);
+
         }
 
         TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);

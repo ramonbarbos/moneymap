@@ -86,7 +86,7 @@ class DespesaCartaoList extends TPage
         $this->datagrid->style = 'width: 100%';
 
         //Criando colunas da datagrid
-        $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
+       // $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
         $column_2 = new TDataGridColumn('cpf', 'CPF', 'left',);
         $column_3 = new TDataGridColumn('cartao->nome_cartao', 'Cartão', 'left',);
         $column_4 = new TDataGridColumn('anoMes', 'Mês', 'left',);
@@ -101,18 +101,46 @@ class DespesaCartaoList extends TPage
         $column_5->setTransformer($formato_vl_despesa);
 
 
-
+        $column_4->setTransformer(function ($value, $object, $row) {
+            // Verifica se os dois últimos caracteres da string são '01'
+            if (substr($value, -2) === '01') {
+              return "<span style='color:black'>JANEIRO</span>";
+            } else if (substr($value, -2) === '02') {
+              return "<span style='color:black'>FERVEREIRO</span>";
+            } else if (substr($value, -2) === '03') {
+              return "<span style='color:black'>MARÇO</span>";
+            } else if (substr($value, -2) === '04') {
+              return "<span style='color:black'>ABRIL</span>";
+            }else if (substr($value, -2) === '05') {
+              return "<span style='color:black'>MAIO</span>";
+            }else if (substr($value, -2) === '06') {
+              return "<span style='color:black'>JUNHO</span>";
+            }else if (substr($value, -2) === '07') {
+              return "<span style='color:black'>JULHO</span>";
+            }else if (substr($value, -2) === '08') {
+              return "<span style='color:black'>AGOSTO</span>";
+            }else if (substr($value, -2) === '09') {
+              return "<span style='color:black'>SETEMBRO</span>";
+            }else if (substr($value, -2) === '10') {
+              return "<span style='color:black'>OUTUBRO</span>";
+            }else if (substr($value, -2) === '11') {
+              return "<span style='color:black'>NOVEMBRO</span>";
+            }else if (substr($value, -2) === '12') {
+              return "<span style='color:black'>DEZEMBRO</span>";
+            }
+          });
 
         //add coluna da datagrid
-        $this->datagrid->addColumn($column_1);
+      //  $this->datagrid->addColumn($column_1);
         $this->datagrid->addColumn($column_2);
         $this->datagrid->addColumn($column_3);
         $this->datagrid->addColumn($column_4);
         $this->datagrid->addColumn($column_5);
 
         //Criando ações para o datagrid
-        $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
+       // $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
         $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'cpf']);
+        $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'anoMes']);
 
         $action1 = new TDataGridAction(['DespesaCartaoView', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
