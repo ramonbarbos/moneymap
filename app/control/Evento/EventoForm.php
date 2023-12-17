@@ -61,24 +61,39 @@ class EventoForm extends TPage
     $descricao = new TEntry('descricao');
     $fixo = new TCombo('fixo');
     $fixo->addItems(['0' => 'Não', '1' => 'Sim']);
+    $fixo->title  = 'O evento nao irá se repetir na folha';
+
     $incidencia = new TCombo('incidencia');
-    $incidencia->addItems(['DD' => 'Dedução','D' => 'Desconto', 'P' => 'Provento']);
+    $incidencia->addItems(['DD' => 'Dedução', 'D' => 'Desconto', 'P' => 'Provento']);
     $formula = new TEntry('formula');
+    $formula->title  = 'Operadores: {S - Salario} | {P - Previdencia} | {VL - Vale A/R}';
     $cartao         = new TDBUniqueSearch('cartao', 'sample', 'CartoesCredito', 'id', 'id');
     $cartao->setMask('{id} - {nome_cartao}');
+    $cartao->title  = 'Função em Desenvolvimento';
     $banco         = new TDBUniqueSearch('banco_associado', 'sample', 'Bancos', 'id', 'nome');
     $banco->setMask('{nome}');
+    $banco->title  = 'Ao informar o banco, o evento é vinculado a despesa do cartão.';
 
-  
-    $a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia} | {VL - Vale A/R}', 'red', 12, 'bi');
+    //$a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia} | {VL - Vale A/R}', 'red', 12, 'bi');
 
     $this->form->addFields([new TLabel('Codigo (*)')], [$id],);
-    $this->form->addFields(  [new TLabel('Descricao (*)')], [$descricao], [new TLabel('Fixo')], [$fixo]);
-    $this->form->addFields( [new TLabel('Formula')], [$formula], [new TLabel('Incidencia (*)')], [$incidencia], );
-    $this->form->addFields([new TLabel('Banco')], [$banco],[new TLabel('Cartão')], [$cartao],);
-    $this->form->addFields( [new TLabel('')],[$a]);
+    $this->form->addFields([new TLabel('Descricao (*)')], [$descricao], [new TLabel('Fixo')], [$fixo]);
+    $this->form->addFields([new TLabel('Incidencia (*)')], [$incidencia],);
+    // fildes 1 tab
+    $subform = new BootstrapFormBuilder;
+    $subform->setFieldSizes('100%');
+    $subform->setProperty('style', 'border:none');
+
+    $subform->appendPage('Opções Calculo');
+    $subform->addFields([new TLabel('Formula')], [$formula],);
+    //$subform->addFields([new TLabel('')], [$a]);
+
+    $subform->appendPage('Vinculo Banco');
+    $subform->addFields([new TLabel('Banco')], [$banco], [new TLabel('Cartão')], [$cartao],);
+    //$subform->addFields([new TLabel('')], [$b]);
+
     //$this->form->add($a);
-  
+    $this->form->addContent([$subform]);
 
     $id->setEditable(false);
     $id->setSize('100%');

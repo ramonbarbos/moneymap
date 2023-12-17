@@ -64,15 +64,16 @@ class BancoForm extends TPage
     $telefone = new TEntry('telefone');
   
 
-    $this->form->addFields([new TLabel('Codigo')], [$id],);
-    $this->form->addFields(  [new TLabel('Nome (*)')], [$nome], [new TLabel('Banco (*)')], [$codigo_banco] );
+    $this->form->addFields([new TLabel('Cod.')], [$id],);
+    $this->form->addFields(  [new TLabel('Nome (*)')], [$nome], [new TLabel('Codigo (*)')], [$codigo_banco] );
     $this->form->addFields( [new TLabel('Telefone')],[$telefone], [new TLabel('Site')], [$site],);
     //$this->form->add($a);
   
 
     $id->setEditable(false);
     $id->setSize('100%');
-    $nome->addValidation('nome', new TRequiredValidator);
+    $nome->addValidation('Nome', new TRequiredValidator);
+    $codigo_banco->addValidation('Cogido', new TNumericValidator);
 
     // Adicionar botão de salvar
     $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:plus green');
