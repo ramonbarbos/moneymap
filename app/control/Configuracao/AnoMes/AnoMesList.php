@@ -14,6 +14,7 @@ use Adianti\Widget\Datagrid\TDataGridAction;
 use Adianti\Widget\Datagrid\TDataGridColumn;
 use Adianti\Widget\Datagrid\TPageNavigation;
 use Adianti\Widget\Dialog\TMessage;
+use Adianti\Widget\Dialog\TQuestion;
 use Adianti\Widget\Form\TCombo;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
@@ -128,7 +129,49 @@ class AnoMesList extends TPage
 
     }
    
-
+    public function onDelete($param)
+    {
+      try {
+        if (isset($param['key'])) {
+          $id = $param['key'];
+  
+          // Exiba uma mensagem de confirmação antes de excluir
+          $action = new TAction(array($this, 'delete'));
+          $action->setParameter('id', $id);
+  
+          new TQuestion('Deseja excluir?', $action);
+        }
+      } catch (Exception $e) {
+        new TMessage('error', $e->getMessage(), $this->afterSaveAction);
+        TTransaction::rollback();
+      }
+    }
+    public function delete($param)
+    {
+        try {
+            TTransaction::open('sample');
+    
+            if (isset($param['id'])) {
+                $id = $param['id'];
+    
+                $anomes = new AnoMes($id);
+                $folhas = Folha::where('anoMes', 'like', $anomes->descricao)->load();
+    
+                if (count($folhas) > 0) {
+                    new TMessage('warning', 'Não é possível excluir. Vínculo com Folha!');
+                } else {
+                    $anomes->delete();
+                    new TMessage('info', 'Registro excluído', $this->afterSaveAction);
+                    $this->onReload([]);
+                }
+            }
+    
+            TTransaction::close();
+        } catch (Exception $e) {
+            new TMessage('error', $e->getMessage(), $this->afterSaveAction);
+            TTransaction::rollback();
+        }
+    }
 
   
 }

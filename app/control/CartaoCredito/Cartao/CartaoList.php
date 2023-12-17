@@ -167,14 +167,14 @@ class CartaoList extends TPage
 
         if (isset($param['id'])) {
             $id = $param['id'];
+            
+            $cartao = new CartoesCredito($id);
+            $despesas = DespesaCartao::where('id_cartao_credito', '=', $cartao->id)->load();
 
-            $evento = new Evento($id);
-            $folhas = ItemFolha::where('evento_id', '=', $evento->id)->load();
-
-            if (count($folhas) > 0) {
-                new TMessage('warning', 'Não é possível excluir. Vínculo com folhas!');
+            if (count($despesas) > 0) {
+                new TMessage('warning', 'Não é possível excluir. Vínculo com Despesas!');
             } else {
-                $evento->delete();
+                $cartao->delete();
                 new TMessage('info', 'Registro excluído', $this->afterSaveAction);
                 $this->onReload([]);
             }

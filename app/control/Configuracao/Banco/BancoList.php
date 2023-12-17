@@ -155,13 +155,13 @@ class BancoList extends TPage
         if (isset($param['id'])) {
             $id = $param['id'];
 
-            $evento = new Evento($id);
-            $folhas = ItemFolha::where('evento_id', '=', $evento->id)->load();
+            $bancos = new Bancos($id);
+            $evento = Evento::where('banco_associado', '=', $bancos->id)->load();
 
-            if (count($folhas) > 0) {
-                new TMessage('warning', 'Não é possível excluir. Vínculo com folhas!');
+            if (count($evento) > 0) {
+                new TMessage('warning', 'Não é possível excluir. Vínculo com Evento!');
             } else {
-                $evento->delete();
+                $bancos->delete();
                 new TMessage('info', 'Registro excluído', $this->afterSaveAction);
                 $this->onReload([]);
             }

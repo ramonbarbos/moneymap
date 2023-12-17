@@ -215,6 +215,8 @@ class DespesaCartaoList extends TPage
             if (isset($param['id'])) {
                 $id = $param['id'];
 
+
+                
                 $despesa = new DespesaCartao($id);
                 ItemDespesaCartao::where('despesa_cartao_id', '=', $despesa->id)->delete();
                 $despesa->delete();

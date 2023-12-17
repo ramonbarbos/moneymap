@@ -88,10 +88,10 @@ class DespesaList extends TPage
         //Criando colunas da datagrid
         $column_1 = new TDataGridColumn('id', 'Codigo', 'left');
         $column_2 = new TDataGridColumn('cpf', 'CPF', 'left',);
-        $column_2 = new TDataGridColumn('folha->descricao', 'Tipo', 'left',);
-        $column_3 = new TDataGridColumn('anoMes', 'Mês', 'left',);
-        $column_4 = new TDataGridColumn('vl_despesa', 'Despesas', 'left',);
-        $column_5 = new TDataGridColumn('saldo', 'Saldo', 'left',);
+        $column_3 = new TDataGridColumn('folha->descricao', 'Tipo', 'left',);
+        $column_4 = new TDataGridColumn('anoMes', 'Mês', 'left',);
+        $column_5 = new TDataGridColumn('vl_despesa', 'Despesas', 'left',);
+        $column_6 = new TDataGridColumn('saldo', 'Saldo', 'left',);
 
         $formato_vl_despesa = function ($value) {
             if (is_numeric($value)) {
@@ -99,7 +99,7 @@ class DespesaList extends TPage
             }
             return $value;
         };
-        $column_4->setTransformer($formato_vl_despesa);
+        $column_5->setTransformer($formato_vl_despesa);
 
         $formato_vl_saldo = function ($value) {
             if (is_numeric($value)) {
@@ -107,9 +107,9 @@ class DespesaList extends TPage
             }
             return $value;
         };
-        $column_5->setTransformer($formato_vl_saldo);
+        $column_6->setTransformer($formato_vl_saldo);
 
-        $column_3->setTransformer(function ($value, $object, $row) {
+        $column_4->setTransformer(function ($value, $object, $row) {
             // Verifica se os dois últimos caracteres da string são '01'
             if (substr($value, -2) === '01') {
               return "<span style='color:black'>JANEIRO</span>";
@@ -140,11 +140,12 @@ class DespesaList extends TPage
 
 
         //add coluna da datagrid
-        $this->datagrid->addColumn($column_1);
+        //$this->datagrid->addColumn($column_1);
         $this->datagrid->addColumn($column_2);
         $this->datagrid->addColumn($column_3);
         $this->datagrid->addColumn($column_4);
         $this->datagrid->addColumn($column_5);
+        $this->datagrid->addColumn($column_6);
 
         //Criando ações para o datagrid
         $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
