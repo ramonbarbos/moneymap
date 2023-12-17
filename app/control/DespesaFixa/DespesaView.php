@@ -83,9 +83,15 @@ class DespesaView extends TPage
     $vl_salario = new TEntry('vl_salario');
 
 
+
     $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('Folha')], [$tp_folha]);
     $this->form->addFields([new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Despesa')], [$vl_despesa]);
+
+    $atualizar = TButton::create('atualizar', ['DespesaService', 'onAtualizar'], 'Atualizar', 'fa:plus-circle green');
+    $atualizar->getAction()->setParameter('static', '1');
+    $this->form->addFields([], [$atualizar]);
+ 
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
@@ -112,7 +118,9 @@ class DespesaView extends TPage
     $criteria_event->setProperty('order', 'id');
     $criteria_event->add(new TFilter('incidencia', 'like', 'D'));
     $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao', null, $criteria_event);
-    $evento_id->setChangeAction(new TAction(['DespesaService', 'onCheckCartao']));
+   // $evento_id->setChangeAction(new TAction(['DespesaService', 'onCheckCartao']));
+
+
 
     $evento_id->enableSearch();
     $evento_id->setSize('100%');
@@ -268,11 +276,8 @@ class DespesaView extends TPage
 
             if( $param['fl_situacao'][$key]){
               $fl_situacao =  $param['fl_situacao'][$key];
-
-              
             }else{
               $fl_situacao = 0;
-             
             }
 
            

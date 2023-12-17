@@ -18,6 +18,7 @@ class ItemDespesaCartao extends TRecord
         parent::addAttribute('evento_id');
         parent::addAttribute('dt_despesa');
         parent::addAttribute('descricao');
+        parent::addAttribute('parcela');
         parent::addAttribute('valor');
         parent::addAttribute('fl_situacao');
 

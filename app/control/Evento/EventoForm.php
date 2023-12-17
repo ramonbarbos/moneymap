@@ -66,6 +66,8 @@ class EventoForm extends TPage
     $formula = new TEntry('formula');
     $cartao         = new TDBUniqueSearch('cartao', 'sample', 'CartoesCredito', 'id', 'id');
     $cartao->setMask('{id} - {nome_cartao}');
+    $banco         = new TDBUniqueSearch('banco_associado', 'sample', 'Bancos', 'id', 'nome');
+    $banco->setMask('{nome}');
 
   
     $a = new TTextDisplay('Operadores: {S - Salario} | {P - Previdencia} | {VL - Vale A/R}', 'red', 12, 'bi');
@@ -73,7 +75,7 @@ class EventoForm extends TPage
     $this->form->addFields([new TLabel('Codigo (*)')], [$id],);
     $this->form->addFields(  [new TLabel('Descricao (*)')], [$descricao], [new TLabel('Fixo')], [$fixo]);
     $this->form->addFields( [new TLabel('Formula')], [$formula], [new TLabel('Incidencia (*)')], [$incidencia], );
-    $this->form->addFields([new TLabel('Cartão')], [$cartao],);
+    $this->form->addFields([new TLabel('Banco')], [$banco],[new TLabel('Cartão')], [$cartao],);
     $this->form->addFields( [new TLabel('')],[$a]);
     //$this->form->add($a);
   
@@ -83,6 +85,8 @@ class EventoForm extends TPage
     $descricao->addValidation('descricao', new TRequiredValidator);
     $cartao->setMinLength(0);
     $cartao->setSize('100%');
+    $banco->setSize('100%');
+    $banco->setMinLength(0);
 
     // Adicionar botão de salvar
     $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'fa:plus green');

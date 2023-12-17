@@ -18,6 +18,7 @@ class Evento extends TRecord
         parent::addAttribute('fixo');
         parent::addAttribute('incidencia');
         parent::addAttribute('formula');
+        parent::addAttribute('banco_associado');
         parent::addAttribute('cartao');
     }
 

@@ -64,11 +64,9 @@ class DespesaCartaoView extends TPage
     $cartao         = new TDBUniqueSearch('id_cartao_credito', 'sample', 'CartoesCredito', 'id', 'nome_cartao');
     $cartao->addValidation('cartao', new TRequiredValidator);
     $cartao->setChangeAction(new TAction(['DespesaCartaoService', 'onCheckCPF']));
-
     $anoMes         = new TDBUniqueSearch('anoMes', 'sample', 'AnoMes', 'descricao', 'descricao');
     $anoMes->addValidation('anoMes', new TRequiredValidator);
     $anoMes->setChangeAction(new TAction(['DespesaCartaoService', 'onCheckCPF']));
-
 
 
     if (isset($param['key'])) {
@@ -79,7 +77,6 @@ class DespesaCartaoView extends TPage
       $cpf         = new TCombo('cpf');
       $cpf->setChangeAction(new TAction(['DespesaCartaoService', 'onCPFChange']));
     }
-
 
     $valor_total = new TEntry('valor_total');
 
@@ -117,6 +114,7 @@ class DespesaCartaoView extends TPage
     $descricao = new TEntry('descricao[]');
     $descricao->setSize('100%');
 
+    $parcela = new TEntry('parcela[]');
     $valor = new TEntry('valor[]');
     $valor->setNumericMask(2, '.', '', false);
    
@@ -138,16 +136,18 @@ class DespesaCartaoView extends TPage
     $this->fieldlist->addField('<b>Data</b>',   $dt_despesa,   ['width' => '15%']);
     $this->fieldlist->addField('<b>C.Custo</b>',  $evento_id,  ['width' => '25%']);
     $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '25%']);
-    $this->fieldlist->addField('<b>Valor</b>', $valor, ['width' => '15%', 'sum' => true]);
+    $this->fieldlist->addField('<b>Parcela</b>',   $parcela,   ['width' => '25%']);
+    $this->fieldlist->addField('<b>Valor</b>', $valor, ['width' => '25%', 'sum' => true]);
 
     // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'onTotalUpdate']));
 
     $this->fieldlist->enableSorting();
 
+    $this->form->addField($dt_despesa);
     $this->form->addField($evento_id);
     $this->form->addField($descricao);
+    $this->form->addField($parcela);
     $this->form->addField($valor);
-    $this->form->addField($dt_despesa);
 
     //$dt_despesa->addValidation('Data', new TRequiredListValidator);
     $evento_id->addValidation('Centro de custo', new TRequiredListValidator);
@@ -242,12 +242,21 @@ class DespesaCartaoView extends TPage
             } else {
               $dataFormatada = '';
             }
+
+            
+            if ($param['parcela'][$key]) {
+              $parcela =  $param['parcela'][$key];
+            } else {
+              $parcela = 0;
+            }
+
            
             $item = new ItemDespesaCartao;
             $item->despesa_cartao_id   = $despesa->id;
             $item->dt_despesa   = $dataFormatada;
             $item->evento_id   = $param['evento_id'][$key];
             $item->descricao   = $param['descricao'][$key];
+            $item->parcela   = $parcela;
             $item->valor      = (float) $param['valor'][$key];
 
             $item->store();
@@ -278,11 +287,19 @@ class DespesaCartaoView extends TPage
               $dataFormatada = '';
             }
 
+            if ($param['parcela'][$key]) {
+              $parcela =  $param['parcela'][$key];
+            } else {
+              $parcela = 0;
+            }
+
+
             $item = new ItemDespesaCartao;
             $item->despesa_cartao_id   = $despesa->id;
             $item->dt_despesa   = $dataFormatada;
             $item->evento_id   = $param['evento_id'][$key];
             $item->descricao   = $param['descricao'][$key];
+            $item->parcela      =  $parcela;
             $item->valor      = (float) $param['valor'][$key];
             $item->store();
             $total +=  $item->valor;

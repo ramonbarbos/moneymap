@@ -112,13 +112,14 @@ class DespesaCartaoService
               $folha  =  Folha::where('cpf', 'like', $params['cpf'])
                 ->where('anoMes', '=', $params['anoMes'])->first();
 
-              $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
-                ->where('parcela', '<>', ' ')
-                ->where('tipo', 'like', 'D')->orderby(1)
-                ->load();
+              if ($folha) {
+                $item_folhas = ItemFolha::where('folha_id', '=', $folha->id)
+                  ->where('parcela', '>', '0')
+                  ->where('tipo', 'like', 'D')->orderby(1)
+                  ->load();
 
-                
-              if ($item_folhas || $folha) {
+
+
                 TFieldList::clear('my_field_list');
 
                 $dataF = new stdClass;
@@ -127,26 +128,19 @@ class DespesaCartaoService
 
                 foreach ($item_folhas as $item) {
 
-                  // ENTRAR SOMENTE PARCELAS DE CARTAO
-
-                  $evento = Evento::where('id', '=', $item->evento_id)
-                    ->where('cartao', '=', $params['id_cartao_credito'])->first();
-
-                  if (@$evento->id == $item->evento_id) {
-                    TFieldList::addRows('my_field_list', 1);
-
-                    $dataF->evento_id[] = $item->evento_id;
-                    $dataF->valor[] = $item->valor;
-                  }
+                  TFieldList::addRows('my_field_list', 1);
+                  $dataF->evento_id[] = $item->evento_id;
+                  $dataF->valor[] =   $item->valor;
                 }
                 TForm::sendData('my_form_despesa_cartao',  $dataF,  false, true, 300);
-
-                TForm::sendData('my_form_despesa_cartao', (object) ['id' => '']);
-                TForm::sendData('my_form_despesa_cartao', (object) ['valor_total' => '']);
               } else {
+                TFieldList::disableField('my_field_list');
+                TToast::show('info', 'Não existe folha para esse mês');
                 TFieldList::clear('my_field_list');
               }
 
+              TForm::sendData('my_form_despesa_cartao', (object) ['id' => '']);
+              TForm::sendData('my_form_despesa_cartao', (object) ['valor_total' => '']);
               TFieldList::clear('my_field_list');
             }
           } else {
@@ -196,13 +190,14 @@ class DespesaCartaoService
         TCombo::reload('my_form_despesa_cartao', 'cpf', $options);
       } else {
         TFieldList::clear('my_field_list');
+        TToast::show('info', 'Novo');
 
         TCombo::reload('my_form_despesa_cartao', 'cpf', '');
+        TForm::sendData('my_form_despesa_cartao', (object) ['id' => '']);
+        TForm::sendData('my_form_despesa_cartao', (object) ['valor_total' => '']);
       }
     }
 
     TTransaction::close();
   }
-
-
 }
