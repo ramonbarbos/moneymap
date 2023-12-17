@@ -324,83 +324,65 @@ class DespesaService
 
   public static function onAtualizar($params)
   {
-    TTransaction::open('sample');
+      TTransaction::open('sample');
+  
+      TToast::show('info', 'Atualizando');
+  
+      // Verificar se existe desconto vinculado ao CPF
+      $despesa = Despesa::where('cpf', 'like', $params['cpf'])
+        ->where('anoMes', '=', $params['anoMes'])
+        ->where('tp_folha', '=', $params['tp_folha'])
+        ->first();
+  
+      $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->orderby(1)->load();
+      $despesaCartao = DespesaCartao::where('cpf', 'like', $params['cpf'])
+        ->where('anoMes', '=', $params['anoMes'])
+        ->load();
+  
+      $dataF = new stdClass;
+  
+      $dataF->fl_situacao = [];
+      $dataF->dt_despesa = [];
+      $dataF->evento_id = [];
+      $dataF->descricao = [];
+      $dataF->valor = [];
+      $dataF->saldo = [];
+  
+      // Adicionar as despesas comuns
+      foreach ($item_despesas as $item) {
+          TFieldList::clear('my_field_list');
+          TFieldList::addRows('my_field_list', 1);
+  
+          $dataF->fl_situacao[] = $item->fl_situacao;
+          $dataF->dt_despesa[] = date('d/m/Y', strtotime($item->dt_despesa));
+          $dataF->descricao[] = $item->descricao;
+          $dataF->saldo[] = $item->saldo;
+  
+          $itemValorAdicionado = false;
+  
+          // Verificar se existe uma despesa de cartão correspondente
+          foreach ($despesaCartao as $despesaCartaoItem) {
+              $cartao = new CartoesCredito($despesaCartaoItem->id_cartao_credito);
+              $banco = new Bancos($cartao->banco_associado);
+              $evento = Evento::where('banco_associado', '=',  $banco->id)->first();
+  
+              if ($item->evento_id == $evento->id) {
+                 $dataF->evento_id[] = $item->evento_id;
+                  $dataF->valor[] = $despesaCartaoItem->valor_total;
+                  $itemValorAdicionado = true;
+              }
+          }
+  
+          // Se nenhum valor de cartão foi adicionado, adicione o valor do item_despesa
+          if (!$itemValorAdicionado) {
+              $dataF->valor[] = $item->valor;
+              $dataF->evento_id[] = $item->evento_id;
 
-    TToast::show('info', 'Atualizando');
-
-    // Verificar se existe desconto vinculado ao CPF
-    $despesa = Despesa::where('cpf', 'like', $params['cpf'])
-      ->where('anoMes', '=', $params['anoMes'])
-      ->where('tp_folha', '=', $params['tp_folha'])
-      ->first();
-
-    $item_despesas = ItemDespesa::where('despesa_id', '=', $despesa->id)->orderby(1)->load();
-
-    $despesaCartao = DespesaCartao::where('cpf', 'like', $params['cpf'])
-      ->where('anoMes', '=', $params['anoMes'])
-      ->load();
-
-    $dataF = new stdClass;
-
-    $dataF->fl_situacao = [];
-    $dataF->dt_despesa = [];
-    $dataF->evento_id = [];
-    $dataF->descricao = [];
-    $dataF->valor = [];
-    $dataF->saldo = [];
-
-    $eventosSet = new \Ds\Map(); // Mapa para armazenar eventos e seus valores
-    $valoresSet = new \Ds\Map(); // Mapa para armazenar valores
-
-    // Adicionar as despesas comuns
-    foreach ($item_despesas as $item) {
-      TFieldList::clear('my_field_list');
-      TFieldList::addRows('my_field_list', 1);
-
-      // Verificar se o evento já existe no conjunto
-      if ($eventosSet->hasKey($item->evento_id)) {
-        // Atualizar o valor associado ao evento
-        $valoresSet->put($item->evento_id, $item->valor);
-      } else {
-        // Adicionar evento ao conjunto
-        $eventosSet->put($item->evento_id, null);
-        $valoresSet->put($item->evento_id, $item->valor);
+          }
       }
-
-      $dataF->fl_situacao[] = $item->fl_situacao;
-      $dataF->dt_despesa[] = date('d/m/Y', strtotime($item->dt_despesa));
-      $dataF->descricao[] = $item->descricao;
-      $dataF->valor[] = $item->valor;
-      $dataF->saldo[] = $item->saldo;
-    }
-
-    // Adicionar as despesas de cartão
-    foreach ($despesaCartao as $despesaCartaoItem) {
-
-      $cartao = new CartoesCredito($despesaCartaoItem->id_cartao_credito);
-      $banco = new Bancos($cartao->banco_associado);
-      $evento = Evento::where('banco_associado', '=',  $banco->id)->first();
-
-      if ($evento) {
-        // Verificar se o evento já existe no conjunto
-        if ($eventosSet->hasKey($evento->id)) {
-          // Atualizar o valor associado ao evento
-          $valoresSet->put($evento->id, $despesaCartaoItem->valor_total);
-        } else {
-          // Adicionar evento ao conjunto
-          $eventosSet->put($evento->id, null);
-          $valoresSet->put($evento->id, $despesaCartaoItem->valor_total);
-        }
-        $dataF->valor[] = $despesaCartaoItem->valor_total;
-      }
-    }
-
-    // Converter conjunto de eventos de volta para array
-    $dataF->evento_id = $eventosSet->keys()->toArray();
-    $dataF->valor = $valoresSet->values()->toArray();
-
-    TForm::sendData('my_form', $dataF, false, true, 300);
-
-    TTransaction::close();
+  
+      TForm::sendData('my_form', $dataF, false, true, 300);
+  
+      TTransaction::close();
   }
 }

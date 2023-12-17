@@ -56,6 +56,9 @@
           <menuitem label="Banco">
             <action>BancoList</action>
           </menuitem>
+          <menuitem label="Migração">
+            <action>MigrationView</action>
+          </menuitem>
         </menu>
       </menuitem>
     </menu>

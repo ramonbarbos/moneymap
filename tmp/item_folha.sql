@@ -1,0 +1,12 @@
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (30,1,5,'P','','',4.45);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (29,1,2,'DD','','',148.68);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (28,1,1,'P','','',1872.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (27,1,5,'P','','',40.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (26,1,5,'P','','',321.50);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (25,1,14,'DD','','',900.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (24,1,6,'P','','',1000.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (23,2,4,'P','','',638.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (34,3,30,'D','','',90.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (33,3,31,'D','','',650.00);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (32,3,2,'DD','','',148.68);
+INSERT INTO item_folha (id,folha_id,evento_id,tipo,parcela,ref,valor) VALUES (31,3,1,'P','','',1872.00);
