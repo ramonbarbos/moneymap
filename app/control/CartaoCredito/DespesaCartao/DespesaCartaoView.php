@@ -51,7 +51,7 @@ class DespesaCartaoView extends TPage
     $this->form = new BootstrapFormBuilder('my_form_despesa_cartao');
     $this->form->setFormTitle('Novas Despesas do Cartão');
     $this->form->setClientValidation(true);
-    $this->form->setColumnClasses(2, [ 'col-sm-6', 'col-sm-6']);
+    $this->form->setColumnClasses(3, ['col-sm-3', 'col-sm-3', 'col-sm-3', 'col-sm-3']);
 
     $this->setDatabase('sample');
     $this->setActiveRecord('DespesaCartao');
@@ -101,6 +101,7 @@ class DespesaCartaoView extends TPage
 
     $valor_total->setEditable(false);
     $valor_total->setNumericMask(2, '.', '', false);
+    $valor_total->setSize('100%');
 
     $uniq = new THidden('uniq[]');
 
@@ -135,8 +136,8 @@ class DespesaCartaoView extends TPage
     $this->fieldlist->addField('<b>Unniq</b>',  $uniq,   ['width' => '0%', 'uniqid' => true]);
     $this->fieldlist->addField('<b>Data</b>',   $dt_despesa,   ['width' => '15%']);
     $this->fieldlist->addField('<b>C.Custo</b>',  $evento_id,  ['width' => '25%']);
-    $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '25%']);
-    $this->fieldlist->addField('<b>Parcela</b>',   $parcela,   ['width' => '25%']);
+    $this->fieldlist->addField('<b>Descrição</b>',   $descricao,   ['width' => '35%']);
+    $this->fieldlist->addField('<b>Parcela</b>',   $parcela,   ['width' => '15%']);
     $this->fieldlist->addField('<b>Valor</b>', $valor, ['width' => '25%', 'sum' => true]);
 
     // $this->fieldlist->setTotalUpdateAction(new TAction([$this, 'onTotalUpdate']));
@@ -153,6 +154,7 @@ class DespesaCartaoView extends TPage
     $evento_id->addValidation('Centro de custo', new TRequiredListValidator);
     $descricao->addValidation('Descrição', new TRequiredListValidator);
     $valor->addValidation('Valor', new TRequiredListValidator);
+    $parcela->setEditable(false);
 
     //$this->fieldlist->addButtonFunction("__adianti_message('Row data', JSON.stringify(tfieldlist_get_row_data(this)))", 'fa:info-circle blue', 'Show "Text" field');
 
