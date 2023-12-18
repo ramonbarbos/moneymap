@@ -20,6 +20,7 @@ class Despesa extends TRecord
         parent::addAttribute('anoMes');
         parent::addAttribute('vl_despesa');
         parent::addAttribute('saldo');
+        parent::addAttribute('situacao');
 
     }
 

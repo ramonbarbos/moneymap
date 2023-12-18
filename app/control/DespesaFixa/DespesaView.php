@@ -6,6 +6,7 @@ use Adianti\Control\TWindow;
 use Adianti\Database\TCriteria;
 use Adianti\Database\TFilter;
 use Adianti\Database\TTransaction;
+use Adianti\Registry\TSession;
 use Adianti\Validator\TRequiredListValidator;
 use Adianti\Validator\TRequiredValidator;
 use Adianti\Widget\Container\TVBox;
@@ -36,6 +37,7 @@ class DespesaView extends TPage
 {
   private $form;
   private $fieldlist;
+  private static $situacaoo =  null;
 
   use Adianti\base\AdiantiStandardFormTrait;
 
@@ -59,6 +61,7 @@ class DespesaView extends TPage
 
     // Criação de fields
     $id = new TEntry('id');
+    $situacao = new THidden('situacao');
 
     $tp_folha         = new TDBUniqueSearch('tp_folha', 'sample', 'TipoFolha', 'id', 'descricao');
     $tp_folha->addValidation('anoMes', new TRequiredValidator);
@@ -84,14 +87,28 @@ class DespesaView extends TPage
 
 
 
+    $this->form->addFields([new TLabel('')], [$situacao]);
     $this->form->addFields([new TLabel('Codigo')], [$id], [new TLabel('Folha')], [$tp_folha]);
     $this->form->addFields([new TLabel('Mês (*)')], [$anoMes], [new TLabel('CPF (*)')], [$cpf]);
     $this->form->addFields([new TLabel('Salario')], [$vl_salario], [new TLabel('Despesa')], [$vl_despesa]);
 
     $atualizar = TButton::create('atualizar', ['DespesaService', 'onAtualizar'], 'Atualizar', 'fa:plus-circle green');
     $atualizar->getAction()->setParameter('static', '1');
-    $this->form->addFields([], [$atualizar]);
- 
+
+    $bloqueio = TButton::create('bloqueio', ['DespesaService', 'onBloqueio'], 'Bloqueio', 'fa:lock orange');
+    $bloqueio->getAction()->setParameter('static', '1');
+
+    $desbloqueio = TButton::create('bloqueio', ['DespesaService', 'onDesbloqueio'], 'Desbloquear', 'fa:lock orange');
+    $desbloqueio->getAction()->setParameter('static', '1');
+
+
+
+       // $this->form->addFields([], [$atualizar], [], [$desbloqueio]);
+
+
+      $this->form->addFields([], [$atualizar], [], [$bloqueio]);
+    
+
     $this->form->addContent([new TFormSeparator('Itens')]);
 
     $id->setEditable(false);
@@ -118,7 +135,7 @@ class DespesaView extends TPage
     $criteria_event->setProperty('order', 'id');
     $criteria_event->add(new TFilter('incidencia', 'like', 'D'));
     $evento_id = new TDBCombo('evento_id[]', 'sample', 'Evento', 'id', 'descricao', null, $criteria_event);
-   // $evento_id->setChangeAction(new TAction(['DespesaService', 'onCheckCartao']));
+    // $evento_id->setChangeAction(new TAction(['DespesaService', 'onCheckCartao']));
 
 
 
@@ -274,13 +291,13 @@ class DespesaView extends TPage
               $dataFormatada = '';
             }
 
-            if( $param['fl_situacao'][$key]){
+            if ($param['fl_situacao'][$key]) {
               $fl_situacao =  $param['fl_situacao'][$key];
-            }else{
+            } else {
               $fl_situacao = 0;
             }
 
-           
+
             $item = new ItemDespesa;
             $item->despesa_id   = $despesa->id;
             $item->dt_despesa   = $dataFormatada;
@@ -376,7 +393,6 @@ class DespesaView extends TPage
         $this->form->getField('tp_folha')->setEditable(false);
         //$this->form->getField('cpf')->setEditable(false);
 
-
         $data = new stdClass;
         $data->id_item = [];
         $data->dt_despesa = [];
@@ -386,33 +402,62 @@ class DespesaView extends TPage
         $data->saldo = [];
         $data->fl_situacao = [];
 
+        if ($object->situacao == 1) {
+          TFieldList::disableField('my_field_list');
 
-        foreach ($item_despesas as $item) {
 
-          TFieldList::addRows('my_field_list', 1);
+          TForm::sendData('my_form', (object) ['situacao' => $object->situacao]);
 
-          if ($item->dt_despesa) {
-            $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
-          } else {
-            $dt_despesa_formatada = $item->dt_despesa;
+
+          foreach ($item_despesas as $item) {
+
+            TFieldList::addRows('my_field_list', 1);
+
+            if ($item->dt_despesa) {
+              $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
+            } else {
+              $dt_despesa_formatada = $item->dt_despesa;
+            }
+
+            $data->id_item[] = $item->id_item;
+            $data->dt_despesa[] = $dt_despesa_formatada;
+            $data->evento_id[] = $item->evento_id;
+            $data->descricao[] = $item->descricao;
+            $data->valor[] = $item->valor;
+            $data->saldo[] = $item->saldo;
+            $data->fl_situacao[] =  $item->fl_situacao;
+
+            TForm::sendData('my_form', $data, false, true, 10);
           }
+        } else {
+
+          foreach ($item_despesas as $item) {
+
+            TFieldList::addRows('my_field_list', 1);
+
+            if ($item->dt_despesa) {
+              $dt_despesa_formatada = (new DateTime($item->dt_despesa))->format('d/m/Y');
+            } else {
+              $dt_despesa_formatada = $item->dt_despesa;
+            }
 
 
-          $data->id_item[] = $item->id_item;
-          $data->dt_despesa[] = $dt_despesa_formatada;
-          $data->evento_id[] = $item->evento_id;
-          $data->descricao[] = $item->descricao;
-          $data->valor[] = $item->valor;
-          $data->saldo[] = $item->saldo;
-          $data->fl_situacao[] =  $item->fl_situacao;
+            $data->id_item[] = $item->id_item;
+            $data->dt_despesa[] = $dt_despesa_formatada;
+            $data->evento_id[] = $item->evento_id;
+            $data->descricao[] = $item->descricao;
+            $data->valor[] = $item->valor;
+            $data->saldo[] = $item->saldo;
+            $data->fl_situacao[] =  $item->fl_situacao;
 
-      
-          TForm::sendData('my_form', $data, false, true, 10);
-
+            TForm::sendData('my_form', $data, false, true, 10);
+          }
         }
+
 
         TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
         TForm::sendData('my_form', (object) ['saldo' => '']);
+        TForm::sendData('my_form', (object) ['situacao' => $object->situacao]);
 
         $this->form->setData($object);
         TTransaction::close();
@@ -424,7 +469,4 @@ class DespesaView extends TPage
       TTransaction::rollback();
     }
   }
-
- 
-
 }

@@ -274,52 +274,6 @@ class DespesaService
   }
 
 
-  public static function onCheckCartao($param)
-  {
-    try {
-      TTransaction::open('sample');
-
-      /*
-      if (!empty($param['evento_id'])) {
-        // Pega o último evento_id do array
-        $ultimoEventoId = end($param['evento_id']);
-        var_dump($ultimoEventoId);
-
-        // Converte o último valor de string para inteiro
-        $ultimoEventoIdInteiro = intval($ultimoEventoId);
-
-        // Cria um novo objeto Evento com o ID convertido para inteiro
-        $evento = new Evento($ultimoEventoIdInteiro);
-
-        // Consulta o Cartão de Crédito usando o banco associado ao evento
-
-        $cartao = CartoesCredito::where('banco_associado', '=', $evento->banco_associado)->first();
-
-        if ($cartao) {
-          $despesaCartao  =  DespesaCartao::where('cpf', 'like', $param['cpf'])
-            ->where('anoMes', '=', $param['anoMes'])
-            ->where('id_cartao_credito', '=',  $cartao->id)->first();
-            $dataD = new stdClass;
-            $dataD->valor = [];
-
-            if ($despesaCartao) {
-              TToast::show('info', $despesaCartao->valor_total);
-          
-              $dataD->valor[] = $despesaCartao->valor_total;
-          
-              TForm::sendData('my_form',   (object) $dataD);
-            
-            }
-        }
-      }
-*/
-
-      TTransaction::close();
-    } catch (Exception $e) {
-      new TMessage('error', $e->getMessage());
-      TTransaction::rollback();
-    }
-  }
 
 
   public static function onAtualizar($params)
@@ -382,6 +336,41 @@ class DespesaService
       }
   
       TForm::sendData('my_form', $dataF, false, true, 300);
+  
+      TTransaction::close();
+  }
+
+  public static function onBloqueio($params)
+  {
+      TTransaction::open('sample');
+      if($params['id']){
+
+        $despesaForm = new Despesa();
+
+        TToast::show('info', 'Bloqueado');
+        $despesa =  new Despesa($params['id']);
+        $despesa->situacao =  1;
+        $despesa->store();
+  
+        TFieldList::disableField('my_field_list');
+
+      }
+     
+  
+      TTransaction::close();
+  }
+
+  public static function onDesbloqueio($params)
+  {
+      TTransaction::open('sample');
+      if($params['id']){
+
+        $despesaForm = new Despesa();
+
+        TToast::show('info', 'Desbloquear');
+      
+      }
+     
   
       TTransaction::close();
   }
