@@ -353,6 +353,7 @@ class DespesaService
         $despesa->store();
   
         TFieldList::disableField('my_field_list');
+        TScript::create("location.reload();"); // Atualiza a página
 
       }
      
@@ -368,7 +369,13 @@ class DespesaService
         $despesaForm = new Despesa();
 
         TToast::show('info', 'Desbloquear');
-      
+        $despesa =  new Despesa($params['id']);
+        $despesa->situacao =  0;
+        $despesa->store();
+  
+        TFieldList::enableField('my_field_list');
+        TScript::create("location.reload();"); // Atualiza a página
+
       }
      
   

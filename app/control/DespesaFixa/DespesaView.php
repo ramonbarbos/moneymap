@@ -98,16 +98,20 @@ class DespesaView extends TPage
     $bloqueio = TButton::create('bloqueio', ['DespesaService', 'onBloqueio'], 'Bloqueio', 'fa:lock orange');
     $bloqueio->getAction()->setParameter('static', '1');
 
-    $desbloqueio = TButton::create('bloqueio', ['DespesaService', 'onDesbloqueio'], 'Desbloquear', 'fa:lock orange');
+    $desbloqueio = TButton::create('desbloqueio', ['DespesaService', 'onDesbloqueio'], 'Desbloquear', 'fa:unlock-alt orange');
     $desbloqueio->getAction()->setParameter('static', '1');
 
 
 
-       // $this->form->addFields([], [$atualizar], [], [$desbloqueio]);
 
 
+    if (@$param['situacao'] == 1) {
+
+      $this->form->addFields([], [], [], [$desbloqueio]);
+    } else {
       $this->form->addFields([], [$atualizar], [], [$bloqueio]);
-    
+    }
+
 
     $this->form->addContent([new TFormSeparator('Itens')]);
 

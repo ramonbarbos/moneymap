@@ -92,6 +92,7 @@ class DespesaList extends TPage
         $column_4 = new TDataGridColumn('anoMes', 'Mês', 'left',);
         $column_5 = new TDataGridColumn('vl_despesa', 'Despesas', 'left',);
         $column_6 = new TDataGridColumn('saldo', 'Saldo', 'left',);
+        $column_7 = new TDataGridColumn('situacao', 'Situação', 'left',);
 
         $formato_vl_despesa = function ($value) {
             if (is_numeric($value)) {
@@ -138,7 +139,14 @@ class DespesaList extends TPage
             }
           });
 
-
+          $column_7->setTransformer(function ($value, $object, $row) {
+            // Verifica se os dois últimos caracteres da string são '01'
+            if ($value == 1) {
+              return "<span style='color:black'>Bloquado</span>";
+            } else    {
+              return "<span style='color:black'>Desbloqueado</span>";
+            }
+          });
         //add coluna da datagrid
         //$this->datagrid->addColumn($column_1);
         $this->datagrid->addColumn($column_2);
@@ -146,12 +154,13 @@ class DespesaList extends TPage
         $this->datagrid->addColumn($column_4);
         $this->datagrid->addColumn($column_5);
         $this->datagrid->addColumn($column_6);
+        $this->datagrid->addColumn($column_7);
 
         //Criando ações para o datagrid
         $column_1->setAction(new TAction([$this, 'onReload']), ['order' => 'id']);
         $column_2->setAction(new TAction([$this, 'onReload']), ['order' => 'cpf']);
 
-        $action1 = new TDataGridAction(['DespesaView', 'onEdit'], ['id' => '{id}', 'register_state' => 'false']);
+        $action1 = new TDataGridAction(['DespesaView', 'onEdit'], ['id' => '{id}','situacao' => '{situacao}', 'register_state' => 'false']);
         $action2 = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
         $action3 = new TDataGridAction(['DespesaMap', 'onReload'], ['id' => '{id}']);
 
