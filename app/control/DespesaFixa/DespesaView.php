@@ -246,7 +246,8 @@ class DespesaView extends TPage
     // $win = TWindow::create('test', 0.6, 0.8);
     // $win->add('<pre>' . str_replace("\n", '<br>', print_r($param, true)) . '</pre>');
     // $win->show();
-    TToast::show('info', 'Linha removida.');
+   // TToast::show('info', 'Linha removida.'); usar o: mb_convert_encoding($message,"UTF-8")
+   
   }
 
   public static function showRow($param)

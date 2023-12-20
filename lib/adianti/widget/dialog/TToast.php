@@ -27,7 +27,7 @@ class TToast
     {
         if (in_array($type, ['show', 'info', 'success', 'warning', 'error']))
         {
-            $message64 = base64_encode(utf8_decode($message));
+            $message64 = base64_encode(mb_convert_encoding($message,"UTF-8"));
             TScript::create("__adianti_show_toast64('{$type}', '{$message64}', '{$place}', '{$icon}')");
         }
         else
