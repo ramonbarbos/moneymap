@@ -279,11 +279,11 @@ class DespesaMap  extends TPage
         $this->pdf->SetFont('Arial', '', 8);
         $this->pdf->SetTextColor(100, 100, 100);
         $this->pdf->SetX(20);
-        $this->pdf->Cell(150, 12, utf8_decode('CPF: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Tipo de Folha: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Ano Mês: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Despesas: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(100, 12, utf8_decode('Saldo: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(150, 12, mb_convert_encoding('CPF: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, mb_convert_encoding('Tipo de Folha: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, mb_convert_encoding('Ano Mês: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, mb_convert_encoding('Despesas: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(100, 12, mb_convert_encoding('Saldo: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
 
         $this->pdf->Ln(8);
 
@@ -320,12 +320,12 @@ class DespesaMap  extends TPage
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
-        $this->pdf->Cell(65,  12, utf8_decode('Situação'),     1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, utf8_decode('Data'),     1, 0, 'C', 1);
-        $this->pdf->Cell(135, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
-        $this->pdf->Cell(155,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, utf8_decode('Valor'),      1, 0, 'C', 1);
-        $this->pdf->Cell(65,  12, utf8_decode('Saldo'),      1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, mb_convert_encoding('Situação',"ISO-8859-1","UTF-8"),     1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, mb_convert_encoding('Data',"ISO-8859-1","UTF-8"),     1, 0, 'C', 1);
+        $this->pdf->Cell(135, 12, mb_convert_encoding('Centro de Custo',"ISO-8859-1","UTF-8"),  1, 0, 'C', 1);
+        $this->pdf->Cell(155,  12, mb_convert_encoding('Descrição',"ISO-8859-1","UTF-8"), 1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, mb_convert_encoding('Valor',"ISO-8859-1","UTF-8"),      1, 0, 'C', 1);
+        $this->pdf->Cell(65,  12, mb_convert_encoding('Saldo',"ISO-8859-1","UTF-8"),      1, 0, 'C', 1);
     }
     public function AddEvento($item)
     {
@@ -351,8 +351,8 @@ class DespesaMap  extends TPage
 
         $this->pdf->Cell(65,  12,  $fl_situacao, 'LR', 0, 'C');
         $this->pdf->Cell(65,  12,   $dt_despesa_formatada, 'LR', 0, 'C');
-        $this->pdf->Cell(135, 12, utf8_decode($evento->descricao), 'LR', 0, 'C');
-        $this->pdf->Cell(155,  12,   utf8_decode($item->descricao), 'LR', 0, 'C');
+        $this->pdf->Cell(135, 12, mb_convert_encoding($evento->descricao,"ISO-8859-1","UTF-8"), 'LR', 0, 'C');
+        $this->pdf->Cell(155,  12,   mb_convert_encoding($item->descricao,"ISO-8859-1","UTF-8"), 'LR', 0, 'C');
         $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->valor, 2), 'LR', 0, 'C');
         $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->saldo, 2), 'LR', 0, 'C');
 
@@ -388,8 +388,8 @@ class DespesaMap  extends TPage
       $this->pdf->Ln(12);
       $this->pdf->SetTextColor(100,100,100);
       $this->pdf->SetX(20);
-      $this->pdf->Cell(280, 12, utf8_decode('Informações complementares'), 'LTR', 0, 'L');
-      $this->pdf->Cell(270, 12, utf8_decode('Reservado'), 'LTR', 0, 'L');
+      $this->pdf->Cell(280, 12, mb_convert_encoding('Informações complementares',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+      $this->pdf->Cell(270, 12, mb_convert_encoding('Reservado',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
       
       $this->pdf->Ln(8);
       

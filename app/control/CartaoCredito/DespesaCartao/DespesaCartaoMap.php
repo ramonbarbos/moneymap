@@ -267,10 +267,10 @@ class DespesaCartaoMap  extends TPage
         $this->pdf->SetFont('Arial', '', 8);
         $this->pdf->SetTextColor(100, 100, 100);
         $this->pdf->SetX(20);
-        $this->pdf->Cell(140, 12, utf8_decode('CPF: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(135, 12, utf8_decode('Cartão: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(135, 12, utf8_decode('Ano Mês: '), 'LTR', 0, 'L');
-        $this->pdf->Cell(135, 12, utf8_decode('Total: '), 'LTR', 0, 'L');
+        $this->pdf->Cell(140, 12, mb_convert_encoding('CPF: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(135, 12, mb_convert_encoding('Cartão: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(135, 12, mb_convert_encoding('Ano Mês: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+        $this->pdf->Cell(135, 12, mb_convert_encoding('Total: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
 
         $this->pdf->Ln(8);
 
@@ -301,10 +301,10 @@ class DespesaCartaoMap  extends TPage
         $this->pdf->Ln(12);
         $this->pdf->SetX(20);
         $this->pdf->SetFillColor(230, 230, 230);
-        $this->pdf->Cell(140,  12, utf8_decode('Data'),     1, 0, 'C', 1);
-        $this->pdf->Cell(135, 12, utf8_decode('Centro de Custo'),  1, 0, 'C', 1);
-        $this->pdf->Cell(135,  12, utf8_decode('Descrição'), 1, 0, 'C', 1);
-        $this->pdf->Cell(135,  12, utf8_decode('Valor'),      1, 0, 'C', 1);
+        $this->pdf->Cell(140,  12, mb_convert_encoding('Data',"ISO-8859-1","UTF-8"),     1, 0, 'C', 1);
+        $this->pdf->Cell(135, 12, mb_convert_encoding('Centro de Custo',"ISO-8859-1","UTF-8"),  1, 0, 'C', 1);
+        $this->pdf->Cell(135,  12, mb_convert_encoding('Descrição',"ISO-8859-1","UTF-8"), 1, 0, 'C', 1);
+        $this->pdf->Cell(135,  12, mb_convert_encoding('Valor',"ISO-8859-1","UTF-8"),      1, 0, 'C', 1);
     }
     public function AddEvento($item)
     {
@@ -322,8 +322,8 @@ class DespesaCartaoMap  extends TPage
         $this->pdf->SetFillColor(230, 230, 230);
 
         $this->pdf->Cell(140,  12,   $dt_despesa_formatada, 'LR', 0, 'C');
-        $this->pdf->Cell(135, 12, utf8_decode($evento->descricao), 'LR', 0, 'C');
-        $this->pdf->Cell(135,  12,   utf8_decode($item->descricao), 'LR', 0, 'C');
+        $this->pdf->Cell(135, 12, mb_convert_encoding($evento->descricao,"ISO-8859-1","UTF-8"), 'LR', 0, 'C');
+        $this->pdf->Cell(135,  12,   mb_convert_encoding($item->descricao,"ISO-8859-1","UTF-8"), 'LR', 0, 'C');
         $this->pdf->Cell(135,  12, 'R$ ' . number_format($item->valor, 2), 'LR', 0, 'C');
 
         $this->count_produtos++;
@@ -356,8 +356,8 @@ class DespesaCartaoMap  extends TPage
       $this->pdf->Ln(12);
       $this->pdf->SetTextColor(100,100,100);
       $this->pdf->SetX(20);
-      $this->pdf->Cell(280, 12, utf8_decode('Informações complementares'), 'LTR', 0, 'L');
-      $this->pdf->Cell(270, 12, utf8_decode('Reservado'), 'LTR', 0, 'L');
+      $this->pdf->Cell(280, 12, mb_convert_encoding('Informações complementares',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
+      $this->pdf->Cell(270, 12, mb_convert_encoding('Reservado',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
       
       $this->pdf->Ln(8);
       

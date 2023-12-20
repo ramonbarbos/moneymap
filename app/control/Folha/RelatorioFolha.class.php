@@ -117,9 +117,9 @@ class RelatorioFolha
     $this->pdf->SetFont('Arial', '', 8);
     $this->pdf->SetTextColor(100, 100, 100);
     $this->pdf->SetX(20);
-    $this->pdf->Cell(150, 12, mb_convert_encoding('CPF: ',"UTF-8"), 'LTR', 0, 'L');
+    $this->pdf->Cell(150, 12, mb_convert_encoding('CPF: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
     $this->pdf->Cell(100, 12, 'Tipo de Folha: ', 'LTR', 0, 'L');
-    $this->pdf->Cell(100, 12, mb_convert_encoding('Ano Mês: ',"UTF-8"), 'LTR', 0, 'L');
+    $this->pdf->Cell(100, 12, mb_convert_encoding('Ano Mês: ',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
     $this->pdf->Cell(100, 12, 'Salario: ', 'LTR', 0, 'L');
     $this->pdf->Cell(100, 12, 'Despesas: ', 'LTR', 0, 'L');
 
@@ -157,8 +157,8 @@ class RelatorioFolha
     $this->pdf->Ln(12);
     $this->pdf->SetX(20);
     $this->pdf->SetFillColor(230, 230, 230);
-    $this->pdf->Cell(40,  12, mb_convert_encoding('Evento',"UTF-8"),     1, 0, 'L', 1);
-    $this->pdf->Cell(315, 12, mb_convert_encoding('Descrição',"UTF-8"),  1, 0, 'L', 1);
+    $this->pdf->Cell(40,  12, mb_convert_encoding('Evento',"ISO-8859-1","UTF-8"),     1, 0, 'L', 1);
+    $this->pdf->Cell(315, 12, mb_convert_encoding('Descrição',"ISO-8859-1","UTF-8"),  1, 0, 'L', 1);
     $this->pdf->Cell(50,  12, 'Tipo', 1, 0, 'L', 1);
     $this->pdf->Cell(40,  12, 'Ref',      1, 0, 'L', 1);
     $this->pdf->Cell(45,  12, 'Parcelas',      1, 0, 'L', 1);
@@ -182,8 +182,8 @@ class RelatorioFolha
     $this->pdf->SetFillColor(230, 230, 230);
 
     $this->pdf->Cell(40,  12, $itemFolha->id, 'LR', 0, 'C');
-    $this->pdf->Cell(315, 12, mb_convert_encoding($evento->descricao,"UTF-8"), 'LR', 0, 'L');
-    $this->pdf->Cell(50,  12,   mb_convert_encoding($evento->incidencia,"UTF-8"), 'LR', 0, 'C');
+    $this->pdf->Cell(315, 12, mb_convert_encoding($evento->descricao, "ISO-8859-1","UTF-8"), 'LR', 0, 'L');
+    $this->pdf->Cell(50,  12,   mb_convert_encoding($evento->incidencia, "ISO-8859-1","UTF-8"), 'LR', 0, 'C');
     $this->pdf->Cell(40,  12, $itemFolha->ref, 'LR', 0, 'C');
     $this->pdf->Cell(45,  12, $itemFolha->parcela, 'LR', 0, 'C');
     $this->pdf->Cell(70,  12, 'R$ ' . number_format($itemFolha->valor, 2), 'LR', 0, 'R');
@@ -220,7 +220,7 @@ class RelatorioFolha
       $this->pdf->Ln(12);
       $this->pdf->SetTextColor(100,100,100);
       $this->pdf->SetX(20);
-      $this->pdf->Cell(280, 12, mb_convert_encoding('Informações complementares',"UTF-8"), 'LTR', 0, 'L');
+      $this->pdf->Cell(280, 12, mb_convert_encoding('Informações complementares',"ISO-8859-1","UTF-8"), 'LTR', 0, 'L');
       $this->pdf->Cell(270, 12, 'Reservado', 'LTR', 0, 'L');
       
       $this->pdf->Ln(8);
