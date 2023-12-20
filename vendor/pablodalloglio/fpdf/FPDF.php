@@ -1570,12 +1570,9 @@ class FPDF
     protected function _escape($s)
     {
         // Escape special characters
-        if(strpos($s,'(')!==false || strpos($s,')')!==false || strpos($s,'\\')!==false || strpos($s,"\r")!==false)
-        {
-            return str_replace(array('\\','(',')',"\r"), array('\\\\','\\(','\\)','\\r'), $s);
-        }
-        else
-        {
+        if ($s !== null && (strpos($s, '(') !== false || strpos($s, ')') !== false || strpos($s, '\\') !== false || strpos($s, "\r") !== false)) {
+            return str_replace(array('\\', '(', ')', "\r"), array('\\\\', '\\(', '\\)', '\\r'), $s);
+        } else {
             return $s;
         }
     }
