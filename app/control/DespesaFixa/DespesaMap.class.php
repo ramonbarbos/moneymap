@@ -357,6 +357,8 @@ class DespesaMap  extends TPage
         $this->pdf->Cell(65,  12, 'R$ ' . number_format($item->saldo, 2), 'LR', 0, 'C');
 
         $this->count_produtos++;
+        TTransaction::close();
+
     }
     public function addRodapeFolha()
     {

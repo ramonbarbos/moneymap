@@ -188,7 +188,7 @@ class DespesaService
                   $dataF->valor[] = $despesas->valor_total;
                 }
 
-                TForm::sendData('my_form',  $dataF,  false, true, 300);
+                TForm::sendData('my_form', $dataF, false, true);
               }
 
               if ($item_folhas || $folha) {
@@ -207,7 +207,7 @@ class DespesaService
                   }
                 }
 
-                TForm::sendData('my_form',  $dataF,  false, true, 300);
+                TForm::sendData('my_form', $dataF, false, true);
 
                 TForm::sendData('my_form', (object) ['vl_salario' => $folha->vl_salario]);
                 TForm::sendData('my_form', (object) ['vl_despesa' => $folha->vl_despesa]);
@@ -335,7 +335,7 @@ class DespesaService
           }
       }
   
-      TForm::sendData('my_form', $dataF, false, true, 300);
+      TForm::sendData('my_form', $dataF, false, true);
   
       TTransaction::close();
   }

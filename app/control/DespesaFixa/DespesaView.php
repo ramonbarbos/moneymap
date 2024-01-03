@@ -246,8 +246,7 @@ class DespesaView extends TPage
     // $win = TWindow::create('test', 0.6, 0.8);
     // $win->add('<pre>' . str_replace("\n", '<br>', print_r($param, true)) . '</pre>');
     // $win->show();
-   // TToast::show('info', 'Linha removida.'); usar o: mb_convert_encoding($message,"UTF-8")
-   
+   // TToast::show('info', 'Linha removida.');
   }
 
   public static function showRow($param)
@@ -275,8 +274,8 @@ class DespesaView extends TPage
       $despesa = new Despesa;
       $despesa->fromArray((array) $data);
       $folha = Folha::where('cpf', '=', $data->cpf)
-        ->where('anoMes', '=', $data->anoMes)->first();
-
+        ->where('tp_folha', '=', $data->tp_folha)
+->where('anoMes', '=', $data->anoMes)->first();
 
 
       if (!empty($despesa->id)) {
@@ -359,13 +358,16 @@ class DespesaView extends TPage
             $item->fl_situacao      =  $fl_situacao;
             $item->store();
             $total +=  $item->valor;
+            $saldo =  $item->saldo;
           }
         }
 
 
         $despesa->vl_despesa = $total;
         $despesa->folha_id = $folha->id;
+         $despesa->saldo =  $saldo;
         $despesa->store();
+        
 
         TForm::sendData('my_form', (object) ['id' => $despesa->id]);
         new TMessage('info', 'Registos Salvos', $this->afterSaveAction); //
